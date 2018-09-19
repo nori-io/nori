@@ -339,6 +339,10 @@ func (r *manager) Cache() interfaces.Cache {
 	return i
 }
 
+func (r *manager) Config() interfaces.ConfigManager {
+	return r.cfgManager
+}
+
 func (r *manager) Http() interfaces.Http {
 	item := r.Get(entities.HTTP.String())
 	if item == nil {
