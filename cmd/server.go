@@ -64,8 +64,8 @@ var serverCmd = &cobra.Command{
 		}
 
 		// gRPC Config
-		if config.Config.Bool("grpc.enable") {
-			addr := config.Config.String("grpc.address")
+		if config.Config.Bool("nori.grpc.enable") {
+			addr := config.Config.String("nori.grpc.address")
 			server := grpc.NewServer(
 				[]string{config.Config.String("plugins.dir")},
 				addr,
@@ -85,13 +85,9 @@ var serverCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(serverCmd)
 
-	serverCmd.Flags().Bool("grpc-enable", true, "use gRPC")
-	serverCmd.Flags().String("grpc-address", "localhost:12345", "gRPC host and port")
 	serverCmd.Flags().String("pem", "server.pem", "path to pem file")
 	serverCmd.Flags().String("key", "server.key", "path to key file")
 
-	viper.BindPFlag("grpc-enable", serverCmd.Flags().Lookup("grpc-enable"))
-	viper.BindPFlag("grpc-address", serverCmd.Flags().Lookup("grpc-address"))
 	viper.BindPFlag("pem", serverCmd.Flags().Lookup("pem"))
 	viper.BindPFlag("key", serverCmd.Flags().Lookup("key"))
 }

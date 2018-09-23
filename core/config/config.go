@@ -25,8 +25,8 @@ var Log *logrus.Logger
 
 func init() {
 	Config = go_config.New()
-	Config.SetDefault("grpc.enable", true)
-	Config.SetDefault("grpc.address", "0.0.0.0:29876")
+	Config.SetDefault("nori.grpc.enable", true)
+	Config.SetDefault("nori.grpc.address", "0.0.0.0:29876")
 
 	Log = logrus.New()
 }

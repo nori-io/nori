@@ -5,6 +5,8 @@ import (
 
 	"errors"
 
+	"strings"
+
 	go_config "github.com/cheebo/go-config"
 	"github.com/secure2work/nori/core/entities"
 	"github.com/sirupsen/logrus"
@@ -31,6 +33,10 @@ func GetNoriCoreStorage(cfg go_config.Config, log *logrus.Logger) NoriCoreStorag
 			log.Error(errors.New("nori.storage.type not defined"))
 			return
 		}
+		if strings.ToLower(storageType) == "none" {
+			instance, _ = getNoneStorage()
+			return
+		}
 
 		storageSource := cfg.String("nori.storage.source")
 		if len(storageSource) == 0 {
@@ -41,9 +47,6 @@ func GetNoriCoreStorage(cfg go_config.Config, log *logrus.Logger) NoriCoreStorag
 		var err error
 
 		switch storageType {
-		case "none":
-			storage, err = getNoneStorage()
-			break
 		case "mysql":
 			storage, err = getMySqlStorage(noriCoreStorage{
 				Source: storageSource,

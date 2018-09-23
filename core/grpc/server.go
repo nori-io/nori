@@ -46,8 +46,8 @@ type Server struct {
 	gRPCAddress string
 	gRPCEnable  bool
 
-	pemFile string
-	keyFile string
+	certFile string
+	keyFile  string
 
 	pluginManager  plugins.PluginManager
 	pluginRegistry plugins.PluginRegistry
@@ -78,8 +78,8 @@ func NewServer(
 	}
 }
 
-func (s *Server) SetCertificates(pem, key string) {
-	s.pemFile = pem
+func (s *Server) SetCertificates(cert, key string) {
+	s.certFile = cert
 	s.keyFile = key
 }
 
@@ -293,7 +293,7 @@ func (s Server) CertsUploadCommand(_ context.Context, c *commands.CertsUploadReq
 	size = int(c.Pem[:1][0])
 	hmac = c.Pem[1 : size+1]
 	c.Pem = c.Pem[size+1:]
-	pemBody, err := s.passkey.Decrypt(c.Pem, hmac)
+	certBody, err := s.passkey.Decrypt(c.Pem, hmac)
 	if err != nil {
 		return &commands.ErrorReply{
 			Status: false,
@@ -308,7 +308,7 @@ func (s Server) CertsUploadCommand(_ context.Context, c *commands.CertsUploadReq
 			Error:  err.Error(),
 		}, err
 	}
-	err = os.MkdirAll(filepath.Dir(s.pemFile), os.ModePerm)
+	err = os.MkdirAll(filepath.Dir(s.certFile), os.ModePerm)
 	if err != nil {
 		return &commands.ErrorReply{
 			Status: false,
@@ -333,16 +333,16 @@ func (s Server) CertsUploadCommand(_ context.Context, c *commands.CertsUploadReq
 		}, err
 	}
 
-	fPem, err := os.Create(s.pemFile)
+	fCert, err := os.Create(s.certFile)
 	if err != nil {
 		return &commands.ErrorReply{
 			Status: false,
 			Error:  err.Error(),
 		}, err
 	}
-	defer fPem.Close()
+	defer fCert.Close()
 
-	_, err = fPem.Write(pemBody)
+	_, err = fCert.Write(certBody)
 	if err != nil {
 		return &commands.ErrorReply{
 			Status: false,
@@ -359,9 +359,9 @@ func (s Server) CertsUploadCommand(_ context.Context, c *commands.CertsUploadReq
 }
 
 func (s Server) CheckTLS() (grpc.ServerOption, error) {
-	if len(s.pemFile) > 0 && len(s.keyFile) > 0 &&
-		fileExists(s.pemFile) && fileExists(s.keyFile) {
-		creds, err := credentials.NewServerTLSFromFile(s.pemFile, s.keyFile)
+	if len(s.certFile) > 0 && len(s.keyFile) > 0 &&
+		fileExists(s.certFile) && fileExists(s.keyFile) {
+		creds, err := credentials.NewServerTLSFromFile(s.certFile, s.keyFile)
 		if err != nil {
 			return nil, err
 		} else {
