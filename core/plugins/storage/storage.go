@@ -41,11 +41,15 @@ func GetNoriCoreStorage(cfg go_config.Config, log *logrus.Logger) NoriCoreStorag
 		var err error
 
 		switch storageType {
+		case "none":
+			storage, err = getNoneStorage()
+			break
 		case "mysql":
 			storage, err = getMySqlStorage(noriCoreStorage{
 				Source: storageSource,
 				Log:    log,
 			})
+			break
 			//case "postgresql":
 			//	// @todo implement
 			//case "file":

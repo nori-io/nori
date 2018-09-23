@@ -1,22 +1,7 @@
-# Nori CMS
+# Nori Engine
 
-## Configuration
 
-- plugin manager
-  - pm.source = sql
-  - pm.sql.driver = mysql
-  - pm.sql.connection = 
-- plugins
-  - plugins.dir : string - path to directory with plugins
-- routing
-- database
+# Contributors
 
-## Plugins
-
-Plugins uploaded into plugin directory. Plugin directory defined in configuration.
-
-#### Build Plugin
-
-```bash
-go build -buildmode=plugin -o plugin.so
-```
+- Sergei Che
+- Stan Shulga 
