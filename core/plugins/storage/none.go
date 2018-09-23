@@ -1,7 +1,8 @@
 package storage
 
 import (
-	"github.com/pkg/errors"
+	"errors"
+
 	"github.com/secure2work/nori/core/entities"
 )
 
