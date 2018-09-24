@@ -2,11 +2,7 @@ FROM golang:1.10.1 AS builder
 RUN go version
 
 COPY . /go/src/github.com/secure2work/nori/
-RUN go get github.com/secure2work/nori/
-RUN go get -u github.com/golang/protobuf/{proto,protoc-gen-go}
-RUN go install github.com/golang/protobuf/protoc-gen-go
-WORKDIR /go/src/github.com/secure2work/nori/proto
-RUN protoc --go_out=plugins=grpc:. *.proto
+
 WORKDIR /go/src/github.com/secure2work/nori/
 RUN set -x && \
     go get github.com/golang/dep/cmd/dep && \
