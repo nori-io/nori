@@ -1,5 +1,4 @@
 .idea/
 *.so
-proto/*.pb.go
 vendor/
 Gopkg.lock
