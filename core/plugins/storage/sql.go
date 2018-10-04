@@ -15,7 +15,7 @@ type mysql struct {
 	log *logrus.Logger
 }
 
-func getMySqlStorage(cfg noriCoreStorage) (NoriCoreStorage, error) {
+func getMySqlStorage(cfg noriCoreStorage) (NoriStorage, error) {
 	db, err := sql.Open("mysql", cfg.Source)
 	if err != nil {
 		return nil, err

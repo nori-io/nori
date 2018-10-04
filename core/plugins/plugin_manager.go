@@ -39,7 +39,7 @@ import (
 )
 
 type PluginManager interface {
-	Load(dir string) error
+	Load(dir []string) error
 	LoadPlugin(filePath string) PluginEntry
 	Plugins() map[string]PluginEntry
 	Run(ctx context.Context, registry PluginRegistry, installed []entities.PluginMeta) error
@@ -48,7 +48,7 @@ type PluginManager interface {
 }
 
 type manager struct {
-	storage    storage.NoriCoreStorage
+	storage    storage.NoriStorage
 	cfgManager interfaces.ConfigManager
 	log        *logrus.Logger
 	plugins    map[string]PluginEntry
@@ -58,7 +58,7 @@ type manager struct {
 var instance *manager
 var once sync.Once
 
-func GetPluginManager(storage storage.NoriCoreStorage) PluginManager {
+func GetPluginManager(storage storage.NoriStorage) PluginManager {
 	once.Do(func() {
 		instance = &manager{
 			storage:    storage,
@@ -75,32 +75,34 @@ func (r *manager) Plugins() map[string]PluginEntry {
 	return r.plugins
 }
 
-func (r *manager) Load(dir string) (err error) {
-	var dirs []os.FileInfo
-	if dirs, err = ioutil.ReadDir(dir); err != nil {
-		return err
-	}
-	for _, d := range dirs {
-		if d.IsDir() {
-			continue
+func (r *manager) Load(sources []string) (err error) {
+	for _, dir := range sources {
+		var dirs []os.FileInfo
+		if dirs, err = ioutil.ReadDir(dir); err != nil {
+			return err
 		}
-		if path.Ext(d.Name()) != ".so" {
-			continue
-		}
+		for _, d := range dirs {
+			if d.IsDir() {
+				continue
+			}
+			if path.Ext(d.Name()) != ".so" {
+				continue
+			}
 
-		// load plugin
-		filePath := filepath.Join(dir, d.Name())
-		entry := r.LoadPlugin(filePath)
-		if entry == nil {
-			continue
-		}
+			// load plugin
+			filePath := filepath.Join(dir, d.Name())
+			entry := r.LoadPlugin(filePath)
+			if entry == nil {
+				continue
+			}
 
-		r.log.Infof(
-			"Found: '%s:%s' by '%s'",
-			entry.Plugin().GetMeta().GetId(),
-			entry.Plugin().GetMeta().GetVersion(),
-			entry.Plugin().GetMeta().GetAuthor(),
-		)
+			r.log.Infof(
+				"Found: '%s:%s' by '%s'",
+				entry.Plugin().GetMeta().GetId(),
+				entry.Plugin().GetMeta().GetVersion(),
+				entry.Plugin().GetMeta().GetAuthor(),
+			)
+		}
 	}
 	return nil
 }
@@ -121,7 +123,7 @@ func (r *manager) LoadPlugin(filePath string) PluginEntry {
 
 	f, err := os.Open(filePath)
 	if err != nil {
-		r.log.WithField("file", filePath).Error(PluginOpenError.Error())
+		r.log.WithField("file", filePath).WithField("os", "macos").Error(PluginOpenError.Error())
 		return nil
 	}
 	hasher := sha256.New()
@@ -283,10 +285,20 @@ func (r *manager) Run(ctx context.Context, registry PluginRegistry, installed []
 	for _, pe := range enabledPluginEntries {
 		err := pe.Plugin().Init(ctx, r.cfgManager)
 		if err != nil {
+			r.log.WithFields(logrus.Fields{
+				"p.id":   pe.Plugin().GetMeta().GetId(),
+				"p.name": pe.Plugin().GetMeta().GetPluginName(),
+				"call":   "plugin.Init",
+			}).Error(err)
 			return err
 		}
 		err = pe.Plugin().Start(ctx, registry)
 		if err != nil {
+			r.log.WithFields(logrus.Fields{
+				"p.id":   pe.Plugin().GetMeta().GetId(),
+				"p.name": pe.Plugin().GetMeta().GetPluginName(),
+				"call":   "plugin.Start",
+			}).Error(err)
 			return err
 		}
 		r.log.Infof("Started plugin %s", pe.Plugin().GetMeta().GetId())
@@ -355,8 +367,11 @@ func (r *manager) Http() interfaces.Http {
 	return i
 }
 
-func (r *manager) Logger() *logrus.Logger {
-	return r.log
+func (r *manager) Logger(meta entities.PluginMeta) *logrus.Logger {
+	return r.log.WithFields(logrus.Fields{
+		"p.id":   meta.GetId(),
+		"p.name": meta.GetPluginName(),
+	}).Logger
 }
 
 func (r *manager) Mail() interfaces.Mail {

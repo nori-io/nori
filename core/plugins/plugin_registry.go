@@ -18,6 +18,7 @@ package plugins
 import (
 	"github.com/sirupsen/logrus"
 
+	"github.com/secure2work/nori/core/entities"
 	"github.com/secure2work/nori/core/interfaces"
 )
 
@@ -29,7 +30,7 @@ type PluginRegistry interface {
 	Cache() interfaces.Cache
 	Config() interfaces.ConfigManager
 	Http() interfaces.Http
-	Logger() *logrus.Logger
+	Logger(meta entities.PluginMeta) *logrus.Logger
 	Mail() interfaces.Mail
 	PubSub() interfaces.PubSub
 	Session() interfaces.Session

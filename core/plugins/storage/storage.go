@@ -17,23 +17,32 @@ type noriCoreStorage struct {
 	Log    *logrus.Logger
 }
 
-type NoriCoreStorage interface {
+type NoriStorage interface {
 	GetInstallations() ([]entities.PluginMeta, error)
 	SaveInstallation(meta entities.PluginMeta) error
 	RemoveInstallation(id string) error
 }
 
-var instance NoriCoreStorage
+const (
+	storageTypeNone  = "none"
+	storageTypeMysql = "mysql"
+	storageTypeFile  = "file"
+)
+
+var instance NoriStorage
 var once sync.Once
 
-func GetNoriCoreStorage(cfg go_config.Config, log *logrus.Logger) NoriCoreStorage {
+func GetNoriStorage(cfg go_config.Config, log *logrus.Logger) NoriStorage {
 	once.Do(func() {
 		storageType := cfg.String("nori.storage.type")
 		if len(storageType) == 0 {
-			log.Error(errors.New("nori.storage.type not defined"))
-			return
+			storageType = storageTypeNone
 		}
-		if strings.ToLower(storageType) == "none" {
+
+		storageType = strings.ToLower(storageType)
+
+		// if storageType == none then return NoneStorage
+		if storageType == storageTypeNone {
 			instance, _ = getNoneStorage()
 			return
 		}
@@ -43,20 +52,16 @@ func GetNoriCoreStorage(cfg go_config.Config, log *logrus.Logger) NoriCoreStorag
 			log.Error(errors.New("nori.storage.source not defined"))
 		}
 
-		var storage NoriCoreStorage
+		var storage NoriStorage
 		var err error
 
 		switch storageType {
-		case "mysql":
+		case storageTypeMysql:
 			storage, err = getMySqlStorage(noriCoreStorage{
 				Source: storageSource,
 				Log:    log,
 			})
 			break
-			//case "postgresql":
-			//	// @todo implement
-			//case "file":
-			//	// @todo implement
 		default:
 			log.Error(errors.New("unknown nori.storage.type: " + storageType))
 		}

@@ -23,6 +23,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"strings"
+
 	"github.com/secure2work/nori/core/config"
 	"github.com/secure2work/nori/core/grpc"
 	"github.com/secure2work/nori/core/plugins"
@@ -34,16 +36,18 @@ var serverCmd = &cobra.Command{
 	Use:   "server",
 	Short: "server",
 	Run: func(cmd *cobra.Command, args []string) {
-		noriCoreStorage := storage.GetNoriCoreStorage(config.Config, config.Log)
+		noriCoreStorage := storage.GetNoriStorage(config.Config, config.Log)
 		if noriCoreStorage == nil {
-			config.Log.Error("can't create NoriCoreStorage")
+			config.Log.Error("can't create NoriStorage")
 			os.Exit(1)
 		}
 
 		pluginManager := plugins.GetPluginManager(noriCoreStorage)
 
 		// Load Plugins
-		err := loadPlugins(pluginManager)
+		dirs := getPluginsDir()
+		config.Log.Infof("Plugin dir(s): \n- %s", strings.Join(dirs, ",\n- "))
+		err := pluginManager.Load(dirs)
 		if err != nil {
 			config.Log.Error(err)
 			os.Exit(1)
@@ -59,7 +63,6 @@ var serverCmd = &cobra.Command{
 		pluginRegistry := (pluginManager).(plugins.PluginRegistry)
 		err = pluginManager.Run(context.Background(), pluginRegistry, installedPluginsList)
 		if err != nil {
-			config.Log.Error(err)
 			os.Exit(1)
 		}
 
@@ -67,7 +70,7 @@ var serverCmd = &cobra.Command{
 		if config.Config.Bool("nori.grpc.enable") {
 			addr := config.Config.String("nori.grpc.address")
 			server := grpc.NewServer(
-				[]string{config.Config.String("plugins.dir")},
+				dirs,
 				addr,
 				true,
 				pluginManager,
@@ -92,18 +95,19 @@ func init() {
 	viper.BindPFlag("key", serverCmd.Flags().Lookup("key"))
 }
 
-func getPluginsDir() string {
-	dir := config.Config.String("plugins.dir")
-	if len(dir) == 0 {
-		config.Log.Error("plugins.dir not defined")
+func getPluginsDir() []string {
+	dirs := config.Config.Slice("plugins.dir", ",")
+	if len(dirs) == 0 {
+		config.Log.Error("plugins.dir not defined or has incorrect format")
 		os.Exit(1)
 	}
-	return dir
-}
-
-func loadPlugins(pm plugins.PluginManager) error {
-	dir := getPluginsDir()
-	config.Log.Infof("Plugins dir: %s", dir)
-
-	return pm.Load(dir)
+	var list []string
+	for _, d := range dirs {
+		item, ok := d.(string)
+		if !ok {
+			continue
+		}
+		list = append(list, item)
+	}
+	return list
 }

@@ -9,7 +9,7 @@ import (
 type none struct {
 }
 
-func getNoneStorage() (NoriCoreStorage, error) {
+func getNoneStorage() (NoriStorage, error) {
 	return none{}, nil
 }
 
