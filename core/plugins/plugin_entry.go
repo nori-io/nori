@@ -35,11 +35,11 @@ type PluginEntry interface {
 }
 
 type pluginEntry struct {
-	kind     entities.PluginKind
-	plugin   interface{}
-	filePath string
-	hash     []byte
-	weight   int
+	pluginInterface entities.PluginInterface
+	plugin          interface{}
+	filePath        string
+	hash            []byte
+	weight          int
 }
 
 func (p *pluginEntry) Plugin() Plugin {

@@ -36,7 +36,7 @@ func getMySqlStorage(cfg noriCoreStorage) (NoriStorage, error) {
 		    plugin_name varchar(255),
 		    plugin_uri varchar(1000),
 		    tags varchar(255),
-		    kind varchar(255),
+		    interface varchar(255),
 		    version varchar(255),
 		    dependencies text,
 		    installed bigint,
@@ -51,7 +51,7 @@ func getMySqlStorage(cfg noriCoreStorage) (NoriStorage, error) {
 
 func (m *mysql) GetInstallations() ([]entities.PluginMeta, error) {
 	var meta []entities.PluginMeta
-	rows, err := m.db.Query("SELECT id, author, author_uri, description, license, license_uri, plugin_name, plugin_uri, tags, kind, version, dependencies FROM nori_plugins")
+	rows, err := m.db.Query("SELECT id, author, author_uri, description, license, license_uri, plugin_name, plugin_uri, tags, interface, version, dependencies FROM nori_plugins")
 	if err != nil {
 		return meta, err
 	}
@@ -85,7 +85,7 @@ func (m *mysql) SaveInstallation(meta entities.PluginMeta) error {
 	// @todo store file hash (?)
 	_, err = statement.Exec(meta.GetId(), meta.GetAuthor(), meta.GetAuthorURI(), meta.GetDescription(),
 		meta.GetLicense(), meta.GetLicenseURI(), meta.GetPluginName(), meta.GetPluginURI(),
-		strings.Join(meta.GetTags(), ","), meta.GetKind(), meta.GetVersion(),
+		strings.Join(meta.GetTags(), ","), meta.GetInterface(), meta.GetVersion(),
 		strings.Join(meta.GetDependencies(), ","), time.Now().Unix(), "")
 
 	return err

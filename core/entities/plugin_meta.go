@@ -16,48 +16,44 @@
 package entities
 
 type PluginMeta interface {
+	GetId() string
+
 	GetAuthor() string
 	GetAuthorURI() string
 
 	GetDependencies() []string
 	GetDescription() string
 
+	GetInterface() PluginInterface
+
 	GetLicense() string
 	GetLicenseURI() string
-
-	GetId() string
 
 	GetPluginName() string
 	GetPluginURI() string
 
 	GetTags() []string
 
-	GetKind() PluginKind
-
 	GetVersion() string
 }
 
-// @todo rewrite this comments, make it clear
-// Structure Description:
-// Author - author's name or company's name
-// AuithorURI - link to author's web-site
-// Dependencies []string - this is an array of PluginName
-// Id - this is plugin's id in format {company}/{kind} or {team}/{technology}/{plugin-name}", ex: nori/http, nori/redis/cluster
-// PluginName - this is the name of the plugin, ex: "HTML Pages Manager v1.0"
-// PluginURI - this is a link to plugin documentation / web-page / support
 type PluginMetaStruct struct {
 	Id           string
 	Author       string
 	AuthorURI    string
 	Dependencies []string
 	Description  string
+	Interface    PluginInterface
 	License      string
 	LicenseURI   string
 	PluginName   string
 	PluginURI    string
 	Tags         []string
-	Kind         PluginKind
 	Version      string
+}
+
+func (p *PluginMetaStruct) GetId() string {
+	return p.Id
 }
 
 func (p *PluginMetaStruct) GetAuthor() string {
@@ -76,16 +72,16 @@ func (p *PluginMetaStruct) GetDescription() string {
 	return p.Description
 }
 
+func (p *PluginMetaStruct) GetInterface() PluginInterface {
+	return p.Interface
+}
+
 func (p *PluginMetaStruct) GetLicense() string {
 	return p.License
 }
 
 func (p *PluginMetaStruct) GetLicenseURI() string {
 	return p.LicenseURI
-}
-
-func (p *PluginMetaStruct) GetId() string {
-	return p.Id
 }
 
 func (p *PluginMetaStruct) GetPluginName() string {
@@ -98,10 +94,6 @@ func (p *PluginMetaStruct) GetPluginURI() string {
 
 func (p *PluginMetaStruct) GetTags() []string {
 	return p.Tags
-}
-
-func (p *PluginMetaStruct) GetKind() PluginKind {
-	return p.Kind
 }
 
 func (p *PluginMetaStruct) GetVersion() string {

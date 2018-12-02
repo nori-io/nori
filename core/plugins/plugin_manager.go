@@ -140,12 +140,12 @@ func (r *manager) LoadPlugin(filePath string) PluginEntry {
 	}
 
 	var name string
-	kind := plug.GetMeta().GetKind()
-	switch kind {
+	pluginInterface := plug.GetMeta().GetInterface()
+	switch pluginInterface {
 	case entities.Custom:
 		name = plug.GetMeta().GetId()
 	default:
-		name = strings.ToLower(kind.String())
+		name = strings.ToLower(pluginInterface.String())
 	}
 
 	if len(name) == 0 {
@@ -256,19 +256,19 @@ func (r *manager) Run(ctx context.Context, registry PluginRegistry, installed []
 
 	installedEntries := map[string]PluginEntry{}
 
-	// only Custom PluginKind must be installed, other Kinds do not need installation,
+	// only Custom PluginInterface must be installed, other Kinds do not need installation,
 	// because they provide interfaces to service without any implementation
 	for id, e := range r.Plugins() {
 		// find plugin in installed and add to installedEntries
 		meta := e.Plugin().GetMeta()
-		switch meta.GetKind() {
+		switch meta.GetInterface() {
 		case entities.Custom:
 			if isInstalled(meta, installed) {
 				installedEntries[id] = e
 			}
 			break
 		default:
-			installedEntries[e.Plugin().GetMeta().GetKind().String()] = e
+			installedEntries[e.Plugin().GetMeta().GetInterface().String()] = e
 		}
 	}
 

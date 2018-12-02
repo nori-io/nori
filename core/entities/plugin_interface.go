@@ -15,10 +15,10 @@
 
 package entities
 
-type PluginKind int
+type PluginInterface int
 
 const (
-	Auth PluginKind = iota
+	Auth PluginInterface = iota
 	Authorize
 	Cache
 	Config
@@ -33,7 +33,7 @@ const (
 	Transport
 )
 
-var pluginKindNames = [...]string{
+var pluginInterfaceNames = [...]string{
 	"Auth",
 	"Authorize",
 	"Cache",
@@ -49,9 +49,9 @@ var pluginKindNames = [...]string{
 	"Transport",
 }
 
-func (p PluginKind) String() string {
-	if p < 0 || int(p) >= len(pluginKindNames) {
+func (p PluginInterface) String() string {
+	if p < 0 || int(p) >= len(pluginInterfaceNames) {
 		return "Unknown"
 	}
-	return pluginKindNames[p]
+	return pluginInterfaceNames[p]
 }
