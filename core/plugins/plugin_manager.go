@@ -33,7 +33,7 @@ import (
 	cfgmanager "github.com/secure2work/nori/core/config"
 	"github.com/secure2work/nori/core/entities"
 	"github.com/secure2work/nori/core/plugins/interfaces"
-	"github.com/secure2work/nori/core/plugins/storage"
+	"github.com/secure2work/nori/core/storage"
 )
 
 type PluginManager interface {

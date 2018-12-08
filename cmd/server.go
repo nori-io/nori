@@ -28,7 +28,7 @@ import (
 	"github.com/cheebo/go-config"
 	"github.com/secure2work/nori/core/grpc"
 	"github.com/secure2work/nori/core/plugins"
-	"github.com/secure2work/nori/core/plugins/storage"
+	"github.com/secure2work/nori/core/storage"
 	"github.com/sirupsen/logrus"
 )
 
