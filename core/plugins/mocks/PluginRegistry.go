@@ -2,7 +2,8 @@
 
 package mocks
 
-import interfaces "github.com/secure2work/nori/core/interfaces"
+import entities "github.com/secure2work/nori/core/entities"
+import interfaces "github.com/secure2work/nori/core/plugins/interfaces"
 import logrus "github.com/sirupsen/logrus"
 import mock "github.com/stretchr/testify/mock"
 
@@ -60,15 +61,15 @@ func (_m *PluginRegistry) Cache() interfaces.Cache {
 }
 
 // Config provides a mock function with given fields:
-func (_m *PluginRegistry) Config() interfaces.Config {
+func (_m *PluginRegistry) Config() interfaces.ConfigManager {
 	ret := _m.Called()
 
-	var r0 interfaces.Config
-	if rf, ok := ret.Get(0).(func() interfaces.Config); ok {
+	var r0 interfaces.ConfigManager
+	if rf, ok := ret.Get(0).(func() interfaces.ConfigManager); ok {
 		r0 = rf()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(interfaces.Config)
+			r0 = ret.Get(0).(interfaces.ConfigManager)
 		}
 	}
 
@@ -107,13 +108,13 @@ func (_m *PluginRegistry) Http() interfaces.Http {
 	return r0
 }
 
-// Logger provides a mock function with given fields:
-func (_m *PluginRegistry) Logger() *logrus.Logger {
-	ret := _m.Called()
+// Logger provides a mock function with given fields: meta
+func (_m *PluginRegistry) Logger(meta entities.PluginMeta) *logrus.Logger {
+	ret := _m.Called(meta)
 
 	var r0 *logrus.Logger
-	if rf, ok := ret.Get(0).(func() *logrus.Logger); ok {
-		r0 = rf()
+	if rf, ok := ret.Get(0).(func(entities.PluginMeta) *logrus.Logger); ok {
+		r0 = rf(meta)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*logrus.Logger)
@@ -149,6 +150,22 @@ func (_m *PluginRegistry) PubSub() interfaces.PubSub {
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(interfaces.PubSub)
+		}
+	}
+
+	return r0
+}
+
+// Session provides a mock function with given fields:
+func (_m *PluginRegistry) Session() interfaces.Session {
+	ret := _m.Called()
+
+	var r0 interfaces.Session
+	if rf, ok := ret.Get(0).(func() interfaces.Session); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(interfaces.Session)
 		}
 	}
 

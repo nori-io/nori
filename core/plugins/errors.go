@@ -25,7 +25,7 @@ var PluginOpenError = errors.New("can't open plugin file")
 var PluginLookupError = errors.New("can't lookup Plugin variable")
 var PluginInterfaceError = errors.New("can't match Plugin variable to Plugin interface")
 var PluginHashError = errors.New("can't calculate hash for plugin file")
-var PluginNamespaceError = errors.New("can't parse plugin namespace")
+var PluginImplementedInterfaceError = errors.New("can't resolve plugin interface")
 
 type DependencyError struct {
 	PlugName      string

@@ -3,30 +3,32 @@ package storage
 import (
 	"sync"
 
-	"errors"
-
 	"strings"
+
+	"fmt"
 
 	go_config "github.com/cheebo/go-config"
 	"github.com/secure2work/nori/core/entities"
 	"github.com/sirupsen/logrus"
 )
 
-type noriCoreStorage struct {
+type noriStorage struct {
 	Source string
 	Log    *logrus.Logger
 }
 
 type NoriStorage interface {
-	GetInstallations() ([]entities.PluginMeta, error)
-	SaveInstallation(meta entities.PluginMeta) error
-	RemoveInstallation(id string) error
+	GetPluginMetas() ([]entities.PluginMeta, error)
+	SavePluginMeta(meta entities.PluginMeta) error
+	DeletePluginMeta(id string) error
 }
 
 const (
 	storageTypeNone  = "none"
 	storageTypeMysql = "mysql"
-	storageTypeFile  = "file"
+
+	cfgNoriStorageType   = "nori.storage.type"
+	cfgNoriStorageSource = "nori.storage.source"
 )
 
 var instance NoriStorage
@@ -34,22 +36,21 @@ var once sync.Once
 
 func GetNoriStorage(cfg go_config.Config, log *logrus.Logger) NoriStorage {
 	once.Do(func() {
-		storageType := cfg.String("nori.storage.type")
+		storageType := cfg.String(cfgNoriStorageType)
 		if len(storageType) == 0 {
 			storageType = storageTypeNone
 		}
 
 		storageType = strings.ToLower(storageType)
 
-		// if storageType == none then return NoneStorage
 		if storageType == storageTypeNone {
 			instance, _ = getNoneStorage()
 			return
 		}
 
-		storageSource := cfg.String("nori.storage.source")
+		storageSource := cfg.String(cfgNoriStorageSource)
 		if len(storageSource) == 0 {
-			log.Error(errors.New("nori.storage.source not defined"))
+			log.Error(fmt.Errorf("%s not defined", cfgNoriStorageSource))
 		}
 
 		var storage NoriStorage
@@ -57,13 +58,13 @@ func GetNoriStorage(cfg go_config.Config, log *logrus.Logger) NoriStorage {
 
 		switch storageType {
 		case storageTypeMysql:
-			storage, err = getMySqlStorage(noriCoreStorage{
+			storage, err = getMySqlStorage(noriStorage{
 				Source: storageSource,
 				Log:    log,
 			})
 			break
 		default:
-			log.Error(errors.New("unknown nori.storage.type: " + storageType))
+			log.Error(fmt.Errorf("unknown %s: %s", cfgNoriStorageType, storageType))
 		}
 		if err != nil {
 			log.Error(err)

@@ -16,8 +16,9 @@
 package plugins
 
 import (
-	"github.com/secure2work/nori/core/entities"
 	"sort"
+
+	"github.com/secure2work/nori/core/entities"
 )
 
 type pluginList []PluginEntry
@@ -50,7 +51,7 @@ func (i pluginList) Less(x, y int) bool {
 	}
 
 	// sorting by name
-	if i[x].getWeight() == i[y].getWeight() && i[x].Plugin().GetMeta().GetId() < i[y].Plugin().GetMeta().GetId() {
+	if i[x].getWeight() == i[y].getWeight() && i[x].GetMeta().GetId() < i[y].GetMeta().GetId() {
 		return true
 	}
 

@@ -1,12 +1,8 @@
-FROM golang:1.10.1 AS builder
+FROM golang:1.11.2 AS builder
 RUN go version
 
 RUN go get -v github.com/secure2work/nori
 WORKDIR /go/src/github.com/secure2work/nori/
-
-#RUN set -x && \
-#    go get github.com/golang/dep/cmd/dep && \
-#    dep ensure -v
 
 RUN go build -o nori .
 
@@ -27,20 +23,18 @@ RUN touch /nori/config/nori.json
 RUN echo '{\n\
     "nori": {\n\
         "grpc": {\n\
-          "enable": true,\n\
-          "tls": {\n\
-            "ca": "/nori/certs/ca.pem",\n\
-            "private": "/nori/certs/private.pem"\n\
-          }\n\
+          "enable": true\n\
         },\n\
       "storage": {\n\
         "type": "none"\n\
       }\n\
     },\n\
     "plugins": {\n\
-      "dir": "/nori/plugins"\n\
+      "dir": [\n\
+        "/nori/plugins"\n\
+      ]\n\
     }\n\
-}' >> /nori/config/nori.json
+}' > /nori/config/nori.json
 
 EXPOSE 8080
 EXPOSE 29876

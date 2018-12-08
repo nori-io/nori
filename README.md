@@ -36,6 +36,15 @@ Example config file:
 }
 ```
 
+
+Configuration keys:
+
+- nori.storage.type string(none | mysql) - type of storage to storage system data
+- nori.storage.source string (empty | name:password@addr:port/database)
+- plugins.dir []string - paths to plugins dirs
+
+
+
 # Contributors
 
 - Sergei Che

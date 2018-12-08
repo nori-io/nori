@@ -25,10 +25,11 @@ import (
 
 	"strings"
 
-	"github.com/secure2work/nori/core/config"
+	"github.com/cheebo/go-config"
 	"github.com/secure2work/nori/core/grpc"
 	"github.com/secure2work/nori/core/plugins"
 	"github.com/secure2work/nori/core/plugins/storage"
+	"github.com/sirupsen/logrus"
 )
 
 // serverCmd represents the server command
@@ -36,47 +37,47 @@ var serverCmd = &cobra.Command{
 	Use:   "server",
 	Short: "server",
 	Run: func(cmd *cobra.Command, args []string) {
-		noriCoreStorage := storage.GetNoriStorage(config.Config, config.Log)
-		if noriCoreStorage == nil {
-			config.Log.Error("can't create NoriStorage")
+		logger := logrus.New()
+
+		noriStorage := storage.GetNoriStorage(config, logger)
+		if noriStorage == nil {
+			logger.Error("can't create NoriStorage")
 			os.Exit(1)
 		}
 
-		pluginManager := plugins.GetPluginManager(noriCoreStorage)
+		pluginManager := plugins.GetPluginManager(noriStorage, logger, config)
 
 		// Load Plugins
-		dirs := getPluginsDir()
-		config.Log.Infof("Plugin dir(s): \n- %s", strings.Join(dirs, ",\n- "))
+		dirs := getPluginsDir(config, logger)
+		logger.Infof("Plugin dir(s): \n- %s", strings.Join(dirs, ",\n- "))
 		err := pluginManager.Load(dirs)
 		if err != nil {
-			config.Log.Error(err)
+			logger.Error(err)
 			os.Exit(1)
 		}
 
 		// Get list of installed plugins
-		installedPluginsList, err := noriCoreStorage.GetInstallations()
+		installedPluginsList, err := noriStorage.GetPluginMetas()
 		if err != nil {
-			config.Log.Error(err)
+			logger.Error(err)
 			os.Exit(1)
 		}
 
-		pluginRegistry := (pluginManager).(plugins.PluginRegistry)
-		err = pluginManager.Run(context.Background(), pluginRegistry, installedPluginsList)
+		err = pluginManager.Run(context.Background(), installedPluginsList)
 		if err != nil {
 			os.Exit(1)
 		}
 
 		// gRPC Config
-		if config.Config.Bool("nori.grpc.enable") {
-			addr := config.Config.String("nori.grpc.address")
+		if config.Bool("nori.grpc.enable") {
+			addr := config.String("nori.grpc.address")
 			server := grpc.NewServer(
 				dirs,
 				addr,
 				true,
 				pluginManager,
-				pluginRegistry,
-				config.Log)
-			server.SetCertificates(config.Config.String("nori.grpc.tls.ca"), config.Config.String("nori.grpc.tls.private"))
+				logger)
+			server.SetCertificates(config.String("nori.grpc.tls.ca"), config.String("nori.grpc.tls.private"))
 			err = server.Run()
 			if err != nil {
 				log.Fatal(err)
@@ -88,6 +89,9 @@ var serverCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(serverCmd)
 
+	config.SetDefault("nori.grpc.enable", true)
+	config.SetDefault("nori.grpc.address", "0.0.0.0:29876")
+
 	serverCmd.Flags().String("pem", "server.pem", "path to pem file")
 	serverCmd.Flags().String("key", "server.key", "path to key file")
 
@@ -95,10 +99,10 @@ func init() {
 	viper.BindPFlag("key", serverCmd.Flags().Lookup("key"))
 }
 
-func getPluginsDir() []string {
-	dirs := config.Config.Slice("plugins.dir", ",")
+func getPluginsDir(config go_config.Config, logger *logrus.Logger) []string {
+	dirs := config.Slice("plugins.dir", ",")
 	if len(dirs) == 0 {
-		config.Log.Error("plugins.dir not defined or has incorrect format")
+		logger.Error("plugins.dir not defined or has incorrect format")
 		os.Exit(1)
 	}
 	var list []string

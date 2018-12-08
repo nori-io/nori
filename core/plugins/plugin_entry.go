@@ -18,8 +18,12 @@ package plugins
 import (
 	"strings"
 
+	"context"
+
 	"github.com/hashicorp/go-version"
 	"github.com/secure2work/nori/core/entities"
+	"github.com/secure2work/nori/core/plugins/interfaces"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -27,23 +31,61 @@ const (
 )
 
 type PluginEntry interface {
-	Plugin() Plugin
+	GetInstance() interface{}
+	GetMeta() entities.PluginMeta
+	Init(ctx context.Context, cm interfaces.ConfigManager) error
+	Install(ctx context.Context, registry PluginRegistry) error
+	Start(ctx context.Context, registry PluginRegistry) error
+	Stop(ctx context.Context, registry PluginRegistry) error
+	UnInstall(ctx context.Context, registry PluginRegistry) error
+
 	isDependent(id string, version string) (bool, error)
 	checkDependencies(map[string]PluginEntry) []error
 	calcWeight(map[string]PluginEntry) int
 	getWeight() int
 }
 
-type pluginEntry struct {
-	pluginInterface entities.PluginInterface
-	plugin          interface{}
-	filePath        string
-	hash            []byte
-	weight          int
+func NewPluginEntry(plugin Plugin, filePath string) PluginEntry {
+	return &pluginEntry{
+		plugin:   plugin,
+		filePath: filePath,
+		weight:   -1,
+	}
 }
 
-func (p *pluginEntry) Plugin() Plugin {
-	return (p.plugin).(Plugin)
+type pluginEntry struct {
+	filePath string
+	log      *logrus.Logger
+	plugin   Plugin
+	weight   int
+}
+
+func (p *pluginEntry) GetInstance() interface{} {
+	return p.plugin
+}
+
+func (p *pluginEntry) GetMeta() entities.PluginMeta {
+	return p.plugin.GetMeta()
+}
+
+func (p *pluginEntry) Init(ctx context.Context, cm interfaces.ConfigManager) error {
+	return p.plugin.Init(ctx, cm)
+}
+
+func (p *pluginEntry) Install(ctx context.Context, registry PluginRegistry) error {
+	return p.plugin.Install(ctx, registry)
+}
+
+func (p *pluginEntry) Start(ctx context.Context, registry PluginRegistry) error {
+	return p.plugin.Start(ctx, registry)
+}
+
+func (p *pluginEntry) Stop(ctx context.Context, registry PluginRegistry) error {
+	return p.plugin.Start(ctx, registry)
+}
+
+func (p *pluginEntry) UnInstall(ctx context.Context, registry PluginRegistry) error {
+	return p.plugin.UnInstall(ctx, registry)
 }
 
 func (p *pluginEntry) getWeight() int {
@@ -55,7 +97,7 @@ func (p *pluginEntry) calcWeight(plugEntries map[string]PluginEntry) int {
 		return p.weight
 	}
 
-	deps := p.Plugin().GetMeta().GetDependencies()
+	deps := p.GetMeta().GetDependencies()
 
 	if len(deps) == 0 {
 		p.weight = 0
@@ -79,7 +121,7 @@ func (p *pluginEntry) calcWeight(plugEntries map[string]PluginEntry) int {
 func (p *pluginEntry) checkDependencies(plugEntries map[string]PluginEntry) []error {
 	errs := make([]error, 0)
 
-	for _, dep := range p.Plugin().GetMeta().GetDependencies() {
+	for _, dep := range p.GetMeta().GetDependencies() {
 		var constraint string
 		dep, constraint = splitConstraint(dep)
 
@@ -87,15 +129,15 @@ func (p *pluginEntry) checkDependencies(plugEntries map[string]PluginEntry) []er
 
 		if !ok {
 			errs = append(errs, &DependencyError{
-				PlugName:      p.Plugin().GetMeta().GetId(),
-				PlugVer:       p.Plugin().GetMeta().GetVersion(),
+				PlugName:      p.GetMeta().GetId(),
+				PlugVer:       p.GetMeta().GetVersion(),
 				DepName:       dep,
 				DepConstraint: constraint,
 			})
 			continue
 		}
 
-		ver := depPlug.Plugin().GetMeta().GetVersion()
+		ver := depPlug.GetMeta().GetVersion()
 		check, err := versionCheck(ver, constraint)
 		if err != nil {
 			errs = append(errs, err)
@@ -104,7 +146,7 @@ func (p *pluginEntry) checkDependencies(plugEntries map[string]PluginEntry) []er
 
 		if !check {
 			errs = append(errs, &DependencyError{
-				PlugName:      p.Plugin().GetMeta().GetId(),
+				PlugName:      p.GetMeta().GetId(),
 				PlugVer:       ver,
 				DepName:       dep,
 				DepConstraint: constraint,
@@ -116,8 +158,8 @@ func (p *pluginEntry) checkDependencies(plugEntries map[string]PluginEntry) []er
 }
 
 func (p *pluginEntry) isDependent(id string, version string) (bool, error) {
-	ver := p.Plugin().GetMeta().GetVersion()
-	for _, dep := range p.Plugin().GetMeta().GetDependencies() {
+	ver := p.GetMeta().GetVersion()
+	for _, dep := range p.GetMeta().GetDependencies() {
 		var constraint string
 		dep, constraint = splitConstraint(dep)
 		if dep == id {

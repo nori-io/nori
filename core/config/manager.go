@@ -1,8 +1,8 @@
-package manager
+package config
 
 import (
 	"github.com/secure2work/nori/core/entities"
-	"github.com/secure2work/nori/core/interfaces"
+	"github.com/secure2work/nori/core/plugins/interfaces"
 )
 
 type manager struct {

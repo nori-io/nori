@@ -15,7 +15,7 @@ type mysql struct {
 	log *logrus.Logger
 }
 
-func getMySqlStorage(cfg noriCoreStorage) (NoriStorage, error) {
+func getMySqlStorage(cfg noriStorage) (NoriStorage, error) {
 	db, err := sql.Open("mysql", cfg.Source)
 	if err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func getMySqlStorage(cfg noriCoreStorage) (NoriStorage, error) {
 	}, nil
 }
 
-func (m *mysql) GetInstallations() ([]entities.PluginMeta, error) {
+func (m *mysql) GetPluginMetas() ([]entities.PluginMeta, error) {
 	var meta []entities.PluginMeta
 	rows, err := m.db.Query("SELECT id, author, author_uri, description, license, license_uri, plugin_name, plugin_uri, tags, interface, version, dependencies FROM nori_plugins")
 	if err != nil {
@@ -61,7 +61,7 @@ func (m *mysql) GetInstallations() ([]entities.PluginMeta, error) {
 		var ms entities.PluginMetaStruct
 		var tags, dependencies string
 		err := rows.Scan(&ms.Id, &ms.Author, &ms.AuthorURI, &ms.Description, &ms.License, &ms.LicenseURI,
-			&ms.PluginName, &ms.PluginURI, &tags, &ms.Kind, &ms.Version, &dependencies)
+			&ms.PluginName, &ms.PluginURI, &tags, &ms.Interface, &ms.Version, &dependencies)
 		if err != nil {
 			m.log.Error(err)
 		}
@@ -77,7 +77,7 @@ func (m *mysql) GetInstallations() ([]entities.PluginMeta, error) {
 	return meta, nil
 }
 
-func (m *mysql) SaveInstallation(meta entities.PluginMeta) error {
+func (m *mysql) SavePluginMeta(meta entities.PluginMeta) error {
 	statement, err := m.db.Prepare("INSERT INTO nori_plugins VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
 	if err != nil {
 		return err
@@ -91,7 +91,7 @@ func (m *mysql) SaveInstallation(meta entities.PluginMeta) error {
 	return err
 }
 
-func (m *mysql) RemoveInstallation(id string) error {
+func (m *mysql) DeletePluginMeta(id string) error {
 	_, err := m.db.Exec("DELETE FROM nori_plugins WHERE id = ? LIMIT 1", id)
 	return err
 }

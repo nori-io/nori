@@ -17,10 +17,8 @@ package plugins
 
 import (
 	"context"
-	"crypto/sha256"
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"path"
@@ -31,10 +29,10 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/secure2work/nori/core/config"
-	cfgmanager "github.com/secure2work/nori/core/config/manager"
+	"github.com/cheebo/go-config"
+	cfgmanager "github.com/secure2work/nori/core/config"
 	"github.com/secure2work/nori/core/entities"
-	"github.com/secure2work/nori/core/interfaces"
+	"github.com/secure2work/nori/core/plugins/interfaces"
 	"github.com/secure2work/nori/core/plugins/storage"
 )
 
@@ -42,40 +40,42 @@ type PluginManager interface {
 	Load(dir []string) error
 	LoadPlugin(filePath string) PluginEntry
 	Plugins() map[string]PluginEntry
-	Run(ctx context.Context, registry PluginRegistry, installed []entities.PluginMeta) error
+	Run(ctx context.Context, installed []entities.PluginMeta) error
 	Install(id string) error
 	UnInstall(id string) error
 }
 
 type manager struct {
-	storage    storage.NoriStorage
-	cfgManager interfaces.ConfigManager
-	log        *logrus.Logger
-	plugins    map[string]PluginEntry
-	files      map[string]error
+	configManager interfaces.ConfigManager
+	files         map[string]error
+	log           *logrus.Logger
+	plugins       map[string]PluginEntry
+	registry      PluginRegistry
+	storage       storage.NoriStorage
 }
 
 var instance *manager
 var once sync.Once
 
-func GetPluginManager(storage storage.NoriStorage) PluginManager {
+func GetPluginManager(storage storage.NoriStorage, log *logrus.Logger, config go_config.Config) PluginManager {
 	once.Do(func() {
 		instance = &manager{
-			storage:    storage,
-			cfgManager: cfgmanager.NewConfigManager(config.Config),
-			log:        config.Log,
-			plugins:    map[string]PluginEntry{},
-			files:      map[string]error{},
+			configManager: cfgmanager.NewConfigManager(config),
+			files:         map[string]error{},
+			log:           log,
+			plugins:       map[string]PluginEntry{},
+			storage:       storage,
 		}
+		instance.registry = GetPluginRegistry(instance, log, instance.configManager)
 	})
 	return instance
 }
 
-func (r *manager) Plugins() map[string]PluginEntry {
-	return r.plugins
+func (m *manager) Plugins() map[string]PluginEntry {
+	return m.plugins
 }
 
-func (r *manager) Load(sources []string) (err error) {
+func (m *manager) Load(sources []string) (err error) {
 	for _, dir := range sources {
 		var dirs []os.FileInfo
 		if dirs, err = ioutil.ReadDir(dir); err != nil {
@@ -91,84 +91,66 @@ func (r *manager) Load(sources []string) (err error) {
 
 			// load plugin
 			filePath := filepath.Join(dir, d.Name())
-			entry := r.LoadPlugin(filePath)
+			entry := m.LoadPlugin(filePath)
 			if entry == nil {
 				continue
 			}
 
-			r.log.Infof(
+			m.log.Infof(
 				"Found: '%s:%s' by '%s'",
-				entry.Plugin().GetMeta().GetId(),
-				entry.Plugin().GetMeta().GetVersion(),
-				entry.Plugin().GetMeta().GetAuthor(),
+				entry.GetMeta().GetId(),
+				entry.GetMeta().GetVersion(),
+				entry.GetMeta().GetAuthor(),
 			)
 		}
 	}
 	return nil
 }
 
-func (r *manager) LoadPlugin(filePath string) PluginEntry {
+func (m *manager) LoadPlugin(filePath string) PluginEntry {
 	pluginFile, err := plugin.Open(filePath)
 	if err != nil {
-		r.log.WithField("file", filePath).Error(err)
-		r.log.WithField("file", filePath).Error(PluginOpenError.Error())
+		m.log.WithField("file", filePath).Error(err)
+		m.log.WithField("file", filePath).Error(PluginOpenError.Error())
 		return nil
 	}
 
 	instance, err := pluginFile.Lookup("Plugin")
 	if err != nil {
-		r.log.WithField("file", filePath).Error(PluginLookupError.Error())
+		m.log.WithField("file", filePath).Error(PluginLookupError.Error())
 		return nil
 	}
-
-	f, err := os.Open(filePath)
-	if err != nil {
-		r.log.WithField("file", filePath).WithField("os", "macos").Error(PluginOpenError.Error())
-		return nil
-	}
-	hasher := sha256.New()
-	if _, err := io.Copy(hasher, f); err != nil {
-		r.log.WithField("file", filePath).Error(PluginHashError.Error())
-		return nil
-	}
-	f.Close()
 
 	plug, ok := instance.(Plugin)
 	if !ok {
-		r.log.WithField("file", filePath).Error(PluginInterfaceError.Error())
+		m.log.WithField("file", filePath).Error(PluginInterfaceError.Error())
 		return nil
 	}
 
-	var name string
-	pluginInterface := plug.GetMeta().GetInterface()
-	switch pluginInterface {
+	var iface string
+	switch plug.GetMeta().GetInterface() {
 	case entities.Custom:
-		name = plug.GetMeta().GetId()
+		iface = plug.GetMeta().GetId()
 	default:
-		name = strings.ToLower(pluginInterface.String())
+		iface = strings.ToLower(plug.GetMeta().GetInterface().String())
 	}
 
-	if len(name) == 0 {
-		r.log.WithField("file", filePath).Error(PluginNamespaceError.Error())
+	if len(iface) == 0 || iface == "unknown" {
+		m.log.WithField("file", filePath).Error(PluginImplementedInterfaceError.Error())
 		return nil
 	}
 
-	entry := &pluginEntry{
-		plugin:   instance,
-		filePath: filePath,
-		hash:     hasher.Sum(nil),
-		weight:   -1,
-	}
+	entry := NewPluginEntry(plug, filePath)
 
-	r.plugins[name] = entry
+	m.plugins[iface] = entry
 
 	return entry
 }
 
-func (r *manager) Install(id string) error {
+func (m *manager) Install(id string) error {
 	var plugin PluginEntry
 	var ok bool
-	if plugin, ok = r.plugins[id]; !ok {
+	if plugin, ok = m.plugins[id]; !ok {
 		return &PluginNotFound{
 			PluginId: id,
 		}
@@ -178,48 +160,48 @@ func (r *manager) Install(id string) error {
 	// @todo Check dependencies or not (?)
 
 	// install plugin
-	r.log.Infof("installing %s", id)
-	err := plugin.Plugin().Install(context.Background(), r)
+	m.log.Infof("installing %s", id)
+	err := plugin.Install(context.Background(), m.registry)
 	if err != nil {
-		r.log.Infof("can't install %s: ", id, err.Error())
+		m.log.Infof("can't install %s: ", id, err.Error())
 		return err
 	}
 
 	// save plugin meta into core storage
-	err = r.storage.SaveInstallation(plugin.Plugin().GetMeta())
+	err = m.storage.SavePluginMeta(plugin.GetMeta())
 	if err != nil {
-		r.log.Infof("can't install %s: ", id, err.Error())
+		m.log.Infof("can't install %s: ", id, err.Error())
 		return err
 	}
-	r.log.Infof("successfully installed %s", id)
+	m.log.Infof("successfully installed %s", id)
 
 	// @todo potential problem: different context on start here and in PluginManager.Run
-	r.log.Infof("starting %s", id)
-	err = plugin.Plugin().Start(context.Background(), r)
+	m.log.Infof("starting %s", id)
+	err = plugin.Start(context.Background(), m.registry)
 	if err != nil {
-		r.log.Infof("error on start %s: %s", id, err.Error())
+		m.log.Infof("error on start %s: %s", id, err.Error())
 		return err
 	}
-	r.log.Infof("successfully started %s", id)
+	m.log.Infof("successfully started %s", id)
 
 	return nil
 }
 
-func (r *manager) UnInstall(id string) error {
+func (m *manager) UnInstall(id string) error {
 	var plugin PluginEntry
 	var ok bool
 
 	// @todo potential problem: different context on start here and in PluginManager.Run
 	ctx := context.Background()
 
-	if plugin, ok = r.plugins[id]; ok {
+	if plugin, ok = m.plugins[id]; ok {
 		// @todo add flag to stop and delete dependent plugins
 		// Check dependencies
 		var dependencies []string
-		version := plugin.Plugin().GetMeta().GetVersion()
-		for _, p := range r.plugins {
+		version := plugin.GetMeta().GetVersion()
+		for _, p := range m.plugins {
 			if ok, _ := p.isDependent(id, version); ok {
-				dependencies = append(dependencies, fmt.Sprintf("%s:%s", p.Plugin().GetMeta().GetId(), p.Plugin().GetMeta().GetVersion()))
+				dependencies = append(dependencies, fmt.Sprintf("%s:%s", p.GetMeta().GetId(), p.GetMeta().GetVersion()))
 			}
 		}
 		if len(dependencies) > 0 {
@@ -230,20 +212,20 @@ func (r *manager) UnInstall(id string) error {
 		}
 
 		// Stop plugin
-		err := plugin.Plugin().Stop(ctx, r)
+		err := plugin.Stop(ctx, m.registry)
 		if err != nil {
 			return err
 		}
 
 		// uninstall plugin
-		err = plugin.Plugin().UnInstall(ctx, r)
+		err = plugin.UnInstall(ctx, m.registry)
 		if err != nil {
 			return err
 		}
 	}
 
-	// save plugin meta into core storage
-	err := r.storage.RemoveInstallation(id)
+	// delete plugin meta from core storage
+	err := m.storage.DeletePluginMeta(id)
 	if err != nil {
 		return err
 	}
@@ -251,16 +233,16 @@ func (r *manager) UnInstall(id string) error {
 	return nil
 }
 
-func (r *manager) Run(ctx context.Context, registry PluginRegistry, installed []entities.PluginMeta) error {
+func (m *manager) Run(ctx context.Context, installed []entities.PluginMeta) error {
 	var enabledPluginEntries []PluginEntry
 
 	installedEntries := map[string]PluginEntry{}
 
 	// only Custom PluginInterface must be installed, other Kinds do not need installation,
 	// because they provide interfaces to service without any implementation
-	for id, e := range r.Plugins() {
+	for id, e := range m.Plugins() {
 		// find plugin in installed and add to installedEntries
-		meta := e.Plugin().GetMeta()
+		meta := e.GetMeta()
 		switch meta.GetInterface() {
 		case entities.Custom:
 			if isInstalled(meta, installed) {
@@ -268,14 +250,14 @@ func (r *manager) Run(ctx context.Context, registry PluginRegistry, installed []
 			}
 			break
 		default:
-			installedEntries[e.Plugin().GetMeta().GetInterface().String()] = e
+			installedEntries[e.GetMeta().GetInterface().String()] = e
 		}
 	}
 
 	errs := CheckDependencies(installedEntries)
 	if len(errs) > 0 {
 		for _, e := range errs {
-			r.log.Error(e.Error())
+			m.log.Error(e.Error())
 		}
 		return errors.New("unresolved dependencies")
 	}
@@ -283,153 +265,25 @@ func (r *manager) Run(ctx context.Context, registry PluginRegistry, installed []
 	enabledPluginEntries = SortPlugins(installedEntries)
 
 	for _, pe := range enabledPluginEntries {
-		err := pe.Plugin().Init(ctx, r.cfgManager)
+		err := pe.Init(ctx, m.configManager)
 		if err != nil {
-			r.log.WithFields(logrus.Fields{
-				"p.id":   pe.Plugin().GetMeta().GetId(),
-				"p.name": pe.Plugin().GetMeta().GetPluginName(),
+			m.log.WithFields(logrus.Fields{
+				"p.id":   pe.GetMeta().GetId(),
+				"p.name": pe.GetMeta().GetPluginName(),
 				"call":   "plugin.Init",
 			}).Error(err)
 			return err
 		}
-		err = pe.Plugin().Start(ctx, registry)
+		err = pe.Start(ctx, m.registry)
 		if err != nil {
-			r.log.WithFields(logrus.Fields{
-				"p.id":   pe.Plugin().GetMeta().GetId(),
-				"p.name": pe.Plugin().GetMeta().GetPluginName(),
+			m.log.WithFields(logrus.Fields{
+				"p.id":   pe.GetMeta().GetId(),
+				"p.name": pe.GetMeta().GetPluginName(),
 				"call":   "plugin.Start",
 			}).Error(err)
 			return err
 		}
-		r.log.Infof("Started plugin %s", pe.Plugin().GetMeta().GetId())
+		m.log.Infof("Started plugin %s", pe.GetMeta().GetId())
 	}
 	return nil
-}
-
-func (r *manager) Get(ns string) interface{} {
-	for n, p := range r.plugins {
-		if strings.ToLower(n) == strings.ToLower(ns) {
-			return p.Plugin().GetInstance()
-		}
-	}
-	return nil
-}
-
-func (r *manager) Auth() interfaces.Auth {
-	item := r.Get(entities.Auth.String())
-	if item == nil {
-		return nil
-	}
-	i, ok := item.(interfaces.Auth)
-	if !ok {
-		r.log.Error("Can't cast to Auth interface")
-	}
-	return i
-}
-
-func (r *manager) Authorize() interfaces.Authorize {
-	item := r.Get(entities.Authorize.String())
-	if item == nil {
-		return nil
-	}
-	i, ok := item.(interfaces.Authorize)
-	if !ok {
-		r.log.Error("Can't cast to Authorize interface")
-	}
-	return i
-}
-
-func (r *manager) Cache() interfaces.Cache {
-	item := r.Get(entities.Cache.String())
-	if item == nil {
-		return nil
-	}
-	i, ok := item.(interfaces.Cache)
-	if !ok {
-		r.log.Error("Can't cast to Cache interface")
-	}
-	return i
-}
-
-func (r *manager) Config() interfaces.ConfigManager {
-	return r.cfgManager
-}
-
-func (r *manager) Http() interfaces.Http {
-	item := r.Get(entities.HTTP.String())
-	if item == nil {
-		return nil
-	}
-	i, ok := item.(interfaces.Http)
-	if !ok {
-		r.log.Error("Can't cast to HTTP interface")
-	}
-	return i
-}
-
-func (r *manager) Logger(meta entities.PluginMeta) *logrus.Logger {
-	return r.log.WithFields(logrus.Fields{
-		"p.id":   meta.GetId(),
-		"p.name": meta.GetPluginName(),
-	}).Logger
-}
-
-func (r *manager) Mail() interfaces.Mail {
-	item := r.Get(entities.Mail.String())
-	if item == nil {
-		return nil
-	}
-	i, ok := item.(interfaces.Mail)
-	if !ok {
-		r.log.Error("Can't cast to Mail interface")
-	}
-	return i
-}
-
-func (r *manager) PubSub() interfaces.PubSub {
-	item := r.Get(entities.PubSub.String())
-	if item == nil {
-		return nil
-	}
-	i, ok := item.(interfaces.PubSub)
-	if !ok {
-		r.log.Error("Can't cast to PubSub interface")
-	}
-	return i
-}
-
-func (r *manager) Session() interfaces.Session {
-	item := r.Get(entities.Session.String())
-	if item == nil {
-		return nil
-	}
-	i, ok := item.(interfaces.Session)
-	if !ok {
-		r.log.Error("Can't cast to Session interface")
-	}
-	return i
-}
-
-func (r *manager) Sql() interfaces.SQL {
-	item := r.Get(entities.SQL.String())
-	if item == nil {
-		return nil
-	}
-	i, ok := item.(interfaces.SQL)
-	if !ok {
-		r.log.Error("Can't cast to SQL interface")
-	}
-	return i
-}
-
-func (r *manager) Templates() interfaces.Templates {
-	item := r.Get(entities.Templates.String())
-	if item == nil {
-		return nil
-	}
-	i, ok := item.(interfaces.Templates)
-	if !ok {
-		r.log.Error("Can't cast to Templates interface")
-	}
-	return i
 }

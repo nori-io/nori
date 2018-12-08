@@ -35,7 +35,7 @@ func TestPluginEntry_calcWeightKinds(t *testing.T) {
 		PluginName:   "Nori HTTP",
 		Id:           order[1],
 		Dependencies: []string{},
-		Kind:         entities.HTTP,
+		Interface:    entities.HTTP,
 		Version:      "1.0",
 	})
 
@@ -44,7 +44,7 @@ func TestPluginEntry_calcWeightKinds(t *testing.T) {
 		PluginName:   "Nori Cache",
 		Id:           order[0],
 		Dependencies: []string{},
-		Kind:         entities.Cache,
+		Interface:    entities.Cache,
 		Version:      "1.0",
 	})
 
@@ -80,7 +80,7 @@ func TestPluginEntry_calcWeightCustom(t *testing.T) {
 		PluginName:   "Nori HTTP",
 		Id:           order[1],
 		Dependencies: []string{},
-		Kind:         entities.HTTP,
+		Interface:    entities.HTTP,
 		Version:      "1.0",
 	})
 
@@ -89,7 +89,7 @@ func TestPluginEntry_calcWeightCustom(t *testing.T) {
 		PluginName:   "Nori Cache",
 		Id:           order[0],
 		Dependencies: []string{},
-		Kind:         entities.Cache,
+		Interface:    entities.Cache,
 		Version:      "1.0",
 	})
 
@@ -98,7 +98,7 @@ func TestPluginEntry_calcWeightCustom(t *testing.T) {
 		PluginName:   "Nori Stats",
 		Id:           order[2],
 		Dependencies: []string{},
-		Kind:         entities.Custom,
+		Interface:    entities.Custom,
 		Version:      "1.0",
 	})
 
@@ -139,7 +139,7 @@ func TestPluginEntry_calcWeightCustomWithDeps(t *testing.T) {
 		PluginName:   "Nori HTTP",
 		Id:           order[1],
 		Dependencies: []string{},
-		Kind:         entities.HTTP,
+		Interface:    entities.HTTP,
 		Version:      "1.0",
 	})
 
@@ -148,7 +148,7 @@ func TestPluginEntry_calcWeightCustomWithDeps(t *testing.T) {
 		PluginName:   "Nori Cache",
 		Id:           order[0],
 		Dependencies: []string{},
-		Kind:         entities.Cache,
+		Interface:    entities.Cache,
 		Version:      "1.0",
 	})
 
@@ -157,7 +157,7 @@ func TestPluginEntry_calcWeightCustomWithDeps(t *testing.T) {
 		PluginName:   "Nori Stats",
 		Id:           order[2],
 		Dependencies: []string{},
-		Kind:         entities.Custom,
+		Interface:    entities.Custom,
 		Version:      "1.0",
 	})
 
@@ -166,7 +166,7 @@ func TestPluginEntry_calcWeightCustomWithDeps(t *testing.T) {
 		PluginName:   "Nori Admin",
 		Id:           order[3],
 		Dependencies: []string{"nori/stats"},
-		Kind:         entities.Custom,
+		Interface:    entities.Custom,
 		Version:      "1.0",
 	})
 
@@ -175,7 +175,7 @@ func TestPluginEntry_calcWeightCustomWithDeps(t *testing.T) {
 		PluginName:   "Nori Test",
 		Id:           order[4],
 		Dependencies: []string{"http"},
-		Kind:         entities.Custom,
+		Interface:    entities.Custom,
 		Version:      "1.0",
 	})
 
@@ -226,7 +226,7 @@ func TestPluginEntry_checkDepsNone(t *testing.T) {
 		PluginName:   "Nori HTTP",
 		Id:           order[1],
 		Dependencies: []string{},
-		Kind:         entities.HTTP,
+		Interface:    entities.HTTP,
 		Version:      "1.0",
 	})
 
@@ -235,7 +235,7 @@ func TestPluginEntry_checkDepsNone(t *testing.T) {
 		PluginName:   "Nori Cache",
 		Id:           order[0],
 		Dependencies: []string{},
-		Kind:         entities.Cache,
+		Interface:    entities.Cache,
 		Version:      "1.0",
 	})
 
@@ -267,7 +267,7 @@ func TestPluginEntry_checkDepsOne(t *testing.T) {
 		PluginName:   "Nori HTTP",
 		Id:           order[1],
 		Dependencies: []string{},
-		Kind:         entities.HTTP,
+		Interface:    entities.HTTP,
 		Version:      "1.0",
 	})
 
@@ -276,7 +276,7 @@ func TestPluginEntry_checkDepsOne(t *testing.T) {
 		PluginName:   "Nori Cache",
 		Id:           order[0],
 		Dependencies: []string{},
-		Kind:         entities.Cache,
+		Interface:    entities.Cache,
 		Version:      "1.0",
 	})
 
@@ -285,7 +285,7 @@ func TestPluginEntry_checkDepsOne(t *testing.T) {
 		PluginName:   "Nori Stats",
 		Id:           order[2],
 		Dependencies: []string{"cache"},
-		Kind:         entities.Custom,
+		Interface:    entities.Custom,
 		Version:      "1.0",
 	})
 
@@ -322,7 +322,7 @@ func TestPluginEntry_checkDepsWithVer(t *testing.T) {
 		PluginName:   "Nori HTTP",
 		Id:           order[1],
 		Dependencies: []string{},
-		Kind:         entities.HTTP,
+		Interface:    entities.HTTP,
 		Version:      "1.0",
 	})
 
@@ -331,7 +331,7 @@ func TestPluginEntry_checkDepsWithVer(t *testing.T) {
 		PluginName:   "Nori Cache",
 		Id:           order[0],
 		Dependencies: []string{},
-		Kind:         entities.Cache,
+		Interface:    entities.Cache,
 		Version:      "1.0",
 	})
 
@@ -340,7 +340,7 @@ func TestPluginEntry_checkDepsWithVer(t *testing.T) {
 		PluginName:   "Nori Stats",
 		Id:           order[2],
 		Dependencies: []string{"cache"},
-		Kind:         entities.Custom,
+		Interface:    entities.Custom,
 		Version:      "1.1",
 	})
 
@@ -349,7 +349,7 @@ func TestPluginEntry_checkDepsWithVer(t *testing.T) {
 		PluginName:   "Nori Admin",
 		Id:           order[3],
 		Dependencies: []string{"nori/stats:>=1.0"},
-		Kind:         entities.Custom,
+		Interface:    entities.Custom,
 		Version:      "1.0",
 	})
 
@@ -391,7 +391,7 @@ func TestPluginEntry_checkDepsUnresolved(t *testing.T) {
 		PluginName:   "Nori HTTP",
 		Id:           order[1],
 		Dependencies: []string{},
-		Kind:         entities.HTTP,
+		Interface:    entities.HTTP,
 		Version:      "1.0",
 	})
 
@@ -400,7 +400,7 @@ func TestPluginEntry_checkDepsUnresolved(t *testing.T) {
 		PluginName:   "Nori Cache",
 		Id:           order[0],
 		Dependencies: []string{},
-		Kind:         entities.Cache,
+		Interface:    entities.Cache,
 		Version:      "1.0",
 	})
 
@@ -409,7 +409,7 @@ func TestPluginEntry_checkDepsUnresolved(t *testing.T) {
 		PluginName:   "Nori Stats",
 		Id:           order[2],
 		Dependencies: []string{"cache", "nori/pages:>=1.0"},
-		Kind:         entities.Custom,
+		Interface:    entities.Custom,
 		Version:      "1.0",
 	})
 

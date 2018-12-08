@@ -19,7 +19,7 @@ import (
 	"context"
 
 	"github.com/secure2work/nori/core/entities"
-	"github.com/secure2work/nori/core/interfaces"
+	"github.com/secure2work/nori/core/plugins/interfaces"
 )
 
 type Plugin interface {

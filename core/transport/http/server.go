@@ -20,7 +20,6 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/secure2work/nori/core/config"
 	"github.com/secure2work/nori/core/endpoint"
 )
 
@@ -40,6 +39,7 @@ func NewServer(
 	e endpoint.Endpoint,
 	decode DecodeRequest,
 	encode EncodeResponse,
+	logger *logrus.Logger,
 	options ...ServerOption,
 ) *Server {
 	s := &Server{
@@ -47,7 +47,7 @@ func NewServer(
 		decode:       decode,
 		encode:       encode,
 		errorEncoder: DefaultErrorEncoder,
-		logger:       config.Log,
+		logger:       logger,
 	}
 	for _, option := range options {
 		option(s)
@@ -64,7 +64,7 @@ func (s Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	request, err := s.decode(ctx, r)
 	if err != nil {
-		config.Log.Error(err)
+		s.logger.Error(err)
 		s.errorEncoder(ctx, err, w)
 		return
 	}
@@ -72,7 +72,7 @@ func (s Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	response, err := s.e(ctx, request)
 
 	if err != nil {
-		config.Log.Error(err)
+		s.logger.Error(err)
 		s.errorEncoder(ctx, err, w)
 		return
 	}
@@ -82,7 +82,7 @@ func (s Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := s.encode(ctx, w, response); err != nil {
-		config.Log.Error(err)
+		s.logger.Error(err)
 		s.errorEncoder(ctx, err, w)
 		return
 	}

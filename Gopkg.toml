@@ -26,52 +26,8 @@
 
 
 [[constraint]]
-  name = "github.com/cheebo/go-config"
-  version = "3.0.3"
-
-[[constraint]]
-  name = "github.com/go-sql-driver/mysql"
-  version = "1.4.0"
-
-[[constraint]]
-  name = "github.com/golang/protobuf"
-  version = "1.2.0"
-
-[[constraint]]
-  name = "github.com/gorilla/mux"
-  version = "1.6.2"
-
-[[constraint]]
-  name = "github.com/hashicorp/go-version"
-  version = "1.0.0"
-
-[[constraint]]
-  name = "github.com/mitchellh/go-homedir"
-  version = "1.0.0"
-
-[[constraint]]
-  name = "github.com/sirupsen/logrus"
-  version = "1.0.6"
-
-[[constraint]]
-  name = "github.com/spf13/cobra"
-  version = "0.0.3"
-
-[[constraint]]
-  name = "github.com/spf13/viper"
-  version = "1.2.0"
-
-[[constraint]]
-  name = "github.com/stretchr/testify"
-  version = "1.2.2"
-
-[[constraint]]
-  branch = "master"
-  name = "golang.org/x/net"
-
-[[constraint]]
-  name = "google.golang.org/grpc"
-  version = "1.15.0"
+  name = "github.com/secure2work/nori/cmd"
+  version = "1.0.3"
 
 [prune]
   go-tests = true

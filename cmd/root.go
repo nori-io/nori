@@ -26,7 +26,7 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 
-	"github.com/secure2work/nori/core/config"
+	"github.com/sirupsen/logrus"
 )
 
 var cfgFile string
@@ -37,6 +37,13 @@ const (
 )
 
 // rootCmd represents the base command when called without any subcommands
+// config
+var config = go_config.New()
+
+// logger
+var logger = logrus.New()
+
+// root command
 var rootCmd = &cobra.Command{
 	Use:   "nori",
 	Short: "",
@@ -46,7 +53,7 @@ var rootCmd = &cobra.Command{
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		config.Log.Error(err)
+		logger.Error(err)
 		os.Exit(1)
 	}
 }
@@ -63,7 +70,7 @@ func initConfig() {
 		// Find home directory.
 		home, err := homedir.Dir()
 		if err != nil {
-			config.Log.Error(err)
+			logger.Error(err)
 			os.Exit(1)
 		}
 		// build config file path
@@ -74,12 +81,12 @@ func initConfig() {
 		file.File{Path: cfgFile, Type: go_config.JSON, Namespace: ""},
 	)
 	if err != nil {
-		config.Log.Error(err)
+		logger.Error(err)
 		os.Exit(1)
 	}
-	config.Config.UseSource(fileSource)
+	config.UseSource(fileSource)
 
-	config.Log.Infof("Using config file: %s", cfgFile)
+	logger.Infof("Using config file: %s", cfgFile)
 
-	config.Config.UseSource(env.Source("NORI"))
+	config.UseSource(env.Source("NORI"))
 }

@@ -49,14 +49,13 @@ type Server struct {
 	certFile string
 	keyFile  string
 
-	pluginManager  plugins.PluginManager
-	pluginRegistry plugins.PluginRegistry
-	passkey        *Passkey
-	grpcServer     *grpc.Server
-	gShutdown      chan struct{}
-	secure         bool
-	done           bool
-	log            *logrus.Logger
+	pluginManager plugins.PluginManager
+	passkey       *Passkey
+	grpcServer    *grpc.Server
+	gShutdown     chan struct{}
+	secure        bool
+	done          bool
+	log           *logrus.Logger
 }
 
 func NewServer(
@@ -64,17 +63,15 @@ func NewServer(
 	addr string,
 	enable bool,
 	pluginManager plugins.PluginManager,
-	pluginRegistry plugins.PluginRegistry,
 	log *logrus.Logger,
 ) *Server {
 	return &Server{
-		pluginManager:  pluginManager,
-		pluginRegistry: pluginRegistry,
-		pluginDirs:     dirs,
-		gRPCAddress:    addr,
-		gRPCEnable:     enable,
-		gShutdown:      make(chan struct{}, 1),
-		log:            log,
+		pluginManager: pluginManager,
+		pluginDirs:    dirs,
+		gRPCAddress:   addr,
+		gRPCEnable:    enable,
+		gShutdown:     make(chan struct{}, 1),
+		log:           log,
 	}
 }
 
@@ -162,9 +159,9 @@ func (s Server) PluginListCommand(_ context.Context, _ *commands.PluginListReque
 
 	for _, plug := range s.pluginManager.Plugins() {
 		reply.Data = append(reply.Data, &commands.PluginList{
-			Id:     plug.Plugin().GetMeta().GetId(),
-			Name:   plug.Plugin().GetMeta().GetPluginName(),
-			Author: plug.Plugin().GetMeta().GetAuthor(),
+			Id:     plug.GetMeta().GetId(),
+			Name:   plug.GetMeta().GetPluginName(),
+			Author: plug.GetMeta().GetAuthor(),
 		})
 	}
 	return reply, nil
@@ -264,9 +261,9 @@ func (s Server) PluginUploadCommand(_ context.Context, c *commands.PluginUploadR
 	if pe := s.pluginManager.LoadPlugin(path); pe != nil {
 		s.log.Infof(
 			"Found: '%s:%s' by '%s'",
-			pe.Plugin().GetMeta().GetId(),
-			pe.Plugin().GetMeta().GetVersion(),
-			pe.Plugin().GetMeta().GetAuthor(),
+			pe.GetMeta().GetId(),
+			pe.GetMeta().GetVersion(),
+			pe.GetMeta().GetAuthor(),
 		)
 	} else {
 		s.log.Errorf("can't load plugin %s", c.Name)
