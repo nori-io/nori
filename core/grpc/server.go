@@ -382,6 +382,10 @@ func (s Server) CertsUploadCommand(_ context.Context, c *commands.CertsUploadReq
 	}, nil
 }
 
+func (s Server) SendPingCommand(_ context.Context, ping *commands.PingRequest) (*commands.PongReply, error) {
+	return &commands.PongReply{Message: ping.Message}, nil
+}
+
 func (s Server) CheckTLS() (grpc.ServerOption, error) {
 	if len(s.certFile) > 0 && len(s.keyFile) > 0 &&
 		fileExists(s.certFile) && fileExists(s.keyFile) {

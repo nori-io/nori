@@ -2,6 +2,7 @@ syntax = "proto3";
 
 import "plugin_commands.proto";
 import "certs_commands.proto";
+import "ping_pong_commands.proto";
 
 package commands;
 
@@ -14,4 +15,6 @@ service Commands {
     rpc PluginUploadCommand (PluginUploadRequest) returns (ErrorReply) {}
 
     rpc CertsUploadCommand(CertsUploadRequest) returns (ErrorReply) {}
+
+    rpc SendPingCommand (PingRequest) returns (PongReply) {}
 }
