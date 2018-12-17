@@ -17,12 +17,16 @@ package grpc
 
 import (
 	"errors"
+	"fmt"
 	"net"
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"sync"
 	"syscall"
+
+	"github.com/secure2work/nori/core/plugins/meta"
 
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
@@ -49,7 +53,7 @@ type Server struct {
 	certFile string
 	keyFile  string
 
-	pluginManager plugins.PluginManager
+	pluginManager plugins.Manager
 	passkey       *Passkey
 	grpcServer    *grpc.Server
 	gShutdown     chan struct{}
@@ -62,7 +66,7 @@ func NewServer(
 	dirs []string,
 	addr string,
 	enable bool,
-	pluginManager plugins.PluginManager,
+	pluginManager plugins.Manager,
 	log *logrus.Logger,
 ) *Server {
 	return &Server{
@@ -157,11 +161,11 @@ func (s Server) PluginListCommand(_ context.Context, _ *commands.PluginListReque
 	reply := new(commands.PluginListReply)
 	reply.Data = make([]*commands.PluginList, 0)
 
-	for _, plug := range s.pluginManager.Plugins() {
+	for _, m := range s.pluginManager.Metas() {
 		reply.Data = append(reply.Data, &commands.PluginList{
-			Id:     plug.GetMeta().GetId(),
-			Name:   plug.GetMeta().GetPluginName(),
-			Author: plug.GetMeta().GetAuthor(),
+			Id:     m.Id().String(),
+			Name:   m.GetDescription().Name,
+			Author: m.GetAuthor().Name,
 		})
 	}
 	return reply, nil
@@ -201,7 +205,19 @@ func (s Server) PluginRemoveCommand(_ context.Context, c *commands.PluginRemoveR
 }
 
 func (s Server) PluginInstallCommand(ctx context.Context, c *commands.PluginInstallRequest) (*commands.ErrorReply, error) {
-	err := s.pluginManager.Install(c.Id)
+	parts := strings.Split(c.Id, ":")
+	if len(parts) != 2 {
+		err := fmt.Errorf("ID does not contain version information")
+		return &commands.ErrorReply{
+			Status: false,
+			Error:  err.Error(),
+		}, err
+	}
+	id := meta.ID{
+		ID:      parts[0],
+		Version: parts[1],
+	}
+	err := s.pluginManager.Install(id, ctx)
 	if err != nil {
 		return &commands.ErrorReply{
 			Status: false,
@@ -214,8 +230,20 @@ func (s Server) PluginInstallCommand(ctx context.Context, c *commands.PluginInst
 	}, nil
 }
 
-func (s Server) PluginUninstallCommand(_ context.Context, c *commands.PluginUninstallRequest) (*commands.ErrorReply, error) {
-	err := s.pluginManager.UnInstall(c.Id)
+func (s Server) PluginUninstallCommand(ctx context.Context, c *commands.PluginUninstallRequest) (*commands.ErrorReply, error) {
+	parts := strings.Split(c.Id, ":")
+	if len(parts) != 2 {
+		err := fmt.Errorf("ID does not contain version information")
+		return &commands.ErrorReply{
+			Status: false,
+			Error:  err.Error(),
+		}, err
+	}
+	id := meta.ID{
+		ID:      parts[0],
+		Version: parts[1],
+	}
+	err := s.pluginManager.UnInstall(id, ctx)
 	if err != nil {
 		return &commands.ErrorReply{
 			Status: false,
@@ -258,11 +286,10 @@ func (s Server) PluginUploadCommand(_ context.Context, c *commands.PluginUploadR
 
 	s.log.Infof("plugin %s uploaded", c.Name)
 
-	if pe := s.pluginManager.LoadPlugin(path); pe != nil {
+	if pe, _ := s.pluginManager.AddFile(path); pe != nil {
 		s.log.Infof(
-			"Found: '%s:%s' by '%s'",
-			pe.GetMeta().GetId(),
-			pe.GetMeta().GetVersion(),
+			"Found: '%s' by '%s'",
+			pe.GetMeta().Id().String(),
 			pe.GetMeta().GetAuthor(),
 		)
 	} else {

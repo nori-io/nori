@@ -1,43 +1,67 @@
 package config
 
 import (
-	"github.com/secure2work/nori/core/entities"
 	"github.com/secure2work/nori/core/plugins/interfaces"
+	"github.com/secure2work/nori/core/plugins/meta"
 )
 
+type Manager interface {
+	Register(meta.Meta) Config
+}
+
+type Config interface {
+	Bool(key string, desc string) Bool
+	Float(key string, desc string) Float
+	Int(key string, desc string) Int
+	UInt(key string, desc string) UInt
+	Slice(key, delimiter string, desc string) Slice
+	String(key string, desc string) String
+	StringMap(key string, desc string) StringMap
+}
+
+type (
+	Bool      func() bool
+	Float     func() float64
+	Int       func() int
+	UInt      func() uint
+	Slice     func() []interface{}
+	String    func() string
+	StringMap func() map[string]interface{}
+)
+
+type Variable struct {
+	Name        string
+	Description string
+}
+
 type manager struct {
-	configs map[string][]ConfigVariable
+	configs map[meta.ID][]Variable
 	config  interfaces.Config
 }
 
-func NewConfigManager(config interfaces.Config) interfaces.ConfigManager {
+func NewManager(config interfaces.Config) Manager {
 	m := new(manager)
-	m.configs = make(map[string][]ConfigVariable)
+	m.configs = make(map[meta.ID][]Variable)
 	m.config = config
 	return m
 }
 
-func (m *manager) PluginRegister(meta entities.PluginMeta) interfaces.Manager {
-	cfgs := make([]ConfigVariable, 0)
-	m.configs[meta.GetId()] = cfgs
-	return &configs{
+func (m *manager) Register(meta meta.Meta) Config {
+	cfgs := make([]Variable, 0)
+	m.configs[meta.Id()] = cfgs
+	return &config{
 		cfgs:   cfgs,
 		config: m.config,
 	}
 }
 
-type ConfigVariable struct {
-	Name        string
-	Description string
-}
-
-type configs struct {
-	cfgs   []ConfigVariable
+type config struct {
+	cfgs   []Variable
 	config interfaces.Config
 }
 
-func (c *configs) Bool(key string, desc string) interfaces.Bool {
-	c.cfgs = append(c.cfgs, ConfigVariable{
+func (c *config) Bool(key string, desc string) Bool {
+	c.cfgs = append(c.cfgs, Variable{
 		Name:        key,
 		Description: desc,
 	})
@@ -46,8 +70,8 @@ func (c *configs) Bool(key string, desc string) interfaces.Bool {
 	}
 }
 
-func (c *configs) Float(key string, desc string) interfaces.Float {
-	c.cfgs = append(c.cfgs, ConfigVariable{
+func (c *config) Float(key string, desc string) Float {
+	c.cfgs = append(c.cfgs, Variable{
 		Name:        key,
 		Description: desc,
 	})
@@ -56,8 +80,8 @@ func (c *configs) Float(key string, desc string) interfaces.Float {
 	}
 }
 
-func (c *configs) Int(key string, desc string) interfaces.Int {
-	c.cfgs = append(c.cfgs, ConfigVariable{
+func (c *config) Int(key string, desc string) Int {
+	c.cfgs = append(c.cfgs, Variable{
 		Name:        key,
 		Description: desc,
 	})
@@ -66,8 +90,8 @@ func (c *configs) Int(key string, desc string) interfaces.Int {
 	}
 }
 
-func (c *configs) UInt(key string, desc string) interfaces.UInt {
-	c.cfgs = append(c.cfgs, ConfigVariable{
+func (c *config) UInt(key string, desc string) UInt {
+	c.cfgs = append(c.cfgs, Variable{
 		Name:        key,
 		Description: desc,
 	})
@@ -76,8 +100,8 @@ func (c *configs) UInt(key string, desc string) interfaces.UInt {
 	}
 }
 
-func (c *configs) Slice(key, delimiter string, desc string) interfaces.Slice {
-	c.cfgs = append(c.cfgs, ConfigVariable{
+func (c *config) Slice(key, delimiter string, desc string) Slice {
+	c.cfgs = append(c.cfgs, Variable{
 		Name:        key,
 		Description: desc,
 	})
@@ -86,8 +110,8 @@ func (c *configs) Slice(key, delimiter string, desc string) interfaces.Slice {
 	}
 }
 
-func (c *configs) String(key string, desc string) interfaces.String {
-	c.cfgs = append(c.cfgs, ConfigVariable{
+func (c *config) String(key string, desc string) String {
+	c.cfgs = append(c.cfgs, Variable{
 		Name:        key,
 		Description: desc,
 	})
@@ -96,8 +120,8 @@ func (c *configs) String(key string, desc string) interfaces.String {
 	}
 }
 
-func (c *configs) StringMap(key string, desc string) interfaces.StringMap {
-	c.cfgs = append(c.cfgs, ConfigVariable{
+func (c *config) StringMap(key string, desc string) StringMap {
+	c.cfgs = append(c.cfgs, Variable{
 		Name:        key,
 		Description: desc,
 	})

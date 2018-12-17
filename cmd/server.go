@@ -26,6 +26,7 @@ import (
 	"strings"
 
 	"github.com/cheebo/go-config"
+	configManager "github.com/secure2work/nori/core/config"
 	"github.com/secure2work/nori/core/grpc"
 	"github.com/secure2work/nori/core/plugins"
 	"github.com/secure2work/nori/core/storage"
@@ -45,25 +46,22 @@ var serverCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		pluginManager := plugins.GetPluginManager(noriStorage, logger, config)
+		configManager := configManager.NewManager(config)
+		registry := plugins.NewRegistry(configManager, logger)
+
+		// todo add storage
+		pluginManager := plugins.NewManager(registry, logger)
 
 		// Load Plugins
 		dirs := getPluginsDir(config, logger)
 		logger.Infof("Plugin dir(s): \n- %s", strings.Join(dirs, ",\n- "))
-		err := pluginManager.Load(dirs)
+		err := pluginManager.AddDir(dirs)
 		if err != nil {
 			logger.Error(err)
-			os.Exit(1)
 		}
 
-		// Get list of installed plugins
-		installedPluginsList, err := noriStorage.GetPluginMetas()
-		if err != nil {
-			logger.Error(err)
-			os.Exit(1)
-		}
-
-		err = pluginManager.Run(context.Background(), installedPluginsList)
+		// todo: add list of installed plugins
+		err = pluginManager.StartAll(context.Background())
 		if err != nil {
 			os.Exit(1)
 		}

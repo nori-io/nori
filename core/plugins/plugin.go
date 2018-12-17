@@ -1,33 +1,18 @@
-// Copyright © 2018 Secure2Work info@secure2work.com
-//
-// This program is free software: you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation, either version 3
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-
 package plugins
 
 import (
 	"context"
 
-	"github.com/secure2work/nori/core/entities"
-	"github.com/secure2work/nori/core/plugins/interfaces"
+	"github.com/secure2work/nori/core/config"
+	"github.com/secure2work/nori/core/plugins/meta"
 )
 
 type Plugin interface {
 	GetInstance() interface{}
-	GetMeta() entities.PluginMeta
-	Init(ctx context.Context, config interfaces.ConfigManager) error
-	Install(ctx context.Context, registry PluginRegistry) error
-	Start(ctx context.Context, registry PluginRegistry) error
-	Stop(ctx context.Context, registry PluginRegistry) error
-	UnInstall(ctx context.Context, registry PluginRegistry) error
+	GetMeta() meta.Meta
+	Init(ctx context.Context, config config.Manager) error
+	Install(ctx context.Context, registry Registry) error
+	Start(ctx context.Context, registry Registry) error
+	Stop(ctx context.Context, registry Registry) error
+	UnInstall(ctx context.Context, registry Registry) error
 }
