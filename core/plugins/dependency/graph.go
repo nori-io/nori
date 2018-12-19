@@ -1,4 +1,4 @@
-package dep
+package dependency
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"github.com/gonum/graph/simple"
 )
 
-func topologicalSort(g *simple.DirectedGraph) ([]*graph.Node, error) {
+func Sort(g *simple.DirectedGraph) ([]*graph.Node, error) {
 	var sorted []*graph.Node
 	q := NewNodeQueue()
 

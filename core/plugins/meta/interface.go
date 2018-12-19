@@ -15,14 +15,16 @@
 
 package meta
 
+import "github.com/secure2work/nori/version"
+
 type Interface int
 
 const (
-	Auth Interface = iota
+	Custom Interface = iota
+	Auth
 	Authorize
 	Cache
 	Config
-	Custom
 	HTTP
 	HTTPTransport
 	Mail
@@ -34,11 +36,11 @@ const (
 )
 
 var interfaceNames = [...]string{
+	"Custom",
 	"Auth",
 	"Authorize",
 	"Cache",
 	"Config",
-	"Custom",
 	"HTTP",
 	"HTTPTransport",
 	"Mail",
@@ -49,9 +51,17 @@ var interfaceNames = [...]string{
 	"Transport",
 }
 
-func (p Interface) String() string {
-	if p < 0 || int(p) >= len(interfaceNames) {
-		return "Unknown"
+func (i Interface) String() string {
+	if i < 0 || int(i) >= len(interfaceNames) {
+		return ""
 	}
-	return interfaceNames[p]
+	return interfaceNames[i]
+}
+
+func (i Interface) Dependency() Dependency {
+	return Dependency{
+		ID:         PluginID(i.String()),
+		Constraint: "~" + version.NoriMajorVersion,
+		Interface:  i,
+	}
 }

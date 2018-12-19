@@ -47,3 +47,23 @@ type UnknownInterface struct {
 func (e UnknownInterface) Error() string {
 	return fmt.Sprintf("plugin [%s] implements unknown interface", e.Path)
 }
+
+type NonInstallablePlugin struct {
+	Id   meta.ID
+	Path string
+}
+
+func (e NonInstallablePlugin) Error() string {
+	return fmt.Sprintf("non-installable plugin [%s] in %s", e.Id.String(), e.Path)
+}
+
+type IncompatibleCoreVersion struct {
+	Id                 meta.ID
+	NeededCoreVersion  string
+	CurrentCoreVersion string
+}
+
+func (e IncompatibleCoreVersion) Error() string {
+	return fmt.Sprintf("Plugin [%s] requires Nori [%s], running Nori [%s]",
+		e.Id.String(), e.NeededCoreVersion, e.CurrentCoreVersion)
+}

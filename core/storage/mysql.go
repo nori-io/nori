@@ -2,11 +2,11 @@ package storage
 
 import (
 	"database/sql"
+	"encoding/json"
 	"strings"
-	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/secure2work/nori/core/entities"
+	"github.com/secure2work/nori/core/plugins/meta"
 	"github.com/sirupsen/logrus"
 )
 
@@ -27,21 +27,28 @@ func getMySqlStorage(cfg noriStorage) (NoriStorage, error) {
 	}
 
 	db.Exec(`CREATE TABLE IF NOT EXISTS nori_plugins (
-		    id varchar(255) NOT NULL,
-		    author varchar(255),
-		    author_uri varchar(255),
-		    description varchar(255),
-		    license varchar(255),
-		    license_uri varchar(255),
-		    plugin_name varchar(255),
-		    plugin_uri varchar(1000),
-		    tags varchar(255),
-		    interface varchar(255),
-		    version varchar(255),
-		    dependencies text,
-		    installed bigint,
-		    hash varchar(255),
-		    PRIMARY KEY (id)
+		    id varchar(255) NOT NULL ,
+		    version varchar(32) not null ,
+		    
+		    author text ,
+		    
+		    deps text ,
+		    
+		    description text ,
+		    
+		    core text,
+		    
+		    interface int ,
+		    
+		    license text ,
+		    
+		    links text ,
+		    
+		    tags varchar(255) ,
+		    
+		    installed bigint ,
+		    hash varchar(255) ,
+		    PRIMARY KEY (id, version)
 		)  ENGINE=MyISAM;`)
 
 	return &mysql{
@@ -49,49 +56,128 @@ func getMySqlStorage(cfg noriStorage) (NoriStorage, error) {
 	}, nil
 }
 
-func (m *mysql) GetPluginMetas() ([]entities.PluginMeta, error) {
-	var meta []entities.PluginMeta
-	rows, err := m.db.Query("SELECT id, author, author_uri, description, license, license_uri, plugin_name, plugin_uri, tags, interface, version, dependencies FROM nori_plugins")
+func (m *mysql) GetPluginMetas() ([]meta.Meta, error) {
+	var metas []meta.Meta
+	rows, err := m.db.Query(
+		`SELECT id,
+				version,
+				author,
+				deps,
+				description,
+				core,
+				interface,
+				license,
+				links,
+				tags,
+				installed, 
+				hash FROM nori_plugins`)
 	if err != nil {
-		return meta, err
+		return metas, err
 	}
 
 	defer rows.Close()
 	for rows.Next() {
-		var ms entities.PluginMetaStruct
-		var tags, dependencies string
-		err := rows.Scan(&ms.Id, &ms.Author, &ms.AuthorURI, &ms.Description, &ms.License, &ms.LicenseURI,
-			&ms.PluginName, &ms.PluginURI, &tags, &ms.Interface, &ms.Version, &dependencies)
+		var mt meta.Data
+		var iface int
+		var author, description, dependencies, core, license, links, tags string
+		err := rows.Scan(
+			&mt.ID.ID, &mt.ID.Version,
+			&author,
+			&dependencies,
+			&description,
+			&core,
+			&iface,
+			&license,
+			&links,
+			&tags,
+		)
 		if err != nil {
 			m.log.Error(err)
+			continue
 		}
-		ms.Tags = strings.Split(tags, ",")
-		ms.Dependencies = strings.Split(dependencies, ",")
-		meta = append(meta, &ms)
+
+		var authData meta.Author
+		err = json.Unmarshal([]byte(author), authData)
+		if err == nil {
+			mt.Author = authData
+		}
+
+		var depSet []meta.Dependency
+		err = json.Unmarshal([]byte(dependencies), depSet)
+		if err == nil {
+			mt.Dependencies = depSet
+		}
+
+		var descData meta.Description
+		err = json.Unmarshal([]byte(description), descData)
+		if err == nil {
+			mt.Description = descData
+		}
+
+		var coreData meta.Core
+		err = json.Unmarshal([]byte(core), coreData)
+		if err == nil {
+			mt.Core = coreData
+		}
+
+		mt.Interface = meta.Interface(iface)
+
+		var licenseData meta.License
+		err = json.Unmarshal([]byte(license), &licenseData)
+		if err == nil {
+			mt.License = licenseData
+		}
+
+		var linkSet []meta.Link
+		err = json.Unmarshal([]byte(links), &linkSet)
+		if err == nil {
+			mt.Links = linkSet
+		}
+		mt.Tags = strings.Split(tags, ",")
+
+		metas = append(metas, &mt)
 	}
 	err = rows.Err()
 	if err != nil {
 		return nil, err
 	}
 
-	return meta, nil
+	return metas, nil
 }
 
-func (m *mysql) SavePluginMeta(meta entities.PluginMeta) error {
+func (m *mysql) SavePluginMeta(meta meta.Meta) error {
 	statement, err := m.db.Prepare("INSERT INTO nori_plugins VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
 	if err != nil {
 		return err
 	}
-	// @todo store file hash (?)
-	_, err = statement.Exec(meta.GetId(), meta.GetAuthor(), meta.GetAuthorURI(), meta.GetDescription(),
-		meta.GetLicense(), meta.GetLicenseURI(), meta.GetPluginName(), meta.GetPluginURI(),
-		strings.Join(meta.GetTags(), ","), meta.GetInterface(), meta.GetVersion(),
-		strings.Join(meta.GetDependencies(), ","), time.Now().Unix(), "")
+	var author, deps, description, core, license, links []byte
 
+	author, err = json.Marshal(meta.GetAuthor())
+	deps, err = json.Marshal(meta.GetDependencies())
+	description, err = json.Marshal(meta.GetDescription())
+	core, err = json.Marshal(meta.GetCore())
+	license, err = json.Marshal(meta.GetLicense())
+	links, err = json.Marshal(meta.GetLinks())
+
+	// @todo store file hash (?)
+	_, err = statement.Exec(
+		meta.Id().ID,
+		meta.Id().Version,
+		author,
+		deps,
+		description,
+		core,
+		int(meta.GetInterface()),
+		license,
+		links,
+		strings.Join(meta.GetTags(), ","),
+	)
 	return err
 }
 
-func (m *mysql) DeletePluginMeta(id string) error {
-	_, err := m.db.Exec("DELETE FROM nori_plugins WHERE id = ? LIMIT 1", id)
+func (m *mysql) DeletePluginMeta(id meta.ID) error {
+	_, err := m.db.Exec(
+		"DELETE FROM nori_plugins WHERE id = ? AND version = ? LIMIT 1",
+		id.ID, id.Version)
 	return err
 }

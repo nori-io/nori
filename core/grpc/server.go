@@ -214,7 +214,7 @@ func (s Server) PluginInstallCommand(ctx context.Context, c *commands.PluginInst
 		}, err
 	}
 	id := meta.ID{
-		ID:      parts[0],
+		ID:      meta.PluginID(parts[0]),
 		Version: parts[1],
 	}
 	err := s.pluginManager.Install(id, ctx)
@@ -240,7 +240,7 @@ func (s Server) PluginUninstallCommand(ctx context.Context, c *commands.PluginUn
 		}, err
 	}
 	id := meta.ID{
-		ID:      parts[0],
+		ID:      meta.PluginID(parts[0]),
 		Version: parts[1],
 	}
 	err := s.pluginManager.UnInstall(id, ctx)
@@ -289,8 +289,8 @@ func (s Server) PluginUploadCommand(_ context.Context, c *commands.PluginUploadR
 	if pe, _ := s.pluginManager.AddFile(path); pe != nil {
 		s.log.Infof(
 			"Found: '%s' by '%s'",
-			pe.GetMeta().Id().String(),
-			pe.GetMeta().GetAuthor(),
+			pe.Meta().Id().String(),
+			pe.Meta().GetAuthor(),
 		)
 	} else {
 		s.log.Errorf("can't load plugin %s", c.Name)

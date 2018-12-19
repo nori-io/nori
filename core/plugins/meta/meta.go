@@ -6,8 +6,10 @@ import (
 	"github.com/hashicorp/go-version"
 )
 
+type PluginID string
+
 type ID struct {
-	ID      string
+	ID      PluginID
 	Version string
 }
 
@@ -32,9 +34,18 @@ type Core struct {
 	VersionConstraint string
 }
 
+func (d Core) GetConstraint() (version.Constraints, error) {
+	constraints, err := version.NewConstraint(d.VersionConstraint)
+	if err != nil {
+		return nil, err
+	}
+	return constraints, nil
+}
+
 type Dependency struct {
-	ID         string
+	ID         PluginID
 	Constraint string
+	Interface  Interface
 }
 
 func (d Dependency) GetConstraint() (version.Constraints, error) {

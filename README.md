@@ -44,6 +44,13 @@ Configuration keys:
 - plugins.dir []string - paths to plugins dirs
 
 
+# Semantic Versioning
+
+This repo uses Semantic versioning (http://semver.org/), so
+
+MAJOR version when you make incompatible API changes,
+MINOR version when you add functionality in a backwards-compatible manner, and
+PATCH version when you make backwards-compatible bug fixes.
 
 # Contributors
 

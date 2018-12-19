@@ -20,6 +20,8 @@ import (
 	"log"
 	"os"
 
+	"github.com/secure2work/nori/version"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -39,28 +41,40 @@ var serverCmd = &cobra.Command{
 	Short: "server",
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := logrus.New()
+		noriVersion := version.NoriVersion(logger)
 
-		noriStorage := storage.GetNoriStorage(config, logger)
-		if noriStorage == nil {
+		logger.Infof("Nori Engine [version %s]", noriVersion.Version().String())
+
+		// nori core storage
+		storage := storage.GetNoriStorage(config, logger)
+		if storage == nil {
 			logger.Error("can't create NoriStorage")
 			os.Exit(1)
 		}
 
+		// config manager: wrapper around go-config
 		configManager := configManager.NewManager(config)
-		registry := plugins.NewRegistry(configManager, logger)
 
-		// todo add storage
-		pluginManager := plugins.NewManager(registry, logger)
+		// plugin registry
+		registry := plugins.NewRegistryManager(
+			configManager,
+			logger.WithField("component", "PluginRegistry").Logger)
+
+		// plugin manager
+		pluginManager := plugins.NewManager(
+			storage, registry, configManager, noriVersion,
+			logger.WithField("component", "PluginManager").Logger)
 
 		// Load Plugins
 		dirs := getPluginsDir(config, logger)
-		logger.Infof("Plugin dir(s): \n- %s", strings.Join(dirs, ",\n- "))
+		logger.Infof("Plugin dir(s):", strings.Join(dirs, ",\n"))
 		err := pluginManager.AddDir(dirs)
 		if err != nil {
 			logger.Error(err)
 		}
 
-		// todo: add list of installed plugins
+		// check
+
 		err = pluginManager.StartAll(context.Background())
 		if err != nil {
 			os.Exit(1)

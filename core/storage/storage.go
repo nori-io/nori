@@ -3,12 +3,13 @@ package storage
 import (
 	"sync"
 
+	"github.com/secure2work/nori/core/plugins/meta"
+
 	"strings"
 
 	"fmt"
 
 	go_config "github.com/cheebo/go-config"
-	"github.com/secure2work/nori/core/entities"
 	"github.com/sirupsen/logrus"
 )
 
@@ -18,9 +19,9 @@ type noriStorage struct {
 }
 
 type NoriStorage interface {
-	GetPluginMetas() ([]entities.PluginMeta, error)
-	SavePluginMeta(meta entities.PluginMeta) error
-	DeletePluginMeta(id string) error
+	GetPluginMetas() ([]meta.Meta, error)
+	SavePluginMeta(meta meta.Meta) error
+	DeletePluginMeta(id meta.ID) error
 }
 
 const (
