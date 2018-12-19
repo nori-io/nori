@@ -7,16 +7,17 @@ import (
 	"github.com/secure2work/nori/core/config"
 	"github.com/secure2work/nori/core/plugins/dependency"
 	"github.com/secure2work/nori/core/plugins/meta"
+	"github.com/secure2work/nori/core/plugins/plugin"
 	"github.com/sirupsen/logrus"
 )
 
 type RegistryManager interface {
-	Registry() Registry
+	Registry() plugin.Registry
 
-	Add(p Plugin) error
+	Add(p plugin.Plugin) error
 	GetInterface(alias meta.Interface) interface{}
-	Remove(p Plugin)
-	Resolve(dep meta.Dependency) Plugin
+	Remove(p plugin.Plugin)
+	Resolve(dep meta.Dependency) plugin.Plugin
 
 	OrderedPluginList() (PluginList, error)
 }
@@ -26,7 +27,7 @@ type registryManager struct {
 	plugins       *PluginList
 	interfaces    map[meta.Interface]meta.ID
 	configManager config.Manager
-	registry      Registry
+	registry      plugin.Registry
 }
 
 func NewRegistryManager(cm config.Manager, logger *logrus.Logger) RegistryManager {
@@ -39,7 +40,7 @@ func NewRegistryManager(cm config.Manager, logger *logrus.Logger) RegistryManage
 	return rm
 }
 
-func (r registryManager) Add(p Plugin) error {
+func (r registryManager) Add(p plugin.Plugin) error {
 	// add plugin
 	id := p.Meta().Id()
 	r.plugins.Add(p)
@@ -76,7 +77,7 @@ func (r registryManager) Add(p Plugin) error {
 	return nil
 }
 
-func (r registryManager) Remove(p Plugin) {
+func (r registryManager) Remove(p plugin.Plugin) {
 	r.plugins.Remove(p)
 
 	// remove alias for non Custom interface
@@ -86,7 +87,7 @@ func (r registryManager) Remove(p Plugin) {
 	}
 }
 
-func (r registryManager) Resolve(dep meta.Dependency) Plugin {
+func (r registryManager) Resolve(dep meta.Dependency) plugin.Plugin {
 	if dep.Interface != meta.Custom {
 		id, ok := r.interfaces[dep.Interface]
 		if !ok {
@@ -115,7 +116,7 @@ func (r registryManager) GetInterface(alias meta.Interface) interface{} {
 	return plugin.Instance()
 }
 
-func (r registryManager) Registry() Registry {
+func (r registryManager) Registry() plugin.Registry {
 	return r.registry
 }
 
@@ -133,7 +134,7 @@ func (r registryManager) OrderedPluginList() (PluginList, error) {
 	for _, p := range *r.plugins {
 		n1 := nodes[p.Meta().Id()]
 		for _, d := range p.Meta().GetDependencies() {
-			var plug Plugin
+			var plug plugin.Plugin
 			if d.Interface != meta.Custom {
 				ifaceID, ok := r.interfaces[d.Interface]
 				if !ok {

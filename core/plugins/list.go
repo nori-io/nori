@@ -1,34 +1,20 @@
 package plugins
 
 import (
-	"context"
-
-	"github.com/secure2work/nori/core/config"
+	"github.com/secure2work/nori/core/plugins/errors"
 	"github.com/secure2work/nori/core/plugins/meta"
+	"github.com/secure2work/nori/core/plugins/plugin"
 )
 
-type Plugin interface {
-	Meta() meta.Meta
-	Instance() interface{}
-	Init(ctx context.Context, config config.Manager) error
-	Start(ctx context.Context, registry Registry) error
-	Stop(ctx context.Context, registry Registry) error
-}
+type PluginList []plugin.Plugin
 
-type Installable interface {
-	Install(ctx context.Context, registry Registry) error
-	UnInstall(ctx context.Context, registry Registry) error
-}
-
-type PluginList []Plugin
-
-func (pl PluginList) Find(id meta.ID) (Plugin, error) {
+func (pl PluginList) Find(id meta.ID) (plugin.Plugin, error) {
 	for _, p := range pl {
 		if p.Meta().Id() == id {
 			return p, nil
 		}
 	}
-	return nil, NotFound{
+	return nil, errors.NotFound{
 		ID: id,
 	}
 }
@@ -43,7 +29,7 @@ func (pl PluginList) FindByPluginID(id meta.PluginID) PluginList {
 	return list
 }
 
-func (pl PluginList) Resolve(dependency meta.Dependency) Plugin {
+func (pl PluginList) Resolve(dependency meta.Dependency) plugin.Plugin {
 	cons, err := dependency.GetConstraint()
 	if err != nil {
 		return nil
@@ -63,14 +49,14 @@ func (pl PluginList) Resolve(dependency meta.Dependency) Plugin {
 	return nil
 }
 
-func (pl *PluginList) Add(p Plugin) {
+func (pl *PluginList) Add(p plugin.Plugin) {
 	if p, _ := pl.Find(p.Meta().Id()); p != nil {
 		return
 	}
 	*pl = append(*pl, p)
 }
 
-func (pl *PluginList) Remove(p Plugin) {
+func (pl *PluginList) Remove(p plugin.Plugin) {
 	for i, v := range *pl {
 		if v == p {
 			*pl = append((*pl)[:i], (*pl)[i+1:]...)

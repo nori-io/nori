@@ -4,24 +4,9 @@ import (
 	"github.com/secure2work/nori/core/config"
 	"github.com/secure2work/nori/core/plugins/interfaces"
 	"github.com/secure2work/nori/core/plugins/meta"
+	"github.com/secure2work/nori/core/plugins/plugin"
 	"github.com/sirupsen/logrus"
 )
-
-type Registry interface {
-	Resolve(dep meta.Dependency) interface{}
-
-	Auth() interfaces.Auth
-	Authorize() interfaces.Authorize
-	Cache() interfaces.Cache
-	Config() config.Manager
-	Http() interfaces.Http
-	Logger(meta meta.Meta) *logrus.Logger
-	Mail() interfaces.Mail
-	PubSub() interfaces.PubSub
-	Session() interfaces.Session
-	Sql() interfaces.SQL
-	Templates() interfaces.Templates
-}
 
 type registry struct {
 	rm            RegistryManager
@@ -29,7 +14,7 @@ type registry struct {
 	configManager config.Manager
 }
 
-func NewRegistry(rm RegistryManager, cm config.Manager, logger *logrus.Logger) Registry {
+func NewRegistry(rm RegistryManager, cm config.Manager, logger *logrus.Logger) plugin.Registry {
 	return registry{
 		log:           logger,
 		rm:            rm,
@@ -52,7 +37,7 @@ func (r registry) Auth() interfaces.Auth {
 	}
 	i, ok := item.(interfaces.Auth)
 	if !ok {
-		r.log.Errorf("Can't convert plugin %s interface to Auth", item.(Plugin).Meta().Id().String())
+		r.log.Errorf("Can't convert plugin %s interface to Auth", item.(plugin.Plugin).Meta().Id().String())
 		return nil
 	}
 	return i
@@ -65,7 +50,7 @@ func (r registry) Authorize() interfaces.Authorize {
 	}
 	i, ok := item.(interfaces.Authorize)
 	if !ok {
-		r.log.Errorf("Can't convert plugin %s interface to Authorize", item.(Plugin).Meta().Id().String())
+		r.log.Errorf("Can't convert plugin %s interface to Authorize", item.(plugin.Plugin).Meta().Id().String())
 		return nil
 	}
 	return i
@@ -78,7 +63,7 @@ func (r registry) Cache() interfaces.Cache {
 	}
 	i, ok := item.(interfaces.Cache)
 	if !ok {
-		r.log.Errorf("Can't convert plugin %s interface to Cache", item.(Plugin).Meta().Id().String())
+		r.log.Errorf("Can't convert plugin %s interface to Cache", item.(plugin.Plugin).Meta().Id().String())
 		return nil
 	}
 	return i
@@ -95,7 +80,7 @@ func (r registry) Http() interfaces.Http {
 	}
 	i, ok := item.(interfaces.Http)
 	if !ok {
-		r.log.Errorf("Can't convert plugin %s interface to Http", item.(Plugin).Meta().Id().String())
+		r.log.Errorf("Can't convert plugin %s interface to Http", item.(plugin.Plugin).Meta().Id().String())
 		return nil
 	}
 	return i
@@ -112,7 +97,7 @@ func (r registry) Mail() interfaces.Mail {
 	}
 	i, ok := item.(interfaces.Mail)
 	if !ok {
-		r.log.Errorf("Can't convert plugin %s interface to Mail", item.(Plugin).Meta().Id().String())
+		r.log.Errorf("Can't convert plugin %s interface to Mail", item.(plugin.Plugin).Meta().Id().String())
 		return nil
 	}
 	return i
@@ -125,7 +110,7 @@ func (r registry) PubSub() interfaces.PubSub {
 	}
 	i, ok := item.(interfaces.PubSub)
 	if !ok {
-		r.log.Errorf("Can't convert plugin %s interface to PubSub", item.(Plugin).Meta().Id().String())
+		r.log.Errorf("Can't convert plugin %s interface to PubSub", item.(plugin.Plugin).Meta().Id().String())
 		return nil
 	}
 	return i
@@ -138,7 +123,7 @@ func (r registry) Session() interfaces.Session {
 	}
 	i, ok := item.(interfaces.Session)
 	if !ok {
-		r.log.Errorf("Can't convert plugin %s interface to Session", item.(Plugin).Meta().Id().String())
+		r.log.Errorf("Can't convert plugin %s interface to Session", item.(plugin.Plugin).Meta().Id().String())
 		return nil
 	}
 	return i
@@ -151,7 +136,7 @@ func (r registry) Sql() interfaces.SQL {
 	}
 	i, ok := item.(interfaces.SQL)
 	if !ok {
-		r.log.Errorf("Can't convert plugin %s interface to SQL", item.(Plugin).Meta().Id().String())
+		r.log.Errorf("Can't convert plugin %s interface to SQL", item.(plugin.Plugin).Meta().Id().String())
 		return nil
 	}
 	return i
@@ -164,7 +149,7 @@ func (r registry) Templates() interfaces.Templates {
 	}
 	i, ok := item.(interfaces.Templates)
 	if !ok {
-		r.log.Errorf("Can't convert plugin %s interface to Templates", item.(Plugin).Meta().Id().String())
+		r.log.Errorf("Can't convert plugin %s interface to Templates", item.(plugin.Plugin).Meta().Id().String())
 		return nil
 	}
 	return i

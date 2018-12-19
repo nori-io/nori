@@ -6,7 +6,9 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"plugin"
+	stdplugin "plugin"
+
+	"github.com/secure2work/nori/core/plugins/errors"
 
 	"github.com/secure2work/nori/version"
 
@@ -15,12 +17,13 @@ import (
 	"github.com/secure2work/nori/core/storage"
 
 	"github.com/secure2work/nori/core/plugins/meta"
+	"github.com/secure2work/nori/core/plugins/plugin"
 
 	"github.com/sirupsen/logrus"
 )
 
 type Manager interface {
-	AddFile(path string) (Plugin, error)
+	AddFile(path string) (plugin.Plugin, error)
 	AddDir(paths []string) error
 
 	Install(id meta.ID, ctx context.Context) error
@@ -46,7 +49,7 @@ func NewManager(
 ) Manager {
 	return &manager{
 		files:      map[string]meta.ID{},
-		plugins:    map[meta.ID]Plugin{},
+		plugins:    map[meta.ID]plugin.Plugin{},
 		registry:   registry,
 		log:        logger,
 		cfgManager: cfgManager,
@@ -58,17 +61,17 @@ func NewManager(
 type manager struct {
 	files      FileTable
 	log        *logrus.Logger
-	plugins    map[meta.ID]Plugin
+	plugins    map[meta.ID]plugin.Plugin
 	registry   RegistryManager
 	cfgManager config.Manager
 	storage    storage.NoriStorage
 	version    version.Version
 }
 
-func (m *manager) AddFile(path string) (Plugin, error) {
-	file, err := plugin.Open(path)
+func (m *manager) AddFile(path string) (plugin.Plugin, error) {
+	file, err := stdplugin.Open(path)
 	if err != nil {
-		e := FileOpenError{
+		e := errors.FileOpenError{
 			Path: path,
 			Err:  err,
 		}
@@ -79,7 +82,7 @@ func (m *manager) AddFile(path string) (Plugin, error) {
 
 	instance, err := file.Lookup("Plugin")
 	if err != nil {
-		e := LookupError{
+		e := errors.LookupError{
 			Path: path,
 			Err:  err,
 		}
@@ -88,9 +91,9 @@ func (m *manager) AddFile(path string) (Plugin, error) {
 		return nil, e
 	}
 
-	p, ok := instance.(Plugin)
+	p, ok := instance.(plugin.Plugin)
 	if !ok {
-		e := TypeAssertError{
+		e := errors.TypeAssertError{
 			Path: path,
 		}
 		// @todo add err to error collector
@@ -106,7 +109,7 @@ func (m *manager) AddFile(path string) (Plugin, error) {
 	}
 	if !cons.Check(m.version.Version()) {
 		// @todo add err to error collector
-		return nil, IncompatibleCoreVersion{
+		return nil, errors.IncompatibleCoreVersion{
 			Id:                 p.Meta().Id(),
 			NeededCoreVersion:  p.Meta().GetCore().VersionConstraint,
 			CurrentCoreVersion: m.version.Original(),
@@ -161,11 +164,11 @@ func (m *manager) AddDir(paths []string) error {
 func (m *manager) Install(id meta.ID, ctx context.Context) error {
 	p, ok := m.plugins[id]
 	if !ok {
-		return NotFound{ID: id}
+		return errors.NotFound{ID: id}
 	}
-	installable, ok := p.(Installable)
+	installable, ok := p.(plugin.Installable)
 	if !ok {
-		return NonInstallablePlugin{
+		return errors.NonInstallablePlugin{
 			Id:   p.Meta().Id(),
 			Path: m.files.Find(p.Meta().Id()),
 		}
@@ -176,7 +179,7 @@ func (m *manager) Install(id meta.ID, ctx context.Context) error {
 func (m *manager) Meta(id meta.ID) (meta.Meta, error) {
 	p, ok := m.plugins[id]
 	if !ok {
-		return nil, NotFound{
+		return nil, errors.NotFound{
 			ID: id,
 		}
 	}
@@ -194,7 +197,7 @@ func (m *manager) Metas() []meta.Meta {
 func (m *manager) Start(id meta.ID, ctx context.Context) error {
 	p, ok := m.plugins[id]
 	if !ok {
-		return NotFound{ID: id}
+		return errors.NotFound{ID: id}
 	}
 	// check:
 	// - all deps must be resolved
@@ -231,7 +234,7 @@ func (m *manager) StartAll(ctx context.Context) error {
 func (m *manager) Stop(id meta.ID, ctx context.Context) error {
 	p, ok := m.plugins[id]
 	if !ok {
-		return NotFound{ID: id}
+		return errors.NotFound{ID: id}
 	}
 	return p.Stop(ctx, nil)
 }
@@ -244,11 +247,11 @@ func (m *manager) StopAll(ctx context.Context) error {
 func (m *manager) UnInstall(id meta.ID, ctx context.Context) error {
 	p, ok := m.plugins[id]
 	if !ok {
-		return NotFound{ID: id}
+		return errors.NotFound{ID: id}
 	}
-	installable, ok := p.(Installable)
+	installable, ok := p.(plugin.Installable)
 	if !ok {
-		return NonInstallablePlugin{
+		return errors.NonInstallablePlugin{
 			Id:   p.Meta().Id(),
 			Path: m.files.Find(p.Meta().Id()),
 		}
