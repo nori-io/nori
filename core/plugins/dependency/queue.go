@@ -3,7 +3,7 @@ package dependency
 import (
 	"sync"
 
-	"github.com/gonum/graph"
+	"gonum.org/v1/gonum/graph"
 )
 
 // NodeQueue the queue of Items

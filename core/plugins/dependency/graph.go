@@ -3,21 +3,21 @@ package dependency
 import (
 	"fmt"
 
-	"github.com/gonum/graph"
-	"github.com/gonum/graph/simple"
+	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/simple"
 )
 
 func Sort(g *simple.DirectedGraph) ([]*graph.Node, error) {
 	var sorted []*graph.Node
 	q := NewNodeQueue()
 
-	g2 := simple.NewDirectedGraph(0, 0)
+	g2 := simple.NewDirectedGraph()
 	for _, n := range g.Nodes() {
 		g2.AddNode(n)
 	}
 	for _, e := range g.Edges() {
 		g2.SetEdge(simple.Edge{
-			F: e.From(), T: e.To(), W: e.Weight(),
+			F: e.From(), T: e.To(),
 		})
 	}
 

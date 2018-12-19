@@ -3,12 +3,12 @@ package plugins
 import (
 	"fmt"
 
-	"github.com/gonum/graph/simple"
 	"github.com/secure2work/nori/core/config"
 	"github.com/secure2work/nori/core/plugins/dependency"
 	"github.com/secure2work/nori/core/plugins/meta"
 	"github.com/secure2work/nori/core/plugins/plugin"
 	"github.com/sirupsen/logrus"
+	"gonum.org/v1/gonum/graph/simple"
 )
 
 type RegistryManager interface {
@@ -121,12 +121,12 @@ func (r registryManager) Registry() plugin.Registry {
 }
 
 func (r registryManager) OrderedPluginList() (PluginList, error) {
-	graph := simple.NewDirectedGraph(10, 10)
+	graph := simple.NewDirectedGraph()
 
 	nodes := map[meta.ID]dependency.Node{}
 
-	for _, p := range *r.plugins {
-		node := dependency.NewNode(graph.NewNodeID(), p.Meta().Id())
+	for idx, p := range *r.plugins {
+		node := dependency.NewNode(int64(idx), p.Meta().Id())
 		graph.AddNode(node)
 		nodes[p.Meta().Id()] = node
 	}
