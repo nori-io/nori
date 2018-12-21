@@ -13,6 +13,7 @@ service Commands {
     rpc PluginInstallCommand (PluginInstallRequest) returns (ErrorReply) {}
     rpc PluginUninstallCommand (PluginUninstallRequest) returns (ErrorReply) {}
     rpc PluginUploadCommand (PluginUploadRequest) returns (ErrorReply) {}
+    rpc PluginMetaCommand (PluginMetaRequest) returns (PluginMetaReply) {}
 
     rpc CertsUploadCommand(CertsUploadRequest) returns (ErrorReply) {}
 

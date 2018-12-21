@@ -204,6 +204,10 @@ func (s Server) PluginRemoveCommand(_ context.Context, c *commands.PluginRemoveR
 	return nil, nil
 }
 
+func (s Server) PluginMetaCommand(_ context.Context, req *commands.PluginMetaRequest) (*commands.PluginMetaReply, error) {
+	return nil, nil
+}
+
 func (s Server) PluginInstallCommand(ctx context.Context, c *commands.PluginInstallRequest) (*commands.ErrorReply, error) {
 	parts := strings.Split(c.Id, ":")
 	if len(parts) != 2 {

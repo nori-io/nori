@@ -29,7 +29,7 @@ func (m *PingRequest) Reset()         { *m = PingRequest{} }
 func (m *PingRequest) String() string { return proto.CompactTextString(m) }
 func (*PingRequest) ProtoMessage()    {}
 func (*PingRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_ping_pong_commands_4101dd8235268669, []int{0}
+	return fileDescriptor_ping_pong_commands_586882ca1037effa, []int{0}
 }
 func (m *PingRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PingRequest.Unmarshal(m, b)
@@ -67,7 +67,7 @@ func (m *PongReply) Reset()         { *m = PongReply{} }
 func (m *PongReply) String() string { return proto.CompactTextString(m) }
 func (*PongReply) ProtoMessage()    {}
 func (*PongReply) Descriptor() ([]byte, []int) {
-	return fileDescriptor_ping_pong_commands_4101dd8235268669, []int{1}
+	return fileDescriptor_ping_pong_commands_586882ca1037effa, []int{1}
 }
 func (m *PongReply) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PongReply.Unmarshal(m, b)
@@ -100,10 +100,10 @@ func init() {
 }
 
 func init() {
-	proto.RegisterFile("ping_pong_commands.proto", fileDescriptor_ping_pong_commands_4101dd8235268669)
+	proto.RegisterFile("ping_pong_commands.proto", fileDescriptor_ping_pong_commands_586882ca1037effa)
 }
 
-var fileDescriptor_ping_pong_commands_4101dd8235268669 = []byte{
+var fileDescriptor_ping_pong_commands_586882ca1037effa = []byte{
 	// 107 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x92, 0x28, 0xc8, 0xcc, 0x4b,
 	0x8f, 0x2f, 0xc8, 0xcf, 0x4b, 0x8f, 0x4f, 0xce, 0xcf, 0xcd, 0x4d, 0xcc, 0x4b, 0x29, 0xd6, 0x2b,

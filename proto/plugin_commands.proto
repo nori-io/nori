@@ -58,3 +58,14 @@ message PluginUploadRequest {
     string name = 1;
     bytes so = 2;
 }
+
+// cmd: plugin meta
+message PluginMetaRequest {
+    string id = 1;
+    bool dependencies = 2;
+    bool dependencies_status = 3;
+}
+
+message PluginMetaReply {
+    string json = 1;
+}
