@@ -3,6 +3,8 @@ package plugins
 import (
 	"fmt"
 
+	"github.com/secure2work/nori/core/plugins/errors"
+
 	"github.com/secure2work/nori/core/config"
 	"github.com/secure2work/nori/core/plugins/dependency"
 	"github.com/secure2work/nori/core/plugins/meta"
@@ -15,7 +17,7 @@ type RegistryManager interface {
 	Registry() plugin.Registry
 
 	Add(p plugin.Plugin) error
-	GetInterface(alias meta.Interface) interface{}
+	GetInterface(alias meta.Interface) (interface{}, error)
 	Remove(p plugin.Plugin)
 	Resolve(dep meta.Dependency) plugin.Plugin
 
@@ -102,18 +104,22 @@ func (r registryManager) Resolve(dep meta.Dependency) plugin.Plugin {
 	return r.plugins.Resolve(dep)
 }
 
-func (r registryManager) GetInterface(alias meta.Interface) interface{} {
+func (r registryManager) GetInterface(alias meta.Interface) (interface{}, error) {
 	id, ok := r.interfaces[alias]
 	if !ok {
-		return nil
+		return nil, errors.InterfaceNotFound{
+			Interface: alias,
+		}
 	}
 
 	plugin, err := r.plugins.Find(id)
 	if err != nil {
-		return nil
+		return nil, errors.NotFound{
+			ID: id,
+		}
 	}
 
-	return plugin.Instance()
+	return plugin.Instance(), nil
 }
 
 func (r registryManager) Registry() plugin.Registry {

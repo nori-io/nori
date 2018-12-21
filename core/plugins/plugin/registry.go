@@ -8,18 +8,18 @@ import (
 )
 
 type Registry interface {
-	Resolve(dep meta.Dependency) interface{}
+	Resolve(dep meta.Dependency) (interface{}, error)
 
-	Auth() interfaces.Auth
-	Authorize() interfaces.Authorize
-	Cache() interfaces.Cache
+	Auth() (interfaces.Auth, error)
+	Authorize() (interfaces.Authorize, error)
+	Cache() (interfaces.Cache, error)
 	Config() config.Manager
-	Http() interfaces.Http
-	HTTPTransport() interfaces.HTTPTransport
+	Http() (interfaces.Http, error)
+	HTTPTransport() (interfaces.HTTPTransport, error)
 	Logger(meta meta.Meta) *logrus.Logger
-	Mail() interfaces.Mail
-	PubSub() interfaces.PubSub
-	Session() interfaces.Session
-	Sql() interfaces.SQL
-	Templates() interfaces.Templates
+	Mail() (interfaces.Mail, error)
+	PubSub() (interfaces.PubSub, error)
+	Session() (interfaces.Session, error)
+	Sql() (interfaces.SQL, error)
+	Templates() (interfaces.Templates, error)
 }

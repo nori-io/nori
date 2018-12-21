@@ -67,3 +67,28 @@ func (e IncompatibleCoreVersion) Error() string {
 	return fmt.Sprintf("Plugin [%s] requires Nori [%s], running Nori [%s]",
 		e.Id.String(), e.NeededCoreVersion, e.CurrentCoreVersion)
 }
+
+type InterfaceNotFound struct {
+	Interface meta.Interface
+}
+
+func (e InterfaceNotFound) Error() string {
+	return fmt.Sprintf("Interface %s is nil", e.Interface.String())
+}
+
+type DependencyNotFound struct {
+	Dependency meta.Dependency
+}
+
+func (e DependencyNotFound) Error() string {
+	return fmt.Sprintf("Dependency [%s][%s] not found",
+		e.Dependency.ID, e.Dependency.Constraint)
+}
+
+type InterfaceAssertError struct {
+	Interface meta.Interface
+}
+
+func (e InterfaceAssertError) Error() string {
+	return fmt.Sprintf("can's assert %s to interface %s", e.Interface.String())
+}
