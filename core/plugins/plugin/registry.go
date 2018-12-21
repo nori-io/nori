@@ -15,6 +15,7 @@ type Registry interface {
 	Cache() interfaces.Cache
 	Config() config.Manager
 	Http() interfaces.Http
+	HTTPTransport() interfaces.HTTPTransport
 	Logger(meta meta.Meta) *logrus.Logger
 	Mail() interfaces.Mail
 	PubSub() interfaces.PubSub
