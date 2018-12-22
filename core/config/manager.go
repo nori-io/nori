@@ -7,6 +7,7 @@ import (
 
 type Manager interface {
 	Register(meta.Meta) Config
+	PluginVariables(id meta.ID) []Variable
 }
 
 type Config interface {
@@ -35,33 +36,41 @@ type Variable struct {
 }
 
 type manager struct {
-	configs map[meta.ID][]Variable
+	configs map[meta.ID]*[]Variable
 	config  interfaces.Config
 }
 
 func NewManager(config interfaces.Config) Manager {
 	m := new(manager)
-	m.configs = make(map[meta.ID][]Variable)
+	m.configs = make(map[meta.ID]*[]Variable)
 	m.config = config
 	return m
 }
 
 func (m *manager) Register(meta meta.Meta) Config {
 	cfgs := make([]Variable, 0)
-	m.configs[meta.Id()] = cfgs
+	m.configs[meta.Id()] = &cfgs
 	return &config{
-		cfgs:   cfgs,
+		cfgs:   &cfgs,
 		config: m.config,
 	}
 }
 
+func (m *manager) PluginVariables(id meta.ID) []Variable {
+	vars, ok := m.configs[id]
+	if !ok {
+		return []Variable{}
+	}
+	return *vars
+}
+
 type config struct {
-	cfgs   []Variable
+	cfgs   *[]Variable
 	config interfaces.Config
 }
 
 func (c *config) Bool(key string, desc string) Bool {
-	c.cfgs = append(c.cfgs, Variable{
+	*(c.cfgs) = append(*(c.cfgs), Variable{
 		Name:        key,
 		Description: desc,
 	})
@@ -71,7 +80,7 @@ func (c *config) Bool(key string, desc string) Bool {
 }
 
 func (c *config) Float(key string, desc string) Float {
-	c.cfgs = append(c.cfgs, Variable{
+	*(c.cfgs) = append(*(c.cfgs), Variable{
 		Name:        key,
 		Description: desc,
 	})
@@ -81,7 +90,7 @@ func (c *config) Float(key string, desc string) Float {
 }
 
 func (c *config) Int(key string, desc string) Int {
-	c.cfgs = append(c.cfgs, Variable{
+	*(c.cfgs) = append(*(c.cfgs), Variable{
 		Name:        key,
 		Description: desc,
 	})
@@ -91,7 +100,7 @@ func (c *config) Int(key string, desc string) Int {
 }
 
 func (c *config) UInt(key string, desc string) UInt {
-	c.cfgs = append(c.cfgs, Variable{
+	*(c.cfgs) = append(*(c.cfgs), Variable{
 		Name:        key,
 		Description: desc,
 	})
@@ -101,7 +110,7 @@ func (c *config) UInt(key string, desc string) UInt {
 }
 
 func (c *config) Slice(key, delimiter string, desc string) Slice {
-	c.cfgs = append(c.cfgs, Variable{
+	*(c.cfgs) = append(*(c.cfgs), Variable{
 		Name:        key,
 		Description: desc,
 	})
@@ -111,7 +120,7 @@ func (c *config) Slice(key, delimiter string, desc string) Slice {
 }
 
 func (c *config) String(key string, desc string) String {
-	c.cfgs = append(c.cfgs, Variable{
+	*(c.cfgs) = append(*(c.cfgs), Variable{
 		Name:        key,
 		Description: desc,
 	})
@@ -121,7 +130,7 @@ func (c *config) String(key string, desc string) String {
 }
 
 func (c *config) StringMap(key string, desc string) StringMap {
-	c.cfgs = append(c.cfgs, Variable{
+	*(c.cfgs) = append(*(c.cfgs), Variable{
 		Name:        key,
 		Description: desc,
 	})

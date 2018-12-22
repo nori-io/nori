@@ -3,6 +3,8 @@ package plugins_test
 import (
 	"testing"
 
+	noriPlugin "github.com/secure2work/nori/core/plugins/plugin"
+
 	"github.com/secure2work/nori/core/config"
 
 	"github.com/stretchr/testify/assert"
@@ -41,7 +43,9 @@ func TestNewRegistry(t *testing.T) {
 		Constraint: ">=1.0",
 	}
 
-	found := r.Registry().Resolve(dep)
+	found, err := r.Registry().Resolve(dep)
+
+	a.NoError(err)
 
 	a.NotNil(found)
 }
@@ -242,18 +246,10 @@ func (p plugguble) Init(ctx context.Context, config config.Manager) error {
 	return nil
 }
 
-func (p plugguble) Install(ctx context.Context, registry plugins.Registry) error {
+func (p plugguble) Start(ctx context.Context, registry noriPlugin.Registry) error {
 	return nil
 }
 
-func (p plugguble) Start(ctx context.Context, registry plugins.Registry) error {
-	return nil
-}
-
-func (p plugguble) Stop(ctx context.Context, registry plugins.Registry) error {
-	return nil
-}
-
-func (p plugguble) UnInstall(ctx context.Context, registry plugins.Registry) error {
+func (p plugguble) Stop(ctx context.Context, registry noriPlugin.Registry) error {
 	return nil
 }
