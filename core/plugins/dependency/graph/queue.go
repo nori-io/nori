@@ -1,32 +1,32 @@
-package dependency
+package graph
 
 import (
 	"sync"
 
-	"gonum.org/v1/gonum/graph"
+	"github.com/secure2work/nori/core/plugins/meta"
 )
 
 // NodeQueue the queue of Items
 type NodeQueue struct {
-	items []graph.Node
+	items []meta.ID
 	lock  sync.RWMutex
 }
 
 // New creates a new NodeQueue
 func NewNodeQueue() *NodeQueue {
 	return &NodeQueue{
-		items: []graph.Node{},
+		items: []meta.ID{},
 		lock:  sync.RWMutex{},
 	}
 }
 
-func (s *NodeQueue) Enqueue(t graph.Node) {
+func (s *NodeQueue) Enqueue(t meta.ID) {
 	s.lock.Lock()
 	s.items = append(s.items, t)
 	s.lock.Unlock()
 }
 
-func (s *NodeQueue) Dequeue() *graph.Node {
+func (s *NodeQueue) Dequeue() *meta.ID {
 	s.lock.Lock()
 	item := s.items[0]
 	s.items = s.items[1:len(s.items)]

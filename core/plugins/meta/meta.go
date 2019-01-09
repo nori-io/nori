@@ -56,6 +56,10 @@ func (d Dependency) GetConstraint() (version.Constraints, error) {
 	return constraints, nil
 }
 
+func (d Dependency) String() string {
+	return fmt.Sprintf("[%s:%s][interface: %s]", d.ID, d.Constraint, d.Interface.String())
+}
+
 type Description struct {
 	Name        string
 	Description string

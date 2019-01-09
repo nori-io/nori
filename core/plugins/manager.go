@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	stdplugin "plugin"
 
+	"github.com/secure2work/nori/core/plugins/dependency"
+
 	"github.com/secure2work/nori/core/plugins/errors"
 
 	"github.com/secure2work/nori/version"
@@ -42,30 +44,34 @@ type Manager interface {
 
 func NewManager(
 	storage storage.NoriStorage,
-	registry RegistryManager,
-	cfgManager config.Manager,
+	configManager config.Manager,
 	version version.Version,
 	logger *logrus.Logger,
 ) Manager {
+	rm := NewRegistryManager(
+		configManager,
+		logger.WithField("component", "RegistryManager").Logger)
 	return &manager{
-		files:      map[string]meta.ID{},
-		plugins:    map[meta.ID]plugin.Plugin{},
-		registry:   registry,
-		log:        logger,
-		cfgManager: cfgManager,
-		storage:    storage,
-		version:    version,
+		files:         map[string]meta.ID{},
+		configManager: configManager,
+		depManager:    dependency.NewManager(),
+		regManager:    rm,
+		registry:      NewRegistry(rm, configManager, logger),
+		storage:       storage,
+		version:       version,
+		log:           logger,
 	}
 }
 
 type manager struct {
-	files      FileTable
-	log        *logrus.Logger
-	plugins    map[meta.ID]plugin.Plugin
-	registry   RegistryManager
-	cfgManager config.Manager
-	storage    storage.NoriStorage
-	version    version.Version
+	files         FileTable
+	configManager config.Manager
+	depManager    dependency.Manager
+	regManager    RegistryManager
+	registry      plugin.Registry
+	storage       storage.NoriStorage
+	version       version.Version
+	log           *logrus.Logger
 }
 
 func (m *manager) AddFile(path string) (plugin.Plugin, error) {
@@ -75,7 +81,6 @@ func (m *manager) AddFile(path string) (plugin.Plugin, error) {
 			Path: path,
 			Err:  err,
 		}
-		// @todo add err to error collector
 		m.log.WithField("file", path).Error(e.Error())
 		return nil, e
 	}
@@ -86,7 +91,6 @@ func (m *manager) AddFile(path string) (plugin.Plugin, error) {
 			Path: path,
 			Err:  err,
 		}
-		// @todo add err to error collector
 		m.log.WithField("file", path).Error(e.Error())
 		return nil, e
 	}
@@ -96,7 +100,6 @@ func (m *manager) AddFile(path string) (plugin.Plugin, error) {
 		e := errors.TypeAssertError{
 			Path: path,
 		}
-		// @todo add err to error collector
 		m.log.WithField("file", path).Error(e.Error())
 		return nil, e
 	}
@@ -104,11 +107,9 @@ func (m *manager) AddFile(path string) (plugin.Plugin, error) {
 	// check needed Nori version
 	cons, err := p.Meta().GetCore().GetConstraint()
 	if err != nil {
-		// @todo add err to error collector
 		return nil, err
 	}
 	if !cons.Check(m.version.Version()) {
-		// @todo add err to error collector
 		return nil, errors.IncompatibleCoreVersion{
 			Id:                 p.Meta().Id(),
 			NeededCoreVersion:  p.Meta().GetCore().VersionConstraint,
@@ -116,13 +117,19 @@ func (m *manager) AddFile(path string) (plugin.Plugin, error) {
 		}
 	}
 
-	err = m.registry.Add(p)
+	// @todo check installed or not
+	// add to dependency manager
+	err = m.depManager.Add(p.Meta())
 	if err != nil {
-		// @todo add err to error collector
 		return nil, err
 	}
 
-	m.plugins[p.Meta().Id()] = p
+	err = m.regManager.Add(p)
+	if err != nil {
+		m.depManager.Remove(p.Meta().Id())
+		return nil, err
+	}
+
 	m.files[path] = p.Meta().Id()
 
 	return p, nil
@@ -162,9 +169,10 @@ func (m *manager) AddDir(paths []string) error {
 }
 
 func (m *manager) Install(id meta.ID, ctx context.Context) error {
-	p, ok := m.plugins[id]
-	if !ok {
-		return errors.NotFound{ID: id}
+	// @todo check depManager for dependencies
+	p, err := m.regManager.Get(id)
+	if err != nil {
+		return err
 	}
 	installable, ok := p.(plugin.Installable)
 	if !ok {
@@ -173,57 +181,53 @@ func (m *manager) Install(id meta.ID, ctx context.Context) error {
 			Path: m.files.Find(p.Meta().Id()),
 		}
 	}
-	return installable.Install(ctx, m.registry.Registry())
+	return installable.Install(ctx, m.registry)
 }
 
 func (m *manager) Meta(id meta.ID) (meta.Meta, error) {
-	p, ok := m.plugins[id]
-	if !ok {
-		return nil, errors.NotFound{
-			ID: id,
-		}
+	p, err := m.regManager.Get(id)
+	if err != nil {
+		return nil, err
 	}
 	return p.Meta(), nil
 }
 
 func (m *manager) Metas() []meta.Meta {
-	var meta []meta.Meta
-	for _, p := range m.plugins {
-		meta = append(meta, p.Meta())
+	var metas []meta.Meta
+	for _, p := range m.regManager.Plugins() {
+		metas = append(metas, p.Meta())
 	}
-	return meta
+	return metas
 }
 
 func (m *manager) Start(id meta.ID, ctx context.Context) error {
-	p, ok := m.plugins[id]
-	if !ok {
-		return errors.NotFound{ID: id}
+	// @todo check depManager for dependencies
+	p, err := m.regManager.Get(id)
+	if err != nil {
+		return err
 	}
-	// check:
+
+	// @todo
 	// - all deps must be resolved
 	// - all deps must be already started
 	// -- start non-started deps
-	err := p.Init(ctx, m.cfgManager)
+
+	err = p.Init(ctx, m.configManager)
 	if err != nil {
 		return err
 	}
-	return p.Start(ctx, nil)
+	return p.Start(ctx, m.registry)
 }
 
 func (m *manager) StartAll(ctx context.Context) error {
-	// todo start plugins in topological order
-	pl, err := m.registry.OrderedPluginList()
+	// start plugins in dependency correct order
+	pl, err := m.depManager.Sort()
 	if err != nil {
 		return err
 	}
 
-	for _, p := range pl {
-		err := p.Init(ctx, m.cfgManager)
-		if err != nil {
-			return err
-		}
-		err = p.Start(ctx, m.registry.Registry())
-		if err != nil {
+	for _, id := range pl {
+		if err := m.Start(id, ctx); err != nil {
 			return err
 		}
 	}
@@ -232,23 +236,41 @@ func (m *manager) StartAll(ctx context.Context) error {
 }
 
 func (m *manager) Stop(id meta.ID, ctx context.Context) error {
-	p, ok := m.plugins[id]
-	if !ok {
-		return errors.NotFound{ID: id}
+	// @todo stop dependent plugins
+	p, err := m.regManager.Get(id)
+	if err != nil {
+		return err
 	}
-	return p.Stop(ctx, nil)
+
+	return p.Stop(ctx, m.registry)
 }
 
 func (m *manager) StopAll(ctx context.Context) error {
-	// todo stop plugins in topological order
+	// todo stop running plugins in reverse order
+	plugins := m.regManager.Plugins()
+	for i := len(plugins) - 1; i >= 0; i-- {
+		p := plugins[i]
+		err := m.Stop(p.Meta().Id(), ctx)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
 func (m *manager) UnInstall(id meta.ID, ctx context.Context) error {
-	p, ok := m.plugins[id]
-	if !ok {
-		return errors.NotFound{ID: id}
+	// @todo check depManager for dependent plugins
+	p, err := m.regManager.Get(id)
+	if err != nil {
+		return err
 	}
+
+	// stop plugin before uninstall it
+	err = p.Stop(ctx, m.registry)
+	if err != nil {
+		return err
+	}
+
 	installable, ok := p.(plugin.Installable)
 	if !ok {
 		return errors.NonInstallablePlugin{
@@ -256,7 +278,7 @@ func (m *manager) UnInstall(id meta.ID, ctx context.Context) error {
 			Path: m.files.Find(p.Meta().Id()),
 		}
 	}
-	err := installable.UnInstall(ctx, m.registry.Registry())
+	err = installable.UnInstall(ctx, m.registry)
 	if err != nil {
 		m.log.Error(err)
 		return err

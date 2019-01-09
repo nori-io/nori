@@ -55,14 +55,9 @@ var serverCmd = &cobra.Command{
 		// config manager: wrapper around go-config
 		configManager := configManager.NewManager(config)
 
-		// plugin registry
-		registry := plugins.NewRegistryManager(
-			configManager,
-			logger.WithField("component", "PluginRegistry").Logger)
-
 		// plugin manager
 		pluginManager := plugins.NewManager(
-			storage, registry, configManager, noriVersion,
+			storage, configManager, noriVersion,
 			logger.WithField("component", "PluginManager").Logger)
 
 		// Load Plugins

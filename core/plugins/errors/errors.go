@@ -2,6 +2,7 @@ package errors
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/secure2work/nori/core/plugins/meta"
 )
@@ -83,6 +84,36 @@ type DependencyNotFound struct {
 func (e DependencyNotFound) Error() string {
 	return fmt.Sprintf("Dependency [%s][%s] not found",
 		e.Dependency.ID, e.Dependency.Constraint)
+}
+
+type DependenciesNotFound struct {
+	Dependencies map[meta.ID][]meta.Dependency
+}
+
+func (e DependenciesNotFound) Error() string {
+	var msg []string
+	for id, deps := range e.Dependencies {
+		var msgs []string
+		for _, dep := range deps {
+			msgs = append(msgs, DependencyNotFound{
+				Dependency: dep,
+			}.Error())
+		}
+		msg = append(msg, id.String()+"\n"+strings.Join(msgs, "\n"))
+	}
+	return strings.Join(msg, "\n")
+}
+
+type DependencyCycleFound struct {
+	DependencyCycle []meta.Dependency
+}
+
+func (e DependencyCycleFound) Error() string {
+	var deps []string
+	for _, d := range e.DependencyCycle {
+		deps = append(deps, d.String())
+	}
+	return strings.Join(deps, "\n")
 }
 
 type InterfaceAssertError struct {
