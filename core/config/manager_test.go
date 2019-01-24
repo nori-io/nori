@@ -3,13 +3,12 @@ package config_test
 import (
 	"testing"
 
+	commonCfg "github.com/secure2work/nori-common/config"
 	"github.com/secure2work/nori/core/config"
 
-	"github.com/secure2work/nori/core/plugins/meta"
-
+	"github.com/secure2work/nori-common/meta"
 	"github.com/secure2work/nori/core/config/mock"
 	"github.com/stretchr/testify/assert"
-
 	. "github.com/stretchr/testify/mock"
 )
 
@@ -40,11 +39,11 @@ func TestManager_Register(t *testing.T) {
 
 	a.Len(vars, 2)
 	if len(vars) == 2 {
-		a.Equal(config.Variable{
+		a.Equal(commonCfg.Variable{
 			Name:        "http.addr",
 			Description: "HTTP server addr",
 		}, vars[0])
-		a.Equal(config.Variable{
+		a.Equal(commonCfg.Variable{
 			Name:        "http.enabled",
 			Description: "Enable HTTP server",
 		}, vars[1])

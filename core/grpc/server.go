@@ -26,12 +26,12 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/secure2work/nori/core/plugins/meta"
-
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+
+	"github.com/secure2work/nori-common/meta"
 
 	"github.com/secure2work/nori/core/plugins"
 	"github.com/secure2work/nori/proto"

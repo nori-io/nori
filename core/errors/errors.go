@@ -1,10 +1,25 @@
+// Copyright © 2018 Secure2Work info@secure2work.com
+//
+// This program is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation, either version 3
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+
 package errors
 
 import (
 	"fmt"
 	"strings"
 
-	"github.com/secure2work/nori/core/plugins/meta"
+	"github.com/secure2work/nori-common/meta"
 )
 
 type NotFound struct {
@@ -74,7 +89,7 @@ type InterfaceNotFound struct {
 }
 
 func (e InterfaceNotFound) Error() string {
-	return fmt.Sprintf("Interface %s is nil", e.Interface.String())
+	return fmt.Sprintf("Interface %s is nil", e.Interface)
 }
 
 type DependencyNotFound struct {
@@ -121,5 +136,5 @@ type InterfaceAssertError struct {
 }
 
 func (e InterfaceAssertError) Error() string {
-	return fmt.Sprintf("can's assert %s to interface %s", e.Interface.String())
+	return fmt.Sprintf("can's assert %s to interface %s", e.Interface)
 }

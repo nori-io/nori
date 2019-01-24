@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-package cmd
+package commands
 
 import (
 	"context"
@@ -46,7 +46,7 @@ var serverCmd = &cobra.Command{
 		logger.Infof("Nori Engine [version %s]", noriVersion.Version().String())
 
 		// nori core storage
-		storage := storage.GetNoriStorage(config, logger)
+		storage := storage.GetStorage(config, logger)
 		if storage == nil {
 			logger.Error("can't create NoriStorage")
 			os.Exit(1)
@@ -62,7 +62,7 @@ var serverCmd = &cobra.Command{
 
 		// Load Plugins
 		dirs := getPluginsDir(config, logger)
-		logger.Infof("Plugin dir(s):", strings.Join(dirs, ",\n"))
+		logger.Infof("Plugin dir(s): %s", strings.Join(dirs, ",\n"))
 		err := pluginManager.AddDir(dirs)
 		if err != nil {
 			logger.Error(err)

@@ -1,54 +1,40 @@
+// Copyright © 2018 Secure2Work info@secure2work.com
+//
+// This program is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation, either version 3
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+
 package config
 
 import (
-	"github.com/secure2work/nori/core/plugins/interfaces"
-	"github.com/secure2work/nori/core/plugins/meta"
+	commonCfg "github.com/secure2work/nori-common/config"
+	"github.com/secure2work/nori-common/interfaces"
+	"github.com/secure2work/nori-common/meta"
 )
-
-type Manager interface {
-	Register(meta.Meta) Config
-	PluginVariables(id meta.ID) []Variable
-}
-
-type Config interface {
-	Bool(key string, desc string) Bool
-	Float(key string, desc string) Float
-	Int(key string, desc string) Int
-	UInt(key string, desc string) UInt
-	Slice(key, delimiter string, desc string) Slice
-	String(key string, desc string) String
-	StringMap(key string, desc string) StringMap
-}
-
-type (
-	Bool      func() bool
-	Float     func() float64
-	Int       func() int
-	UInt      func() uint
-	Slice     func() []interface{}
-	String    func() string
-	StringMap func() map[string]interface{}
-)
-
-type Variable struct {
-	Name        string
-	Description string
-}
 
 type manager struct {
-	configs map[meta.ID]*[]Variable
+	configs map[meta.ID]*[]commonCfg.Variable
 	config  interfaces.Config
 }
 
-func NewManager(config interfaces.Config) Manager {
+func NewManager(config interfaces.Config) commonCfg.Manager {
 	m := new(manager)
-	m.configs = make(map[meta.ID]*[]Variable)
+	m.configs = make(map[meta.ID]*[]commonCfg.Variable)
 	m.config = config
 	return m
 }
 
-func (m *manager) Register(meta meta.Meta) Config {
-	cfgs := make([]Variable, 0)
+func (m *manager) Register(meta meta.Meta) commonCfg.Config {
+	cfgs := make([]commonCfg.Variable, 0)
 	m.configs[meta.Id()] = &cfgs
 	return &config{
 		cfgs:   &cfgs,
@@ -56,21 +42,21 @@ func (m *manager) Register(meta meta.Meta) Config {
 	}
 }
 
-func (m *manager) PluginVariables(id meta.ID) []Variable {
+func (m *manager) PluginVariables(id meta.ID) []commonCfg.Variable {
 	vars, ok := m.configs[id]
 	if !ok {
-		return []Variable{}
+		return []commonCfg.Variable{}
 	}
 	return *vars
 }
 
 type config struct {
-	cfgs   *[]Variable
+	cfgs   *[]commonCfg.Variable
 	config interfaces.Config
 }
 
-func (c *config) Bool(key string, desc string) Bool {
-	*(c.cfgs) = append(*(c.cfgs), Variable{
+func (c *config) Bool(key string, desc string) commonCfg.Bool {
+	*(c.cfgs) = append(*(c.cfgs), commonCfg.Variable{
 		Name:        key,
 		Description: desc,
 	})
@@ -79,8 +65,8 @@ func (c *config) Bool(key string, desc string) Bool {
 	}
 }
 
-func (c *config) Float(key string, desc string) Float {
-	*(c.cfgs) = append(*(c.cfgs), Variable{
+func (c *config) Float(key string, desc string) commonCfg.Float {
+	*(c.cfgs) = append(*(c.cfgs), commonCfg.Variable{
 		Name:        key,
 		Description: desc,
 	})
@@ -89,8 +75,8 @@ func (c *config) Float(key string, desc string) Float {
 	}
 }
 
-func (c *config) Int(key string, desc string) Int {
-	*(c.cfgs) = append(*(c.cfgs), Variable{
+func (c *config) Int(key string, desc string) commonCfg.Int {
+	*(c.cfgs) = append(*(c.cfgs), commonCfg.Variable{
 		Name:        key,
 		Description: desc,
 	})
@@ -99,8 +85,8 @@ func (c *config) Int(key string, desc string) Int {
 	}
 }
 
-func (c *config) UInt(key string, desc string) UInt {
-	*(c.cfgs) = append(*(c.cfgs), Variable{
+func (c *config) UInt(key string, desc string) commonCfg.UInt {
+	*(c.cfgs) = append(*(c.cfgs), commonCfg.Variable{
 		Name:        key,
 		Description: desc,
 	})
@@ -109,8 +95,8 @@ func (c *config) UInt(key string, desc string) UInt {
 	}
 }
 
-func (c *config) Slice(key, delimiter string, desc string) Slice {
-	*(c.cfgs) = append(*(c.cfgs), Variable{
+func (c *config) Slice(key, delimiter string, desc string) commonCfg.Slice {
+	*(c.cfgs) = append(*(c.cfgs), commonCfg.Variable{
 		Name:        key,
 		Description: desc,
 	})
@@ -119,8 +105,8 @@ func (c *config) Slice(key, delimiter string, desc string) Slice {
 	}
 }
 
-func (c *config) String(key string, desc string) String {
-	*(c.cfgs) = append(*(c.cfgs), Variable{
+func (c *config) String(key string, desc string) commonCfg.String {
+	*(c.cfgs) = append(*(c.cfgs), commonCfg.Variable{
 		Name:        key,
 		Description: desc,
 	})
@@ -129,8 +115,8 @@ func (c *config) String(key string, desc string) String {
 	}
 }
 
-func (c *config) StringMap(key string, desc string) StringMap {
-	*(c.cfgs) = append(*(c.cfgs), Variable{
+func (c *config) StringMap(key string, desc string) commonCfg.StringMap {
+	*(c.cfgs) = append(*(c.cfgs), commonCfg.Variable{
 		Name:        key,
 		Description: desc,
 	})

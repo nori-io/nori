@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/secure2work/nori/core/plugins/meta"
+	"github.com/secure2work/nori-common/meta"
 
 	"github.com/secure2work/nori/core/plugins/dependency"
 	metaMock "github.com/secure2work/nori/core/plugins/meta/mock"

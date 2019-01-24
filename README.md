@@ -7,7 +7,7 @@ All you need:
 2. Put your file into plugin directory
 3. Start Nori
 
-# Run Nori
+## Run Nori
 
 ```bash
 ./nori server --config="/etc/nori/config.json"
@@ -15,7 +15,9 @@ All you need:
 
 --config - path to your config file, by default Nori looking for config in ~/.config/nori
 
-# Configuration
+## Configuration
+
+- plugins.dir []string - paths to plugins dirs
 
 Example config file:
 ```json
@@ -37,14 +39,20 @@ Example config file:
 ```
 
 
-Configuration keys:
+#### MySQL Storage
 
-- nori.storage.type string(none | mysql) - type of storage to storage system data
-- nori.storage.source string (empty | name:password@addr:port/database)
-- plugins.dir []string - paths to plugins dirs
+```json
+{
+  "nori": {
+    "storage": {
+      "type": "mysql",
+      "source": "nori:nori@/noridb"
+    }
+  }
+}
+```
 
-
-# Semantic Versioning
+## Semantic Versioning
 
 This repo uses Semantic versioning (http://semver.org/), so
 
@@ -52,7 +60,7 @@ MAJOR version when you make incompatible API changes,
 MINOR version when you add functionality in a backwards-compatible manner, and
 PATCH version when you make backwards-compatible bug fixes.
 
-# Contributors
+## Contributors
 
 - Sergei Che
 - Stan Shulga 

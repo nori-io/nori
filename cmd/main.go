@@ -15,8 +15,8 @@
 
 package main
 
-import "github.com/secure2work/nori/cmd"
+import "github.com/secure2work/nori/cmd/commands"
 
 func main() {
-	cmd.Execute()
+	commands.Execute()
 }
