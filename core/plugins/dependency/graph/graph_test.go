@@ -1,8 +1,8 @@
 package graph_test
 
 import (
-	"github.com/secure2work/nori/core/plugins/dependency"
 	"github.com/secure2work/nori-common/meta"
+	"github.com/secure2work/nori/core/plugins/dependency"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -10,9 +10,9 @@ import (
 func TestDependencyGraph_Sort(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
-	httpPlugin := meta.Data{
+	plugin1 := meta.Data{
 		ID: meta.ID{
-			ID:      "nori/http",
+			ID:      "plugin1",
 			Version: "1.0",
 		},
 		Author: meta.Author{
@@ -22,11 +22,13 @@ func TestDependencyGraph_Sort(t *testing.T) {
 		Core: meta.Core{
 			VersionConstraint: ">=1.0, <2.0",
 		},
-		Dependencies: []meta.Dependency{},
+		Dependencies: []meta.Dependency{
+			{"plugin2", ">=1.0, <2.0", meta.Custom},
+		},
 		Description: meta.Description{
 			Name: "Nori HTTP Interface",
 		},
-		Interface: meta.HTTP,
+		Interface: meta.Custom,
 		License: meta.License{
 			Title: "",
 			Type:  "GPLv3",
@@ -34,9 +36,9 @@ func TestDependencyGraph_Sort(t *testing.T) {
 		Tags: []string{"http"},
 	}
 
-	mysqlPlugin := meta.Data{
+	plugin2 := meta.Data{
 		ID: meta.ID{
-			ID:      "nori/sql",
+			ID:      "plugin2",
 			Version: "1.0",
 		},
 		Author: meta.Author{
@@ -46,11 +48,13 @@ func TestDependencyGraph_Sort(t *testing.T) {
 		Core: meta.Core{
 			VersionConstraint: ">=1.0, <2.0",
 		},
-		Dependencies: []meta.Dependency{},
+		Dependencies: []meta.Dependency{
+			{"plugin3", ">=1.0, <2.0", meta.Custom},
+		},
 		Description: meta.Description{
 			Name: "NoriCMS: MySQL Driver",
 		},
-		Interface: meta.SQL,
+		Interface: meta.Custom,
 		License: meta.License{
 			Title: "",
 			Type:  "GPLv3",
@@ -58,9 +62,9 @@ func TestDependencyGraph_Sort(t *testing.T) {
 		Tags: []string{"sql", "mysql"},
 	}
 
-	cmsPlugin := meta.Data{
+	plugin3 := meta.Data{
 		ID: meta.ID{
-			ID:      "nori/cms/posts/naive",
+			ID:      "plugin3",
 			Version: "1.0",
 		},
 		Author: meta.Author{
@@ -70,11 +74,7 @@ func TestDependencyGraph_Sort(t *testing.T) {
 		Core: meta.Core{
 			VersionConstraint: ">=1.0, <2.0",
 		},
-		Dependencies: []meta.Dependency{
-			meta.SQL.Dependency("1.0.0"),
-			meta.HTTP.Dependency("1.0.0"),
-			//    meta.HTTPTransport.Dependency(),
-		},
+		Dependencies: []meta.Dependency{},
 		Description: meta.Description{
 			Name:        "NoriCMS Naive Posts Plugin",
 			Description: "Naive Posts Plugin",
@@ -88,53 +88,39 @@ func TestDependencyGraph_Sort(t *testing.T) {
 		Tags: []string{"cms", "posts", "api"},
 	}
 
-	managerPlugin.Add(cmsPlugin)
-	managerPlugin.Add(httpPlugin)
-	managerPlugin.Add(mysqlPlugin)
+	managerPlugin.Add(plugin2)
+	managerPlugin.Add(plugin1)
+	managerPlugin.Add(plugin3)
 
 	t.Log("Порядок плагинов до сортировки:", managerPlugin)
-
-	/*  mConfig := mocks.Config{}
-	  mConfig.On("String", AnythingOfType("string")).
-		Return(func(s string) string {
-		  return s
-		})
-	  manager := config.NewManager(&mConfig)
-	  manager.Register(httpPlugin)
-	  manager.Register(mysqlPlugin)
-	  manager.Register(cmsPlugin)
-	*/
 
 	pluginsSorted, err := managerPlugin.Sort()
 	if err != nil {
 		t.Log("Erroe in sorting")
 	}
-
 	for index, _ := range pluginsSorted {
 		t.Log(index+1, "-й элемент для запуска", pluginsSorted[index].ID, " ", pluginsSorted[index].Version)
 	}
 
 	var (
-		index1Http  int
-		index2Mysql int
-		index3Cms   int
+		index1 int
+		index2 int
+		index3 int
 	)
 	for index, value := range pluginsSorted {
-		if value.ID == "nori/http" {
-			index1Http = index
+		if value.ID == "plugin1" {
+			index1 = index
 		}
 
-		if value.ID == "nori/sql" {
-			index2Mysql = index
+		if value.ID == "plugin2" {
+			index2 = index
 		}
-		if value.ID == "nori/cms/posts/naive" {
-			index3Cms = index
+		if value.ID == "plugin3" {
+			index3 = index
 		}
 	}
 
-	//a.Equal(true, index1Http == 0 || index1Http == 1)
-	//a.Equal(true, index2Mysql == 0 || index2Mysql == 1)
-	a.Equal(true, index3Cms > index1Http)
-	a.Equal(true, index3Cms > index2Mysql)
+	a.Equal(true, index3 < index2)
+	a.Equal(true, index2 < index1)
 
 }
