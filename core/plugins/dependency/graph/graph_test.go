@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-//1) плагин-1 -> плагин-2 -> плагин-3 (все в наличии)
+//1) plugin-1 -> plugin-2 -> plugin-3 (all available)
 /*func TestDependencyGraph_Sort1(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
@@ -129,7 +129,7 @@ import (
 
 }*/
 
-//2) плагин-1 -> плагин-2 -> плагин-3 (3й отсутствует)
+//2) plugin-1 -> plugin-2 -> plugin-3 (3rd is absent)
 /*func TestDependencyGraph_Sort2(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
@@ -225,7 +225,7 @@ import (
 }
 */
 
-//3) плагин-1 -> плагин-2 -> плагин-3 (2й отсутствует)
+//3) plugin-1 -> plugin-2 -> plugin-3 (2nd is absent)
 func TestDependencyGraph_Sort3(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
@@ -321,3 +321,5 @@ func TestDependencyGraph_Sort3(t *testing.T) {
 	managerPlugin.Remove(plugin3.ID)
 
 }
+
+//4) plugin -> interface (all available)
