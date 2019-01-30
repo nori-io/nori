@@ -199,26 +199,7 @@ func TestDependencyGraph_Sort2(t *testing.T) {
 		t.Log(index+1, " element in list for start", pluginsSorted[index].ID, " ", pluginsSorted[index].Version)
 	}
 
-	var (
-		index1 int
-		index2 int
-		index3 int
-	)
-	for index, value := range pluginsSorted {
-		if value.ID == "plugin1" {
-			index1 = index
-		}
 
-		if value.ID == "plugin2" {
-			index2 = index
-		}
-		if value.ID == "plugin3" {
-			index3 = index
-		}
-	}
-	//index3 initialized by default value=0
-	a.Equal(true, index3 == 0)
-	a.Equal(true, index2 < index1)
 	a.NotEqual(err,nil)
 	managerPlugin.Remove(plugin1.ID)
 	managerPlugin.Remove(plugin2.ID)
@@ -294,27 +275,6 @@ func TestDependencyGraph_Sort3(t *testing.T) {
 		t.Log(index+1, " element in list for start", pluginsSorted[index].ID, " ", pluginsSorted[index].Version)
 	}
 
-	var (
-		index1 int
-		index2 int
-		index3 int
-	)
-	for index, value := range pluginsSorted {
-		if value.ID == "plugin1" {
-			index1 = index
-		}
-
-		if value.ID == "plugin2" {
-			index2 = index
-		}
-		if value.ID == "plugin3" {
-			index3 = index
-		}
-	}
-
-	a.Equal(true, index3 < index1 || index3 > index1)
-	//index2 initialized by default value=0
-	a.Equal(true, index2 == 0)
 	a.NotEqual(err,nil)
 	managerPlugin.Remove(plugin1.ID)
 	managerPlugin.Remove(plugin3.ID)
@@ -721,3 +681,6 @@ func TestDependencyGraph_Sort7(t *testing.T) {
 	managerPlugin.Remove(plugin4.ID)
 
 }
+
+//8) To do ring test
+
