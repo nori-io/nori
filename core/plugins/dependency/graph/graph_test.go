@@ -138,6 +138,8 @@ func TestDependencyGraph_Sort(t *testing.T) {
 	//a.Equal(true, index2Mysql == 0 || index2Mysql == 1)
 	a.Equal(true, index3Cms > index1Http)
 	a.Equal(true, index3Cms > index2Mysql)
+	a.Equal(3,len(pluginsSorted))
+
 
 }
 
@@ -256,6 +258,7 @@ func TestDependencyGraph_Sort1(t *testing.T) {
 
 	a.Equal(true, index3 < index2)
 	a.Equal(true, index2 < index1)
+	a.Equal(3,len(pluginsSorted))
 	managerPlugin.Remove(plugin1.ID)
 	managerPlugin.Remove(plugin2.ID)
 	managerPlugin.Remove(plugin3.ID)
@@ -331,7 +334,7 @@ func TestDependencyGraph_Sort2(t *testing.T) {
 		t.Log(index+1, " element in list for start", pluginsSorted[index].ID, " ", pluginsSorted[index].Version)
 	}
 
-
+	a.Equal(0,len(pluginsSorted))
 	a.NotEqual(err,nil)
 	managerPlugin.Remove(plugin1.ID)
 	managerPlugin.Remove(plugin2.ID)
@@ -407,6 +410,7 @@ func TestDependencyGraph_Sort3(t *testing.T) {
 		t.Log(index+1, " element in list for start", pluginsSorted[index].ID, " ", pluginsSorted[index].Version)
 	}
 
+	a.Equal(0,len(pluginsSorted))
 	a.NotEqual(err,nil)
 	managerPlugin.Remove(plugin1.ID)
 	managerPlugin.Remove(plugin3.ID)
@@ -552,7 +556,9 @@ func TestDependencyGraph_Sort5(t *testing.T) {
 
 	a.Equal(true, index1 == 0)
 	a.NotEqual(err,nil)
+	a.Equal(0,len(pluginsSorted))
 	managerPlugin.Remove(plugin1.ID)
+
 
 }
 
@@ -704,6 +710,7 @@ func TestDependencyGraph_Sort6(t *testing.T) {
 	a.Equal(true, index4 < index2)
 	a.Equal(true, index2 < index3)
 	a.Equal(true, index2 < index1)
+	a.Equal(4,len(pluginsSorted))
 	managerPlugin.Remove(plugin1.ID)
 	managerPlugin.Remove(plugin2.ID)
 	managerPlugin.Remove(plugin3.ID)
@@ -809,6 +816,7 @@ func TestDependencyGraph_Sort7(t *testing.T) {
 	}
 
 	a.NotEqual(nil, err )
+	a.Equal(0,len(pluginsSorted))
 	managerPlugin.Remove(plugin1.ID)
 	managerPlugin.Remove(plugin3.ID)
 	managerPlugin.Remove(plugin4.ID)
