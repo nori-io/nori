@@ -95,10 +95,20 @@ func (m *manager) Add(mt meta.Meta) error {
 		}
 		for i, dep := range deps {
 			depId, err := m.Resolve(dep)
+
+			if dep.Interface == mt.GetInterface() && (dep.Interface != "Custom") {
+				m.graph.SetEdge(m.graph.NewEdge(unId, mt.Id()))
+				err = nil
+
+			}
+
 			if err != nil {
+
 				continue
 			}
-			m.graph.SetEdge(m.graph.NewEdge(unId, depId))
+			if !(dep.Interface == mt.GetInterface() && (dep.Interface != "Custom")) {
+				m.graph.SetEdge(m.graph.NewEdge(unId, depId))
+			}
 			m.unresolved[unId] = append(deps[:i], deps[i+1:]...)
 		}
 		if len(m.unresolved[unId]) == 0 {
@@ -173,5 +183,12 @@ func (m *manager) Stop(id meta.ID) {
 }
 
 func (m *manager) Sort() ([]meta.ID, error) {
+
+	if len(m.unresolved) > 0 {
+		return nil, errors.DependenciesNotFound{
+			Dependencies: m.unresolved,
+		}
+	}
+
 	return m.graph.Sort()
 }
