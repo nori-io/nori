@@ -35,7 +35,7 @@ var (
 			URI:   "https://www.gnu.org/licenses/"},
 		Tags: []string{"http"},
 	}
-//depend of plugin3
+	//depend of plugin3
 	plugin2 = meta.Data{
 		ID: meta.ID{
 			ID:      "plugin2",
@@ -61,7 +61,7 @@ var (
 			URI:   "https://www.gnu.org/licenses/"},
 		Tags: []string{"sql", "mysql"},
 	}
-// without dependencies
+	// without dependencies
 	plugin3 = meta.Data{
 		ID: meta.ID{
 			ID:      "plugin3",
@@ -87,7 +87,7 @@ var (
 		},
 		Tags: []string{"cms", "posts", "api"},
 	}
-// without dependencies
+	// without dependencies
 	plugin4 = meta.Data{
 		ID: meta.ID{
 			ID:      "plugin4",
@@ -113,7 +113,6 @@ var (
 		},
 		Tags: []string{"cms", "posts", "api"},
 	}
-
 	// without dependencies
 	pluginHttp = meta.Data{
 		ID: meta.ID{
@@ -138,7 +137,7 @@ var (
 			URI:   "https://www.gnu.org/licenses/"},
 		Tags: []string{"http"},
 	}
-//without dependencies
+	//without dependencies
 	pluginMysql = meta.Data{
 		ID: meta.ID{
 			ID:      "nori/sql",
@@ -162,7 +161,7 @@ var (
 			URI:   "https://www.gnu.org/licenses/"},
 		Tags: []string{"sql", "mysql"},
 	}
-// depend of  pluginHttp, pluginMysql
+	// depend of  pluginHttp, pluginMysql
 	pluginCms = meta.Data{
 		ID: meta.ID{
 			ID:      "nori/cms/posts/naive",
@@ -193,13 +192,12 @@ var (
 	}
 )
 
-//1) plugin1 -> plugin2 -> plugin3 (all available)
+//1) plugin1 -> plugin2 -> plugin3 (all available) order for adding - 1 3 2
 func TestDependencyGraph_Sort1(t *testing.T) {
 	a := assert.New(t)
-	managerPlugin := dependency.NewManager()
+	managerPlugin.Add(plugin1)
 	managerPlugin.Add(plugin3)
 	managerPlugin.Add(plugin2)
-	managerPlugin.Add(plugin1)
 	t.Log("Plugins order until sorting:", managerPlugin)
 	pluginsSorted, err := managerPlugin.Sort()
 	if err != nil {
@@ -236,7 +234,6 @@ func TestDependencyGraph_Sort1(t *testing.T) {
 //2) plugin1 -> plugin2 -> plugin3 (3rd is unavailable)
 func TestDependencyGraph_Sort2(t *testing.T) {
 	a := assert.New(t)
-	managerPlugin := dependency.NewManager()
 	managerPlugin.Add(plugin1)
 	managerPlugin.Add(plugin2)
 	t.Log("Plugins order until sorting:", managerPlugin)
@@ -256,7 +253,6 @@ func TestDependencyGraph_Sort2(t *testing.T) {
 //3) plugin1 -> plugin2 -> plugin3 (2nd is unavailable)
 func TestDependencyGraph_Sort3(t *testing.T) {
 	a := assert.New(t)
-	managerPlugin := dependency.NewManager()
 	managerPlugin.Add(plugin1)
 	managerPlugin.Add(plugin3)
 	t.Log("Plugins order until sorting:", managerPlugin)
@@ -276,11 +272,9 @@ func TestDependencyGraph_Sort3(t *testing.T) {
 //4) plugin1 -> interfaceHttp (all available)
 func TestDependencyGraph_Sort4(t *testing.T) {
 	a := assert.New(t)
-	managerPlugin := dependency.NewManager()
-
-	plugin1.Dependencies=[]meta.Dependency{
-			meta.HTTP.Dependency("1.0"),
-		}
+	plugin1.Dependencies = []meta.Dependency{
+		meta.HTTP.Dependency("1.0"),
+	}
 	managerPlugin.Add(plugin1)
 	managerPlugin.Add(pluginHttp)
 
@@ -309,7 +303,7 @@ func TestDependencyGraph_Sort4(t *testing.T) {
 	a.Equal(true, indexHttp < index1)
 	a.Equal(2, len(pluginsSorted))
 
-	plugin1.Dependencies=[]meta.Dependency{
+	plugin1.Dependencies = []meta.Dependency{
 		{"plugin2", ">=1.0, <2.0", meta.Custom},
 	}
 	managerPlugin.Remove(plugin1.ID)
@@ -320,8 +314,7 @@ func TestDependencyGraph_Sort4(t *testing.T) {
 //5) plugin1-> interfaceHttp (interface is unavailable)
 func TestDependencyGraph_Sort5(t *testing.T) {
 	a := assert.New(t)
-	managerPlugin := dependency.NewManager()
-	plugin1.Dependencies=[]meta.Dependency{
+	plugin1.Dependencies = []meta.Dependency{
 		meta.HTTP.Dependency("1.0"),
 	}
 
@@ -348,7 +341,7 @@ func TestDependencyGraph_Sort5(t *testing.T) {
 	a.Equal(true, index1 == 0)
 	a.NotEqual(err, nil)
 	a.Equal(0, len(pluginsSorted))
-	plugin1.Dependencies=[]meta.Dependency{
+	plugin1.Dependencies = []meta.Dependency{
 		{"plugin2", ">=1.0, <2.0", meta.Custom},
 	}
 	managerPlugin.Remove(plugin1.ID)
@@ -358,12 +351,10 @@ func TestDependencyGraph_Sort5(t *testing.T) {
 //6) plugin1 -> plugin2, plugin 3 -> plugin2, plugin 2 -> plugin4 (all available)
 func TestDependencyGraph_Sort6(t *testing.T) {
 	a := assert.New(t)
-	managerPlugin := dependency.NewManager()
-
-	plugin2.Dependencies= []meta.Dependency{
-			{"plugin4", ">=1.0, <2.0", meta.Custom},
-		}
-	plugin3.Dependencies= []meta.Dependency{
+plugin2.Dependencies = []meta.Dependency{
+		{"plugin4", ">=1.0, <2.0", meta.Custom},
+	}
+	plugin3.Dependencies = []meta.Dependency{
 		{"plugin4", ">=1.0, <2.0", meta.Custom},
 	}
 
@@ -434,10 +425,10 @@ func TestDependencyGraph_Sort6(t *testing.T) {
 	a.Equal(true, index2 < index3)
 	a.Equal(true, index2 < index1)
 	a.Equal(4, len(pluginsSorted))
-	plugin2.Dependencies= []meta.Dependency{
+	plugin2.Dependencies = []meta.Dependency{
 		{"plugin3", ">=1.0, <2.0", meta.Custom},
 	}
-	plugin3.Dependencies= []meta.Dependency{}
+	plugin3.Dependencies = []meta.Dependency{}
 	managerPlugin.Remove(plugin1.ID)
 	managerPlugin.Remove(plugin2.ID)
 	managerPlugin.Remove(plugin3.ID)
@@ -448,12 +439,9 @@ func TestDependencyGraph_Sort6(t *testing.T) {
 //7) plugin1 -> plugin2, plugin 3 -> plugin2, (plugin 2 is unavailable)
 func TestDependencyGraph_Sort7(t *testing.T) {
 	a := assert.New(t)
-	managerPlugin := dependency.NewManager()
-
-
-	plugin3.Dependencies=[]meta.Dependency{
-			{"plugin2", ">=1.0, <2.0", meta.Custom},
-		}
+	plugin3.Dependencies = []meta.Dependency{
+		{"plugin2", ">=1.0, <2.0", meta.Custom},
+	}
 	plugin4 := meta.Data{
 		ID: meta.ID{
 			ID:      "plugin4",
@@ -495,7 +483,7 @@ func TestDependencyGraph_Sort7(t *testing.T) {
 
 	a.NotEqual(nil, err)
 	a.Equal(0, len(pluginsSorted))
-	plugin3.Dependencies=[]meta.Dependency{}
+	plugin3.Dependencies = []meta.Dependency{}
 	managerPlugin.Remove(plugin1.ID)
 	managerPlugin.Remove(plugin3.ID)
 	managerPlugin.Remove(plugin4.ID)
@@ -543,7 +531,7 @@ func TestDependencyGraph_Sort8(t *testing.T) {
 	managerPlugin.Remove(pluginMysql.ID)
 
 }
-//9) ring -plugin1->plugin1
 
+//9) ring -plugin1->plugin1
 
 //10)ring plugin2->plugin3, plugin3->plugin2

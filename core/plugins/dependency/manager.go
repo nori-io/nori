@@ -24,6 +24,8 @@ import (
 type Manager interface {
 	// adds meta to dependency manager
 	Add(m meta.Meta) error
+
+	GetDependencyGraph() []meta.ID
 	// returns whether the ID exists in dependency list
 	Has(id meta.ID) bool
 	// removes meta from dependency list
@@ -127,6 +129,8 @@ func (m *manager) Has(id meta.ID) bool {
 func (m *manager) Remove(id meta.ID) {
 	delete(m.unresolved, id)
 	delete(m.plugins, id)
+	// @todo delete node and related edges?Ол
+	m.graph.RemoveNode(id)
 }
 
 func (m *manager) Resolve(dependency meta.Dependency) (meta.ID, error) {
@@ -191,4 +195,8 @@ func (m *manager) Sort() ([]meta.ID, error) {
 	}
 
 	return m.graph.Sort()
+}
+
+func (m *manager) GetDependencyGraph() []meta.ID {
+	return m.graph.Nodes()
 }
