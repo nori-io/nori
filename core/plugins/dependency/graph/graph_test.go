@@ -8,7 +8,8 @@ import (
 )
 
 var (
-// depend of plugin2
+	managerPlugin = dependency.NewManager()
+	// depend of plugin2
 	plugin1 = meta.Data{
 		ID: meta.ID{
 			ID:      "plugin1",
@@ -87,6 +88,33 @@ var (
 		Tags: []string{"cms", "posts", "api"},
 	}
 // without dependencies
+	plugin4 = meta.Data{
+		ID: meta.ID{
+			ID:      "plugin4",
+			Version: "1.0",
+		},
+		Author: meta.Author{
+			Name: "Nori",
+			URI:  "https://noricms.com",
+		},
+		Core: meta.Core{
+			VersionConstraint: ">=1.0, <2.0",
+		},
+		Dependencies: []meta.Dependency{},
+		Description: meta.Description{
+			Name:        "NoriCMS Naive Posts Plugin",
+			Description: "Naive Posts Plugin",
+		},
+		Interface: meta.Custom,
+		License: meta.License{
+			Title: "",
+			Type:  "GPLv3",
+			URI:   "https://www.gnu.org/licenses/",
+		},
+		Tags: []string{"cms", "posts", "api"},
+	}
+
+	// without dependencies
 	pluginHttp = meta.Data{
 		ID: meta.ID{
 			ID:      "nori/http",
@@ -189,7 +217,6 @@ func TestDependencyGraph_Sort1(t *testing.T) {
 		if value.ID == "plugin1" {
 			index1 = index
 		}
-
 		if value.ID == "plugin2" {
 			index2 = index
 		}
@@ -251,33 +278,9 @@ func TestDependencyGraph_Sort4(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 
-	plugin1 := meta.Data{
-		ID: meta.ID{
-			ID:      "plugin1",
-			Version: "1.0",
-		},
-		Author: meta.Author{
-			Name: "NoriCMS",
-			URI:  "https://noricms.com",
-		},
-		Core: meta.Core{
-			VersionConstraint: ">=1.0, <2.0",
-		},
-		Dependencies: []meta.Dependency{
+	plugin1.Dependencies=[]meta.Dependency{
 			meta.HTTP.Dependency("1.0"),
-		},
-		Description: meta.Description{
-			Name: "Nori HTTP Interface",
-		},
-		Interface: meta.Custom,
-		License: meta.License{
-			Title: "",
-			Type:  "GPLv3",
-			URI:   "https://www.gnu.org/licenses/"},
-		Tags: []string{"http"},
-	}
-
-
+		}
 	managerPlugin.Add(plugin1)
 	managerPlugin.Add(pluginHttp)
 
@@ -305,6 +308,10 @@ func TestDependencyGraph_Sort4(t *testing.T) {
 
 	a.Equal(true, indexHttp < index1)
 	a.Equal(2, len(pluginsSorted))
+
+	plugin1.Dependencies=[]meta.Dependency{
+		{"plugin2", ">=1.0, <2.0", meta.Custom},
+	}
 	managerPlugin.Remove(plugin1.ID)
 	managerPlugin.Remove(pluginHttp.ID)
 
@@ -314,31 +321,8 @@ func TestDependencyGraph_Sort4(t *testing.T) {
 func TestDependencyGraph_Sort5(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
-
-	plugin1 := meta.Data{
-		ID: meta.ID{
-			ID:      "plugin1",
-			Version: "1.0",
-		},
-		Author: meta.Author{
-			Name: "NoriCMS",
-			URI:  "https://noricms.com",
-		},
-		Core: meta.Core{
-			VersionConstraint: ">=1.0, <2.0",
-		},
-		Dependencies: []meta.Dependency{
-			meta.HTTP.Dependency("1.0"),
-		},
-		Description: meta.Description{
-			Name: "Nori HTTP Interface",
-		},
-		Interface: meta.Custom,
-		License: meta.License{
-			Title: "",
-			Type:  "GPLv3",
-			URI:   "https://www.gnu.org/licenses/"},
-		Tags: []string{"http"},
+	plugin1.Dependencies=[]meta.Dependency{
+		meta.HTTP.Dependency("1.0"),
 	}
 
 	managerPlugin.Add(plugin1)
@@ -364,6 +348,9 @@ func TestDependencyGraph_Sort5(t *testing.T) {
 	a.Equal(true, index1 == 0)
 	a.NotEqual(err, nil)
 	a.Equal(0, len(pluginsSorted))
+	plugin1.Dependencies=[]meta.Dependency{
+		{"plugin2", ">=1.0, <2.0", meta.Custom},
+	}
 	managerPlugin.Remove(plugin1.ID)
 
 }
@@ -373,56 +360,11 @@ func TestDependencyGraph_Sort6(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 
-	plugin1 := meta.Data{
-		ID: meta.ID{
-			ID:      "plugin1",
-			Version: "1.0",
-		},
-		Author: meta.Author{
-			Name: "NoriCMS",
-			URI:  "https://noricms.com",
-		},
-		Core: meta.Core{
-			VersionConstraint: ">=1.0, <2.0",
-		},
-		Dependencies: []meta.Dependency{
-			{"plugin2", ">=1.0, <2.0", meta.Custom},
-		},
-		Description: meta.Description{
-			Name: "Nori HTTP Interface",
-		},
-		Interface: meta.Custom,
-		License: meta.License{
-			Title: "",
-			Type:  "GPLv3",
-			URI:   "https://www.gnu.org/licenses/"},
-		Tags: []string{"http"},
-	}
-
-	plugin2 := meta.Data{
-		ID: meta.ID{
-			ID:      "plugin2",
-			Version: "1.0",
-		},
-		Author: meta.Author{
-			Name: "NoriCMS",
-			URI:  "https://noricms.com",
-		},
-		Core: meta.Core{
-			VersionConstraint: ">=1.0, <2.0",
-		},
-		Dependencies: []meta.Dependency{
+	plugin2.Dependencies= []meta.Dependency{
 			{"plugin4", ">=1.0, <2.0", meta.Custom},
-		},
-		Description: meta.Description{
-			Name: "NoriCMS: MySQL Driver",
-		},
-		Interface: meta.Custom,
-		License: meta.License{
-			Title: "",
-			Type:  "GPLv3",
-			URI:   "https://www.gnu.org/licenses/"},
-		Tags: []string{"sql", "mysql"},
+		}
+	plugin3.Dependencies= []meta.Dependency{
+		{"plugin4", ">=1.0, <2.0", meta.Custom},
 	}
 
 	plugin3 := meta.Data{
@@ -440,31 +382,6 @@ func TestDependencyGraph_Sort6(t *testing.T) {
 		Dependencies: []meta.Dependency{
 			{"plugin2", ">=1.0, <2.0", meta.Custom},
 		},
-		Description: meta.Description{
-			Name:        "NoriCMS Naive Posts Plugin",
-			Description: "Naive Posts Plugin",
-		},
-		Interface: meta.Custom,
-		License: meta.License{
-			Title: "",
-			Type:  "GPLv3",
-			URI:   "https://www.gnu.org/licenses/",
-		},
-		Tags: []string{"cms", "posts", "api"},
-	}
-	plugin4 := meta.Data{
-		ID: meta.ID{
-			ID:      "plugin4",
-			Version: "1.0",
-		},
-		Author: meta.Author{
-			Name: "Nori",
-			URI:  "https://noricms.com",
-		},
-		Core: meta.Core{
-			VersionConstraint: ">=1.0, <2.0",
-		},
-		Dependencies: []meta.Dependency{},
 		Description: meta.Description{
 			Name:        "NoriCMS Naive Posts Plugin",
 			Description: "Naive Posts Plugin",
@@ -517,6 +434,10 @@ func TestDependencyGraph_Sort6(t *testing.T) {
 	a.Equal(true, index2 < index3)
 	a.Equal(true, index2 < index1)
 	a.Equal(4, len(pluginsSorted))
+	plugin2.Dependencies= []meta.Dependency{
+		{"plugin3", ">=1.0, <2.0", meta.Custom},
+	}
+	plugin3.Dependencies= []meta.Dependency{}
 	managerPlugin.Remove(plugin1.ID)
 	managerPlugin.Remove(plugin2.ID)
 	managerPlugin.Remove(plugin3.ID)
@@ -529,59 +450,10 @@ func TestDependencyGraph_Sort7(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 
-	plugin1 := meta.Data{
-		ID: meta.ID{
-			ID:      "plugin1",
-			Version: "1.0",
-		},
-		Author: meta.Author{
-			Name: "NoriCMS",
-			URI:  "https://noricms.com",
-		},
-		Core: meta.Core{
-			VersionConstraint: ">=1.0, <2.0",
-		},
-		Dependencies: []meta.Dependency{
-			{"plugin2", ">=1.0, <2.0", meta.Custom},
-		},
-		Description: meta.Description{
-			Name: "Nori HTTP Interface",
-		},
-		Interface: meta.Custom,
-		License: meta.License{
-			Title: "",
-			Type:  "GPLv3",
-			URI:   "https://www.gnu.org/licenses/"},
-		Tags: []string{"http"},
-	}
 
-	plugin3 := meta.Data{
-		ID: meta.ID{
-			ID:      "plugin3",
-			Version: "1.0",
-		},
-		Author: meta.Author{
-			Name: "Nori",
-			URI:  "https://noricms.com",
-		},
-		Core: meta.Core{
-			VersionConstraint: ">=1.0, <2.0",
-		},
-		Dependencies: []meta.Dependency{
+	plugin3.Dependencies=[]meta.Dependency{
 			{"plugin2", ">=1.0, <2.0", meta.Custom},
-		},
-		Description: meta.Description{
-			Name:        "NoriCMS Naive Posts Plugin",
-			Description: "Naive Posts Plugin",
-		},
-		Interface: meta.Custom,
-		License: meta.License{
-			Title: "",
-			Type:  "GPLv3",
-			URI:   "https://www.gnu.org/licenses/",
-		},
-		Tags: []string{"cms", "posts", "api"},
-	}
+		}
 	plugin4 := meta.Data{
 		ID: meta.ID{
 			ID:      "plugin4",
@@ -623,6 +495,7 @@ func TestDependencyGraph_Sort7(t *testing.T) {
 
 	a.NotEqual(nil, err)
 	a.Equal(0, len(pluginsSorted))
+	plugin3.Dependencies=[]meta.Dependency{}
 	managerPlugin.Remove(plugin1.ID)
 	managerPlugin.Remove(plugin3.ID)
 	managerPlugin.Remove(plugin4.ID)
@@ -632,7 +505,6 @@ func TestDependencyGraph_Sort7(t *testing.T) {
 //8) pluginCms->pluginMysql, pluginCms->pluginHttp
 func TestDependencyGraph_Sort8(t *testing.T) {
 	a := assert.New(t)
-	managerPlugin := dependency.NewManager()
 	managerPlugin.Add(pluginCms)
 	managerPlugin.Add(pluginHttp)
 	managerPlugin.Add(pluginMysql)
@@ -666,6 +538,9 @@ func TestDependencyGraph_Sort8(t *testing.T) {
 	a.Equal(true, index3Cms > index1Http)
 	a.Equal(true, index3Cms > index2Mysql)
 	a.Equal(3, len(pluginsSorted))
+	managerPlugin.Remove(pluginCms.ID)
+	managerPlugin.Remove(pluginHttp.ID)
+	managerPlugin.Remove(pluginMysql.ID)
 
 }
 //9) ring -plugin1->plugin1
