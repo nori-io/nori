@@ -208,7 +208,7 @@ func TestDependencyGraph_Sort1(t *testing.T) {
 	}
 	t.Log("Plugins' order after sorting:")
 	for index, _ := range pluginsSorted {
-		t.Log("Plugin n.",index+1, " in list for start:", pluginsSorted[index].String())
+		t.Log("Plugin n.", index+1, " in list for start:", pluginsSorted[index].String())
 	}
 	var (
 		index1 int
@@ -250,7 +250,7 @@ func TestDependencyGraph_Sort2(t *testing.T) {
 	}
 	t.Log("Plugins' order after sorting:")
 	for index, _ := range pluginsSorted {
-		t.Log("Plugin n.",index+1, " in list for start:", pluginsSorted[index].String())
+		t.Log("Plugin n.", index+1, " in list for start:", pluginsSorted[index].String())
 	}
 	a.Equal(0, len(pluginsSorted))
 	a.NotEqual(err, nil)
@@ -273,7 +273,7 @@ func TestDependencyGraph_Sort3(t *testing.T) {
 	}
 	t.Log("Plugins' order after sorting:")
 	for index, _ := range pluginsSorted {
-		t.Log("Plugin n.",index+1, " in list for start:", pluginsSorted[index].String())
+		t.Log("Plugin n.", index+1, " in list for start:", pluginsSorted[index].String())
 	}
 	a.Equal(0, len(pluginsSorted))
 	a.NotEqual(err, nil)
@@ -299,7 +299,7 @@ func TestDependencyGraph_Sort4(t *testing.T) {
 	}
 	t.Log("Plugins' order after sorting:")
 	for index, _ := range pluginsSorted {
-		t.Log("Plugin n.",index+1, " in list for start:", pluginsSorted[index].String())
+		t.Log("Plugin n.", index+1, " in list for start:", pluginsSorted[index].String())
 	}
 
 	var (
@@ -344,7 +344,7 @@ func TestDependencyGraph_Sort5(t *testing.T) {
 	}
 	t.Log("Plugins' order after sorting:")
 	for index, _ := range pluginsSorted {
-		t.Log("Plugin n.",index+1, " in list for start:", pluginsSorted[index].String())
+		t.Log("Plugin n.", index+1, " in list for start:", pluginsSorted[index].String())
 	}
 	for index, _ := range pluginsSorted {
 		t.Log(index+1, " element in list for start:", pluginsSorted[index].ID, " ", pluginsSorted[index].Version)
@@ -372,7 +372,7 @@ func TestDependencyGraph_Sort5(t *testing.T) {
 //6) plugin1 -> plugin2, plugin 3 -> plugin2, plugin 2 -> plugin4 (all available)
 func TestDependencyGraph_Sort6(t *testing.T) {
 	a := assert.New(t)
-plugin2.Dependencies = []meta.Dependency{
+	plugin2.Dependencies = []meta.Dependency{
 		{"plugin4", ">=1.0, <2.0", meta.Custom},
 	}
 	plugin3.Dependencies = []meta.Dependency{
@@ -422,7 +422,7 @@ plugin2.Dependencies = []meta.Dependency{
 	}
 	t.Log("Plugins' order after sorting:")
 	for index, _ := range pluginsSorted {
-		t.Log("Plugin n.",index+1, " in list for start:", pluginsSorted[index].String())
+		t.Log("Plugin n.", index+1, " in list for start:", pluginsSorted[index].String())
 	}
 
 	var (
@@ -507,7 +507,7 @@ func TestDependencyGraph_Sort7(t *testing.T) {
 	}
 	t.Log("Plugins' order after sorting:")
 	for index, _ := range pluginsSorted {
-		t.Log("Plugin n.",index+1, " in list for start:", pluginsSorted[index].String())
+		t.Log("Plugin n.", index+1, " in list for start:", pluginsSorted[index].String())
 	}
 
 	a.NotEqual(nil, err)
@@ -535,7 +535,7 @@ func TestDependencyGraph_Sort8(t *testing.T) {
 	}
 	t.Log("Plugins' order after sorting:")
 	for index, _ := range pluginsSorted {
-		t.Log("Plugin n.",index+1, " in list for start:", pluginsSorted[index].String())
+		t.Log("Plugin n.", index+1, " in list for start:", pluginsSorted[index].String())
 	}
 	var (
 		index1Http  int
@@ -563,5 +563,65 @@ func TestDependencyGraph_Sort8(t *testing.T) {
 }
 
 //9) ring -plugin1->plugin1
+func TestDependencyGraph_Sort9(t *testing.T) {
+	a := assert.New(t)
+	plugin1.Dependencies = []meta.Dependency{
+		{"plugin1", ">=1.0, <2.0", meta.Custom},
+	}
+
+	managerPlugin.Add(plugin1)
+
+	t.Log("Plugins' order until sorting:")
+	for index, value := range managerPlugin.GetDependencyGraph() {
+		t.Log("Plugin n.", index+1, " in list until sotring:", value.ID, " version: ", value.Version, " Dependencies:", value.String())
+	}
+	pluginsSorted, err := managerPlugin.Sort()
+	if err != nil {
+		t.Log("Error in sorting")
+	}
+	t.Log("Plugins' order after sorting:")
+	for index, _ := range pluginsSorted {
+		t.Log("Plugin n.", index+1, " in list for start:", pluginsSorted[index].String())
+	}
+
+	a.NotEqual(err, nil)
+	plugin2.Dependencies = []meta.Dependency{
+		{"plugin2", ">=1.0, <2.0", meta.Custom},
+	}
+	plugin3.Dependencies = []meta.Dependency{}
+	managerPlugin.Remove(plugin1.ID)
+
+}
 
 //10)ring plugin2->plugin3, plugin3->plugin2
+func TestDependencyGraph_Sort10(t *testing.T) {
+	a := assert.New(t)
+	plugin3.Dependencies = []meta.Dependency{
+		{"plugin2", ">=1.0, <2.0", meta.Custom},
+	}
+
+	managerPlugin.Add(plugin2)
+	managerPlugin.Add(plugin3)
+
+	t.Log("Plugins' order until sorting:")
+	for index, value := range managerPlugin.GetDependencyGraph() {
+		t.Log("Plugin n.", index+1, " in list until sotring:", value.ID, " version: ", value.Version, " Dependencies:", value.String())
+	}
+	pluginsSorted, err := managerPlugin.Sort()
+	if err != nil {
+		t.Log("Error in sorting")
+	}
+	t.Log("Plugins' order after sorting:")
+	for index, _ := range pluginsSorted {
+		t.Log("Plugin n.", index+1, " in list for start:", pluginsSorted[index].String())
+	}
+
+	a.NotEqual(err, nil)
+	plugin2.Dependencies = []meta.Dependency{
+		{"plugin2", ">=1.0, <2.0", meta.Custom},
+	}
+	plugin3.Dependencies = []meta.Dependency{}
+	managerPlugin.Remove(plugin2.ID)
+	managerPlugin.Remove(plugin3.ID)
+
+}
