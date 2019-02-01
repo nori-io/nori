@@ -25,7 +25,7 @@ type Manager interface {
 	// adds meta to dependency manager
 	Add(m meta.Meta) error
 
-	GetDependencyGraph() []meta.ID
+	GetPluginsList() map[meta.ID]meta.Meta
 	// returns whether the ID exists in dependency list
 	Has(id meta.ID) bool
 	// removes meta from dependency list
@@ -200,6 +200,6 @@ func (m *manager) Sort() ([]meta.ID, error) {
 	return m.graph.Sort()
 }
 
-func (m *manager) GetDependencyGraph() []meta.ID {
-	return m.graph.Nodes()
+func (m *manager) GetPluginsList() map[meta.ID]meta.Meta {
+	return m.plugins
 }
