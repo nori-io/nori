@@ -199,9 +199,22 @@ func TestDependencyGraph_Sort1(t *testing.T) {
 	managerPlugin.Add(plugin3)
 	managerPlugin.Add(plugin2)
 	t.Log("Plugins' order until sorting:")
-	for index, value := range managerPlugin.GetDependencyGraph() {
-		t.Log("Plugin n.", index+1, " in list until sotring:", value.ID, " version: ", value.Version, " Dependencies:", value.String())
+	pluginsList := managerPlugin.GetPluginsList()
+	i := 0
+	for _, value := range pluginsList {
+		i++
+		if len(value.GetDependencies()) > 0 {
+			t.Log("Plugin n.", i, " in list until sotring:", value.Id()," Dependencies:")
+			j := 0
+			for _, depvalue := range value.GetDependencies() {
+				j++
+				t.Log("Dependence n.", j, "for" ,value.Id().ID ,"is", depvalue.String())
+			}
+		} else {
+			t.Log("Plugin n.", i, " in list until sotring:", value.Id(), "Plugin doesn't have dependencies")
+		}
 	}
+    t.Log()
 	pluginsSorted, err := managerPlugin.Sort()
 	if err != nil {
 		t.Log("Error in sorting")
@@ -241,9 +254,22 @@ func TestDependencyGraph_Sort2(t *testing.T) {
 	managerPlugin.Add(plugin1)
 	managerPlugin.Add(plugin2)
 	t.Log("Plugins' order until sorting:")
-	for index, value := range managerPlugin.GetDependencyGraph() {
-		t.Log("Plugin n.", index+1, " in list until sotring:", value.ID, " version: ", value.Version, " Dependencies:", value.String())
+	pluginsList := managerPlugin.GetPluginsList()
+	i := 0
+	for _, value := range pluginsList {
+		i++
+		if len(value.GetDependencies()) > 0 {
+			t.Log("Plugin n.", i, " in list until sotring:", value.Id()," Dependencies:")
+			j := 0
+			for _, depvalue := range value.GetDependencies() {
+				j++
+				t.Log("Dependence n.", j, "for" ,value.Id().ID ,"is", depvalue.String())
+			}
+		} else {
+			t.Log("Plugin n.", i, " in list until sotring:", value.Id(), "Plugin doesn't have dependencies")
+		}
 	}
+	t.Log()
 	pluginsSorted, err := managerPlugin.Sort()
 	if err != nil {
 		t.Log("Error in sorting")
@@ -264,9 +290,22 @@ func TestDependencyGraph_Sort3(t *testing.T) {
 	managerPlugin.Add(plugin1)
 	managerPlugin.Add(plugin3)
 	t.Log("Plugins' order until sorting:")
-	for index, value := range managerPlugin.GetDependencyGraph() {
-		t.Log("Plugin n.", index+1, " in list until sotring:", value.ID, " version: ", value.Version, " Dependencies:", value.String())
+	pluginsList := managerPlugin.GetPluginsList()
+	i := 0
+	for _, value := range pluginsList {
+		i++
+		if len(value.GetDependencies()) > 0 {
+			t.Log("Plugin n.", i, " in list until sotring:", value.Id()," Dependencies:")
+			j := 0
+			for _, depvalue := range value.GetDependencies() {
+				j++
+				t.Log("Dependence n.", j, "for" ,value.Id().ID ,"is", depvalue.String())
+			}
+		} else {
+			t.Log("Plugin n.", i, " in list until sotring:", value.Id(), "Plugin doesn't have dependencies")
+		}
 	}
+	t.Log()
 	pluginsSorted, err := managerPlugin.Sort()
 	if err != nil {
 		t.Log("Error in sorting")
@@ -290,9 +329,22 @@ func TestDependencyGraph_Sort4(t *testing.T) {
 	managerPlugin.Add(plugin1)
 	managerPlugin.Add(pluginHttp)
 	t.Log("Plugins' order until sorting:")
-	for index, value := range managerPlugin.GetDependencyGraph() {
-		t.Log("Plugin n.", index+1, " in list until sotring:", value.ID, " version: ", value.Version, " Dependencies:", value.String())
+	pluginsList := managerPlugin.GetPluginsList()
+	i := 0
+	for _, value := range pluginsList {
+		i++
+		if len(value.GetDependencies()) > 0 {
+			t.Log("Plugin n.", i, " in list until sotring:", value.Id()," Dependencies:")
+			j := 0
+			for _, depvalue := range value.GetDependencies() {
+				j++
+				t.Log("Dependence n.", j, "for" ,value.Id().ID ,"is", depvalue.String())
+			}
+		} else {
+			t.Log("Plugin n.", i, " in list until sotring:", value.Id(), "Plugin doesn't have dependencies")
+		}
 	}
+	t.Log()
 	pluginsSorted, err := managerPlugin.Sort()
 	if err != nil {
 		t.Log("Error in sorting")
@@ -335,9 +387,22 @@ func TestDependencyGraph_Sort5(t *testing.T) {
 
 	managerPlugin.Add(plugin1)
 	t.Log("Plugins' order until sorting:")
-	for index, value := range managerPlugin.GetDependencyGraph() {
-		t.Log("Plugin n.", index+1, " in list until sotring:", value.ID, " version: ", value.Version, " Dependencies:", value.String())
+	pluginsList := managerPlugin.GetPluginsList()
+	i := 0
+	for _, value := range pluginsList {
+		i++
+		if len(value.GetDependencies()) > 0 {
+			t.Log("Plugin n.", i, " in list until sotring:", value.Id()," Dependencies:")
+			j := 0
+			for _, depvalue := range value.GetDependencies() {
+				j++
+				t.Log("Dependence n.", j, "for" ,value.Id().ID ,"is", depvalue.String())
+			}
+		} else {
+			t.Log("Plugin n.", i, " in list until sotring:", value.Id(), "Plugin doesn't have dependencies")
+		}
 	}
+	t.Log()
 	pluginsSorted, err := managerPlugin.Sort()
 	if err != nil {
 		t.Log("Error in sorting")
@@ -413,9 +478,22 @@ func TestDependencyGraph_Sort6(t *testing.T) {
 	managerPlugin.Add(plugin4)
 
 	t.Log("Plugins' order until sorting:")
-	for index, value := range managerPlugin.GetDependencyGraph() {
-		t.Log("Plugin n.", index+1, " in list until sotring:", value.ID, " version: ", value.Version, " Dependencies:", value.String())
+	pluginsList := managerPlugin.GetPluginsList()
+	i := 0
+	for _, value := range pluginsList {
+		i++
+		if len(value.GetDependencies()) > 0 {
+			t.Log("Plugin n.", i, " in list until sotring:", value.Id()," Dependencies:")
+			j := 0
+			for _, depvalue := range value.GetDependencies() {
+				j++
+				t.Log("Dependence n.", j, "for" ,value.Id().ID ,"is", depvalue.String())
+			}
+		} else {
+			t.Log("Plugin n.", i, " in list until sotring:", value.Id(), "Plugin doesn't have dependencies")
+		}
 	}
+	t.Log()
 	pluginsSorted, err := managerPlugin.Sort()
 	if err != nil {
 		t.Log("Error in sorting")
@@ -498,9 +576,22 @@ func TestDependencyGraph_Sort7(t *testing.T) {
 	managerPlugin.Add(plugin4)
 
 	t.Log("Plugins' order until sorting:")
-	for index, value := range managerPlugin.GetDependencyGraph() {
-		t.Log("Plugin n.", index+1, " in list until sotring:", value.ID, " version: ", value.Version, " Dependencies:", value.String())
+	pluginsList := managerPlugin.GetPluginsList()
+	i := 0
+	for _, value := range pluginsList {
+		i++
+		if len(value.GetDependencies()) > 0 {
+			t.Log("Plugin n.", i, " in list until sotring:", value.Id()," Dependencies:")
+			j := 0
+			for _, depvalue := range value.GetDependencies() {
+				j++
+				t.Log("Dependence n.", j, "for" ,value.Id().ID ,"is", depvalue.String())
+			}
+		} else {
+			t.Log("Plugin n.", i, " in list until sotring:", value.Id(), "Plugin doesn't have dependencies")
+		}
 	}
+	t.Log()
 	pluginsSorted, err := managerPlugin.Sort()
 	if err != nil {
 		t.Log("Error in sorting")
@@ -526,9 +617,22 @@ func TestDependencyGraph_Sort8(t *testing.T) {
 	managerPlugin.Add(pluginHttp)
 	managerPlugin.Add(pluginMysql)
 	t.Log("Plugins' order until sorting:")
-	for index, value := range managerPlugin.GetDependencyGraph() {
-		t.Log("Plugin n.", index+1, " in list until sotring:", value.ID, " version: ", value.Version, " Dependencies:", value.String())
+	pluginsList := managerPlugin.GetPluginsList()
+	i := 0
+	for _, value := range pluginsList {
+		i++
+		if len(value.GetDependencies()) > 0 {
+			t.Log("Plugin n.", i, " in list until sotring:", value.Id()," Dependencies:")
+			j := 0
+			for _, depvalue := range value.GetDependencies() {
+				j++
+				t.Log("Dependence n.", j, "for" ,value.Id().ID ,"is", depvalue.String())
+			}
+		} else {
+			t.Log("Plugin n.", i, " in list until sotring:", value.Id(), "Plugin doesn't have dependencies")
+		}
 	}
+	t.Log()
 	pluginsSorted, err := managerPlugin.Sort()
 	if err != nil {
 		t.Log("Error in sorting")
@@ -572,9 +676,22 @@ func TestDependencyGraph_Sort9(t *testing.T) {
 	managerPlugin.Add(plugin1)
 
 	t.Log("Plugins' order until sorting:")
-	for index, value := range managerPlugin.GetDependencyGraph() {
-		t.Log("Plugin n.", index+1, " in list until sotring:", value.ID, " version: ", value.Version, " Dependencies:", value.String())
+	pluginsList := managerPlugin.GetPluginsList()
+	i := 0
+	for _, value := range pluginsList {
+		i++
+		if len(value.GetDependencies()) > 0 {
+			t.Log("Plugin n.", i, " in list until sotring:", value.Id()," Dependencies:")
+			j := 0
+			for _, depvalue := range value.GetDependencies() {
+				j++
+				t.Log("Dependence n.", j, "for" ,value.Id().ID ,"is", depvalue.String())
+			}
+		} else {
+			t.Log("Plugin n.", i, " in list until sotring:", value.Id(), "Plugin doesn't have dependencies")
+		}
 	}
+	t.Log()
 	pluginsSorted, err := managerPlugin.Sort()
 	if err != nil {
 		t.Log("Error in sorting")
@@ -603,9 +720,22 @@ func TestDependencyGraph_Sort10(t *testing.T) {
 	managerPlugin.Add(plugin3)
 
 	t.Log("Plugins' order until sorting:")
-	for index, value := range managerPlugin.GetDependencyGraph() {
-		t.Log("Plugin n.", index+1, " in list until sotring:", value.ID, " version: ", value.Version, " Dependencies:", value.String())
+	pluginsList := managerPlugin.GetPluginsList()
+	i := 0
+	for _, value := range pluginsList {
+		i++
+		if len(value.GetDependencies()) > 0 {
+			t.Log("Plugin n.", i, " in list until sotring:", value.Id()," Dependencies:")
+			j := 0
+			for _, depvalue := range value.GetDependencies() {
+				j++
+				t.Log("Dependence n.", j, "for" ,value.Id().ID ,"is", depvalue.String())
+			}
+		} else {
+			t.Log("Plugin n.", i, " in list until sotring:", value.Id(), "Plugin doesn't have dependencies")
+		}
 	}
+	t.Log()
 	pluginsSorted, err := managerPlugin.Sort()
 	if err != nil {
 		t.Log("Error in sorting")
@@ -622,5 +752,83 @@ func TestDependencyGraph_Sort10(t *testing.T) {
 	plugin3.Dependencies = []meta.Dependency{}
 	managerPlugin.Remove(plugin2.ID)
 	managerPlugin.Remove(plugin3.ID)
+
+}
+
+//1) plugin1 -> plugin2 -> plugin3 order for adding - 1 3 2, plugin1->Interface Http, pluginCms->interfaceHttp and interfaceMysql (plugins with such interfaces added),pluginHttp and pluginMysql -> plugin3
+func TestDependencyGraph_Sort11(t *testing.T) {
+	a := assert.New(t)
+	plugin1.Dependencies = []meta.Dependency{
+		{"plugin2", ">=1.0, <2.0", meta.Custom},
+		meta.HTTP.Dependency("1.0"),
+	}
+	pluginHttp.Dependencies=[]meta.Dependency{
+		{"plugin3", ">=1.0, <2.0", meta.Custom},
+	}
+	pluginMysql.Dependencies=[]meta.Dependency{
+		{"plugin3", ">=1.0, <2.0", meta.Custom},
+	}
+
+	managerPlugin.Add(plugin1)
+	managerPlugin.Add(pluginHttp)
+	managerPlugin.Add(plugin3)
+	managerPlugin.Add(plugin2)
+	managerPlugin.Add(pluginCms)
+	managerPlugin.Add(pluginMysql)
+
+		t.Log("Plugins' order until sorting:")
+	pluginsList := managerPlugin.GetPluginsList()
+	i := 0
+	for _, value := range pluginsList {
+		i++
+		if len(value.GetDependencies()) > 0 {
+			t.Log("Plugin n.", i, " in list until sotring:", value.Id()," Dependencies:")
+			j := 0
+			for _, depvalue := range value.GetDependencies() {
+				j++
+				t.Log("Dependence n.", j, "for" ,value.Id().ID ,"is", depvalue.String())
+			}
+		} else {
+			t.Log("Plugin n.", i, " in list until sotring:", value.Id(), "Plugin doesn't have dependencies")
+		}
+	}
+	t.Log()
+	pluginsSorted, err := managerPlugin.Sort()
+	if err != nil {
+		t.Log("Error in sorting")
+	}
+	t.Log("Plugins' order after sorting:")
+	for index, _ := range pluginsSorted {
+		t.Log("Plugin n.", index+1, " in list for start:", pluginsSorted[index].String())
+	}
+	var (
+		index1 int
+		index2 int
+		index3 int
+	)
+	for index, value := range pluginsSorted {
+		if value.ID == "plugin1" {
+			index1 = index
+		}
+		if value.ID == "plugin2" {
+			index2 = index
+		}
+		if value.ID == "plugin3" {
+			index3 = index
+		}
+	}
+	a.Equal(true, index3 < index2)
+	a.Equal(true, index2 < index1)
+	a.Equal(3, len(pluginsSorted))
+	plugin1.Dependencies = []meta.Dependency{
+		{"plugin2", ">=1.0, <2.0", meta.Custom},
+	}
+	pluginHttp.Dependencies=[]meta.Dependency{}
+	pluginMysql.Dependencies=[]meta.Dependency{}
+
+	managerPlugin.Remove(plugin1.ID)
+	managerPlugin.Remove(plugin2.ID)
+	managerPlugin.Remove(plugin3.ID)
+	managerPlugin.Remove(pluginCms.ID)
 
 }
