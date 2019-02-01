@@ -584,11 +584,10 @@ func TestDependencyGraph_Sort9(t *testing.T) {
 		t.Log("Plugin n.", index+1, " in list for start:", pluginsSorted[index].String())
 	}
 
-	a.NotEqual(err, nil)
-	plugin2.Dependencies = []meta.Dependency{
+	a.Equal(err, nil)
+	plugin1.Dependencies = []meta.Dependency{
 		{"plugin2", ">=1.0, <2.0", meta.Custom},
 	}
-	plugin3.Dependencies = []meta.Dependency{}
 	managerPlugin.Remove(plugin1.ID)
 
 }

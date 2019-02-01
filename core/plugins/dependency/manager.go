@@ -80,6 +80,9 @@ func (m *manager) Add(mt meta.Meta) error {
 
 	// build edges
 	for _, dep := range mt.GetDependencies() {
+		if dep.ID==mt.Id().ID{
+			continue
+		}
 		depId, err := m.Resolve(dep)
 		if err != nil {
 			if _, ok := m.unresolved[mt.Id()]; !ok {
@@ -109,9 +112,9 @@ func (m *manager) Add(mt meta.Meta) error {
 				continue
 			}
 			if !(dep.Interface == mt.GetInterface() && (dep.Interface != "Custom")) {
-				m.graph.SetEdge(m.graph.NewEdge(unId, depId))
+			m.graph.SetEdge(m.graph.NewEdge(unId, depId))
 			}
-			m.unresolved[unId] = append(deps[:i], deps[i+1:]...)
+		m.unresolved[unId] = append(deps[:i], deps[i+1:]...)
 		}
 		if len(m.unresolved[unId]) == 0 {
 			delete(m.unresolved, unId)
