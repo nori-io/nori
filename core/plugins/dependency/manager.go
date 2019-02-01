@@ -101,7 +101,7 @@ func (m *manager) Add(mt meta.Meta) error {
 		for i, dep := range deps {
 			depId, err := m.Resolve(dep)
 
-	/*	if dep.Interface == mt.GetInterface() && (dep.Interface != "Custom") {
+/*	if dep.Interface == mt.GetInterface() && (dep.Interface != "Custom") {
 				m.graph.SetEdge(m.graph.NewEdge(unId, mt.Id()))
 				err = nil
 
@@ -138,30 +138,47 @@ func (m *manager) Remove(id meta.ID) {
 
 func (m *manager) Resolve(dependency meta.Dependency) (meta.ID, error) {
 	for id, m := range m.plugins {
-		if len(dependency.Interface) > 0 {
 			// dependency on interface
-			if m.GetInterface() != dependency.Interface {
-				continue
+			// dependency on plu
+
+			if id.ID==dependency.ID{
+				constraints, err := dependency.GetConstraint()
+				if err != nil {
+					return meta.ID{}, err
+				}
+				version, err := id.GetVersion()
+				if err != nil {
+					return meta.ID{}, err
+				}
+				if constraints.Check(version) {
+					return id, nil
+				}
 			}
 
-			// dependency on plugin
+
+			if (m.GetInterface() == dependency.Interface)&&(dependency.Interface!="Custom") {
+				constraints, err := dependency.GetConstraint()
+				if err != nil {
+					return meta.ID{}, err
+				}
+				version, err := id.GetVersion()
+				if err != nil {
+					return meta.ID{}, err
+				}
+				if constraints.Check(version) {
+					return id, nil
+				}
+			}
 			if id.ID != dependency.ID {
-				continue
+				if m.GetInterface() != dependency.Interface {
+				continue}
 			}
+
+
 		}
 
-		constraints, err := dependency.GetConstraint()
-		if err != nil {
-			return meta.ID{}, err
-		}
-		version, err := id.GetVersion()
-		if err != nil {
-			return meta.ID{}, err
-		}
-		if constraints.Check(version) {
-			return id, nil
-		}
-	}
+
+
 	return meta.ID{}, errors.DependencyNotFound{
 		Dependency: dependency,
 	}
