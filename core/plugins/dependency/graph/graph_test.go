@@ -175,8 +175,8 @@ var (
 			VersionConstraint: ">=1.0, <2.0",
 		},
 		Dependencies: []meta.Dependency{
-			meta.SQL.Dependency("1.0.0"),
-			meta.HTTP.Dependency("1.0.0"),
+			meta.SQL.Dependency("1.0"),
+			meta.HTTP.Dependency("1.0"),
 		},
 		Description: meta.Description{
 			Name:        "NoriCMS Naive Posts Plugin",
@@ -217,7 +217,7 @@ func TestDependencyGraph_Sort1(t *testing.T) {
     t.Log()
 	pluginsSorted, err := managerPlugin.Sort()
 	if err != nil {
-		t.Log("Error in sorting")
+		t.Log("Error in sorting:",err.Error())
 	}
 	t.Log("Plugins' order after sorting:")
 	for index, _ := range pluginsSorted {
@@ -272,7 +272,7 @@ func TestDependencyGraph_Sort2(t *testing.T) {
 	t.Log()
 	pluginsSorted, err := managerPlugin.Sort()
 	if err != nil {
-		t.Log("Error in sorting")
+		t.Log("Error in sorting:", err.Error())
 	}
 	t.Log("Plugins' order after sorting:")
 	for index, _ := range pluginsSorted {
@@ -308,7 +308,7 @@ func TestDependencyGraph_Sort3(t *testing.T) {
 	t.Log()
 	pluginsSorted, err := managerPlugin.Sort()
 	if err != nil {
-		t.Log("Error in sorting")
+		t.Log("Error in sorting:",err.Error())
 	}
 	t.Log("Plugins' order after sorting:")
 	for index, _ := range pluginsSorted {
@@ -347,7 +347,7 @@ func TestDependencyGraph_Sort4(t *testing.T) {
 	t.Log()
 	pluginsSorted, err := managerPlugin.Sort()
 	if err != nil {
-		t.Log("Error in sorting")
+		t.Log("Error in sorting:",err.Error())
 	}
 	t.Log("Plugins' order after sorting:")
 	for index, _ := range pluginsSorted {
@@ -405,7 +405,7 @@ func TestDependencyGraph_Sort5(t *testing.T) {
 	t.Log()
 	pluginsSorted, err := managerPlugin.Sort()
 	if err != nil {
-		t.Log("Error in sorting")
+		t.Log("Error in sorting:", err.Error())
 	}
 	t.Log("Plugins' order after sorting:")
 	for index, _ := range pluginsSorted {
@@ -496,7 +496,7 @@ func TestDependencyGraph_Sort6(t *testing.T) {
 	t.Log()
 	pluginsSorted, err := managerPlugin.Sort()
 	if err != nil {
-		t.Log("Error in sorting")
+		t.Log("Error in sorting:", err.Error())
 	}
 	t.Log("Plugins' order after sorting:")
 	for index, _ := range pluginsSorted {
@@ -594,7 +594,7 @@ func TestDependencyGraph_Sort7(t *testing.T) {
 	t.Log()
 	pluginsSorted, err := managerPlugin.Sort()
 	if err != nil {
-		t.Log("Error in sorting")
+		t.Log("Error in sorting:", err.Error())
 	}
 	t.Log("Plugins' order after sorting:")
 	for index, _ := range pluginsSorted {
@@ -635,7 +635,7 @@ func TestDependencyGraph_Sort8(t *testing.T) {
 	t.Log()
 	pluginsSorted, err := managerPlugin.Sort()
 	if err != nil {
-		t.Log("Error in sorting")
+		t.Log("Error in sorting:", err.Error())
 	}
 	t.Log("Plugins' order after sorting:")
 	for index, _ := range pluginsSorted {
@@ -694,7 +694,7 @@ func TestDependencyGraph_Sort9(t *testing.T) {
 	t.Log()
 	pluginsSorted, err := managerPlugin.Sort()
 	if err != nil {
-		t.Log("Error in sorting")
+		t.Log("Error in sorting:", err.Error())
 	}
 	t.Log("Plugins' order after sorting:")
 	for index, _ := range pluginsSorted {
@@ -738,7 +738,7 @@ func TestDependencyGraph_Sort10(t *testing.T) {
 	t.Log()
 	pluginsSorted, err := managerPlugin.Sort()
 	if err != nil {
-		t.Log("Error in sorting")
+		t.Log("Error in sorting:", err.Error())
 	}
 	t.Log("Plugins' order after sorting:")
 	for index, _ := range pluginsSorted {
@@ -795,7 +795,7 @@ func TestDependencyGraph_Sort11(t *testing.T) {
 	t.Log()
 	pluginsSorted, err := managerPlugin.Sort()
 	if err != nil {
-		t.Log("Error in sorting")
+		t.Log("Error in sorting:",err.Error())
 	}
 	t.Log("Plugins' order after sorting:")
 	for index, _ := range pluginsSorted {
