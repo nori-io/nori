@@ -8,7 +8,6 @@ import (
 )
 
 var (
-	managerPlugin = dependency.NewManager()
 	// depend of plugin2
 	plugin1 = meta.Data{
 		ID: meta.ID{
@@ -195,6 +194,7 @@ var (
 //1) plugin1 -> plugin2 -> plugin3 (all available) order for adding - 1 3 2
 func TestDependencyGraph_Sort1(t *testing.T) {
 	a := assert.New(t)
+	managerPlugin:= dependency.NewManager()
 	managerPlugin.Add(plugin1)
 	managerPlugin.Add(plugin3)
 	managerPlugin.Add(plugin2)
@@ -251,6 +251,7 @@ func TestDependencyGraph_Sort1(t *testing.T) {
 //2) plugin1 -> plugin2 -> plugin3 (3rd is unavailable)
 func TestDependencyGraph_Sort2(t *testing.T) {
 	a := assert.New(t)
+	managerPlugin:= dependency.NewManager()
 	managerPlugin.Add(plugin1)
 	managerPlugin.Add(plugin2)
 	t.Log("Plugins' order until sorting:")
@@ -287,6 +288,7 @@ func TestDependencyGraph_Sort2(t *testing.T) {
 //3) plugin1 -> plugin2 -> plugin3 (2nd is unavailable)
 func TestDependencyGraph_Sort3(t *testing.T) {
 	a := assert.New(t)
+	managerPlugin:= dependency.NewManager()
 	managerPlugin.Add(plugin1)
 	managerPlugin.Add(plugin3)
 	t.Log("Plugins' order until sorting:")
@@ -323,6 +325,7 @@ func TestDependencyGraph_Sort3(t *testing.T) {
 //4) plugin1 -> interfaceHttp (all available)
 func TestDependencyGraph_Sort4(t *testing.T) {
 	a := assert.New(t)
+	managerPlugin:= dependency.NewManager()
 	plugin1.Dependencies = []meta.Dependency{
 		meta.HTTP.Dependency("1.0"),
 	}
@@ -381,6 +384,8 @@ func TestDependencyGraph_Sort4(t *testing.T) {
 //5) plugin1-> interfaceHttp (interface is unavailable)
 func TestDependencyGraph_Sort5(t *testing.T) {
 	a := assert.New(t)
+	managerPlugin:= dependency.NewManager()
+
 	plugin1.Dependencies = []meta.Dependency{
 		meta.HTTP.Dependency("1.0"),
 	}
@@ -437,6 +442,7 @@ func TestDependencyGraph_Sort5(t *testing.T) {
 //6) plugin1 -> plugin2, plugin 3 -> plugin2, plugin 2 -> plugin4 (all available)
 func TestDependencyGraph_Sort6(t *testing.T) {
 	a := assert.New(t)
+	managerPlugin:= dependency.NewManager()
 	plugin2.Dependencies = []meta.Dependency{
 		{"plugin4", ">=1.0, <2.0", meta.Custom},
 	}
@@ -542,6 +548,7 @@ func TestDependencyGraph_Sort6(t *testing.T) {
 //7) plugin1 -> plugin2, plugin 3 -> plugin2, (plugin 2 is unavailable)
 func TestDependencyGraph_Sort7(t *testing.T) {
 	a := assert.New(t)
+	managerPlugin:= dependency.NewManager()
 	plugin3.Dependencies = []meta.Dependency{
 		{"plugin2", ">=1.0, <2.0", meta.Custom},
 	}
@@ -613,6 +620,7 @@ func TestDependencyGraph_Sort7(t *testing.T) {
 //8) pluginCms->pluginMysql, pluginCms->pluginHttp
 func TestDependencyGraph_Sort8(t *testing.T) {
 	a := assert.New(t)
+	managerPlugin:= dependency.NewManager()
 	managerPlugin.Add(pluginCms)
 	managerPlugin.Add(pluginHttp)
 	managerPlugin.Add(pluginMysql)
@@ -669,6 +677,8 @@ func TestDependencyGraph_Sort8(t *testing.T) {
 //9) ring -plugin1->plugin1
 func TestDependencyGraph_Sort9(t *testing.T) {
 	a := assert.New(t)
+	managerPlugin:= dependency.NewManager()
+
 	plugin1.Dependencies = []meta.Dependency{
 		{"plugin1", ">=1.0, <2.0", meta.Custom},
 	}
@@ -712,6 +722,7 @@ func TestDependencyGraph_Sort9(t *testing.T) {
 //10)ring plugin2->plugin3, plugin3->plugin2
 func TestDependencyGraph_Sort10(t *testing.T) {
 	a := assert.New(t)
+	managerPlugin:= dependency.NewManager()
 	plugin3.Dependencies = []meta.Dependency{
 		{"plugin2", ">=1.0, <2.0", meta.Custom},
 	}
@@ -758,6 +769,8 @@ func TestDependencyGraph_Sort10(t *testing.T) {
 //1) plugin1 -> plugin2 -> plugin3 order for adding - 1 3 2, plugin1->Interface Http, pluginCms->interfaceHttp and interfaceMysql (plugins with such interfaces added),pluginHttp and pluginMysql -> plugin3
 func TestDependencyGraph_Sort11(t *testing.T) {
 	a := assert.New(t)
+	managerPlugin:= dependency.NewManager()
+
 	plugin1.Dependencies = []meta.Dependency{
 		{"plugin2", ">=1.0, <2.0", meta.Custom},
 		meta.HTTP.Dependency("1.0"),
@@ -843,6 +856,8 @@ func TestDependencyGraph_Sort11(t *testing.T) {
 
 /*func TestDependencyGraph_Sort12(t *testing.T) {
 	a := assert.New(t)
+	managerPlugin:= dependency.NewManager()
+
 	plugin1.Dependencies = []meta.Dependency{
 		{"plugin2", ">=1.0, <2.0", meta.Custom},
 		meta.HTTP.Dependency("1.0"),
