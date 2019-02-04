@@ -3,14 +3,14 @@ package plugins_test
 import (
 	"testing"
 
-	noriPlugin "github.com/secure2work/nori-common/plugin"
+	noriPlugin "github.com/nori-io/nori-common/plugin"
 
-	"github.com/secure2work/nori-common/config"
+	"github.com/nori-io/nori-common/config"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/secure2work/nori-common/meta"
-	"github.com/secure2work/nori/core/plugins"
+	"github.com/nori-io/nori-common/meta"
+	"github.com/nori-io/nori/core/plugins"
 	"github.com/sirupsen/logrus"
 
 	"context"

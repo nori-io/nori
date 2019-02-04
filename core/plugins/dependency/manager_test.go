@@ -6,10 +6,10 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/secure2work/nori-common/meta"
+	"github.com/nori-io/nori-common/meta"
 
-	"github.com/secure2work/nori/core/plugins/dependency"
-	metaMock "github.com/secure2work/nori/core/plugins/meta/mock"
+	"github.com/nori-io/nori/core/plugins/dependency"
+	metaMock "github.com/nori-io/nori/core/plugins/meta/mock"
 )
 
 func TestManager_Add(t *testing.T) {

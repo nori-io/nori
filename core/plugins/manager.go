@@ -1,4 +1,4 @@
-// Copyright © 2018 Secure2Work info@secure2work.com
+// Copyright © 2018 Nori info@nori.io
 //
 // This program is free software: you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -23,14 +23,14 @@ import (
 	"path/filepath"
 	stdplugin "plugin"
 
-	"github.com/secure2work/nori/core/plugins/dependency"
-	"github.com/secure2work/nori/core/storage"
-	"github.com/secure2work/nori/version"
+	"github.com/nori-io/nori/core/plugins/dependency"
+	"github.com/nori-io/nori/core/storage"
+	"github.com/nori-io/nori/version"
 
-	commonCfg "github.com/secure2work/nori-common/config"
-	"github.com/secure2work/nori-common/meta"
-	"github.com/secure2work/nori-common/plugin"
-	"github.com/secure2work/nori/core/errors"
+	commonCfg "github.com/nori-io/nori-common/config"
+	"github.com/nori-io/nori-common/meta"
+	"github.com/nori-io/nori-common/plugin"
+	"github.com/nori-io/nori/core/errors"
 
 	"github.com/sirupsen/logrus"
 )

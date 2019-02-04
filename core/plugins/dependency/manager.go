@@ -1,4 +1,4 @@
-// Copyright © 2018 Secure2Work info@secure2work.com
+// Copyright © 2018 Nori info@nori.io
 //
 // This program is free software: you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -16,14 +16,16 @@
 package dependency
 
 import (
-	"github.com/secure2work/nori-common/meta"
-	"github.com/secure2work/nori/core/errors"
-	"github.com/secure2work/nori/core/plugins/dependency/graph"
+	"github.com/nori-io/nori-common/meta"
+	"github.com/nori-io/nori/core/errors"
+	"github.com/nori-io/nori/core/plugins/dependency/graph"
 )
 
 type Manager interface {
 	// adds meta to dependency manager
 	Add(m meta.Meta) error
+
+	GetPluginsList() map[meta.ID]meta.Meta
 	// returns whether the ID exists in dependency list
 	Has(id meta.ID) bool
 	// removes meta from dependency list
@@ -78,6 +80,9 @@ func (m *manager) Add(mt meta.Meta) error {
 
 	// build edges
 	for _, dep := range mt.GetDependencies() {
+		if dep.ID==mt.Id().ID{
+			continue
+		}
 		depId, err := m.Resolve(dep)
 		if err != nil {
 			if _, ok := m.unresolved[mt.Id()]; !ok {
@@ -95,10 +100,19 @@ func (m *manager) Add(mt meta.Meta) error {
 		}
 		for i, dep := range deps {
 			depId, err := m.Resolve(dep)
+
+			/*	if dep.Interface == mt.GetInterface() && (dep.Interface != "Custom") {
+							m.graph.SetEdge(m.graph.NewEdge(unId, mt.Id()))
+							err = nil
+						}*/
+
 			if err != nil {
+
 				continue
 			}
+			//	if !(dep.Interface == mt.GetInterface() && (dep.Interface != "Custom")) {
 			m.graph.SetEdge(m.graph.NewEdge(unId, depId))
+			//		}
 			m.unresolved[unId] = append(deps[:i], deps[i+1:]...)
 		}
 		if len(m.unresolved[unId]) == 0 {
@@ -117,25 +131,53 @@ func (m *manager) Has(id meta.ID) bool {
 func (m *manager) Remove(id meta.ID) {
 	delete(m.unresolved, id)
 	delete(m.plugins, id)
+	// @todo delete node and related edges?Ол
+	m.graph.RemoveNode(id)
 }
 
 func (m *manager) Resolve(dependency meta.Dependency) (meta.ID, error) {
-	for id := range m.plugins {
+	for id, m := range m.plugins {
+		// dependency on interface
+		// dependency on plu
+
+		if id.ID==dependency.ID{
+			constraints, err := dependency.GetConstraint()
+			if err != nil {
+				return meta.ID{}, err
+			}
+			version, err := id.GetVersion()
+			if err != nil {
+				return meta.ID{}, err
+			}
+			if constraints.Check(version) {
+				return id, nil
+			}
+		}
+
+
+		if (m.GetInterface() == dependency.Interface)&&(dependency.Interface!="Custom") {
+			constraints, err := dependency.GetConstraint()
+			if err != nil {
+				return meta.ID{}, err
+			}
+			version, err := id.GetVersion()
+			if err != nil {
+				return meta.ID{}, err
+			}
+			if constraints.Check(version) {
+				return id, nil
+			}
+		}
 		if id.ID != dependency.ID {
-			continue
+			if m.GetInterface() != dependency.Interface {
+				continue}
 		}
-		constraints, err := dependency.GetConstraint()
-		if err != nil {
-			return meta.ID{}, err
-		}
-		version, err := id.GetVersion()
-		if err != nil {
-			return meta.ID{}, err
-		}
-		if constraints.Check(version) {
-			return id, nil
-		}
+
+
 	}
+
+
+
 	return meta.ID{}, errors.DependencyNotFound{
 		Dependency: dependency,
 	}
@@ -173,5 +215,16 @@ func (m *manager) Stop(id meta.ID) {
 }
 
 func (m *manager) Sort() ([]meta.ID, error) {
+
+	if len(m.unresolved) > 0 {
+		return nil, errors.DependenciesNotFound{
+			Dependencies: m.unresolved,
+		}
+	}
+
 	return m.graph.Sort()
+}
+
+func (m *manager) GetPluginsList() map[meta.ID]meta.Meta {
+	return m.plugins
 }

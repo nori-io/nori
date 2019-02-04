@@ -3,11 +3,11 @@ package config_test
 import (
 	"testing"
 
-	commonCfg "github.com/secure2work/nori-common/config"
-	"github.com/secure2work/nori/core/config"
+	commonCfg "github.com/nori-io/nori-common/config"
+	"github.com/nori-io/nori/core/config"
 
-	"github.com/secure2work/nori-common/meta"
-	"github.com/secure2work/nori/core/config/mock"
+	"github.com/nori-io/nori-common/meta"
+	"github.com/nori-io/nori/core/config/mock"
 	"github.com/stretchr/testify/assert"
 	. "github.com/stretchr/testify/mock"
 )

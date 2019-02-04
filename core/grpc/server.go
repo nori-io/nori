@@ -1,4 +1,4 @@
-// Copyright © 2018 Secure2Work info@secure2work.com
+// Copyright © 2018 Nori info@nori.io
 //
 // This program is free software: you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -31,10 +31,10 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
-	"github.com/secure2work/nori-common/meta"
+	"github.com/nori-io/nori-common/meta"
 
-	"github.com/secure2work/nori/core/plugins"
-	"github.com/secure2work/nori/proto"
+	"github.com/nori-io/nori/core/plugins"
+	"github.com/nori-io/nori/proto"
 )
 
 const (
