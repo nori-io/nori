@@ -1,4 +1,4 @@
-// Copyright © 2018 Secure2Work info@secure2work.com
+// Copyright © 2018 Nori info@nori.io
 //
 // This program is free software: you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/secure2work/nori/version"
+	"github.com/nori-io/nori/version"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -28,10 +28,10 @@ import (
 	"strings"
 
 	"github.com/cheebo/go-config"
-	configManager "github.com/secure2work/nori/core/config"
-	"github.com/secure2work/nori/core/grpc"
-	"github.com/secure2work/nori/core/plugins"
-	"github.com/secure2work/nori/core/storage"
+	configManager "github.com/nori-io/nori/core/config"
+	"github.com/nori-io/nori/core/grpc"
+	"github.com/nori-io/nori/core/plugins"
+	"github.com/nori-io/nori/core/storage"
 	"github.com/sirupsen/logrus"
 )
 

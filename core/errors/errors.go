@@ -1,4 +1,4 @@
-// Copyright © 2018 Secure2Work info@secure2work.com
+// Copyright © 2018 Nori info@nori.io
 //
 // This program is free software: you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/secure2work/nori-common/meta"
+	"github.com/nori-io/nori-common/meta"
 )
 
 type NotFound struct {

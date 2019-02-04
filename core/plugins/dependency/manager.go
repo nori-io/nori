@@ -1,4 +1,4 @@
-// Copyright © 2018 Secure2Work info@secure2work.com
+// Copyright © 2018 Nori info@nori.io
 //
 // This program is free software: you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -16,9 +16,9 @@
 package dependency
 
 import (
-	"github.com/secure2work/nori-common/meta"
-	"github.com/secure2work/nori/core/errors"
-	"github.com/secure2work/nori/core/plugins/dependency/graph"
+	"github.com/nori-io/nori-common/meta"
+	"github.com/nori-io/nori/core/errors"
+	"github.com/nori-io/nori/core/plugins/dependency/graph"
 )
 
 type Manager interface {
@@ -101,21 +101,20 @@ func (m *manager) Add(mt meta.Meta) error {
 		for i, dep := range deps {
 			depId, err := m.Resolve(dep)
 
-/*	if dep.Interface == mt.GetInterface() && (dep.Interface != "Custom") {
-				m.graph.SetEdge(m.graph.NewEdge(unId, mt.Id()))
-				err = nil
-
-			}*/
+			/*	if dep.Interface == mt.GetInterface() && (dep.Interface != "Custom") {
+							m.graph.SetEdge(m.graph.NewEdge(unId, mt.Id()))
+							err = nil
+						}*/
 
 			if err != nil {
 
 				continue
 			}
-//	if !(dep.Interface == mt.GetInterface() && (dep.Interface != "Custom")) {
+			//	if !(dep.Interface == mt.GetInterface() && (dep.Interface != "Custom")) {
 			m.graph.SetEdge(m.graph.NewEdge(unId, depId))
-	//		}
-		m.unresolved[unId] = append(deps[:i], deps[i+1:]...)
-	}
+			//		}
+			m.unresolved[unId] = append(deps[:i], deps[i+1:]...)
+		}
 		if len(m.unresolved[unId]) == 0 {
 			delete(m.unresolved, unId)
 		}
@@ -138,44 +137,44 @@ func (m *manager) Remove(id meta.ID) {
 
 func (m *manager) Resolve(dependency meta.Dependency) (meta.ID, error) {
 	for id, m := range m.plugins {
-			// dependency on interface
-			// dependency on plu
+		// dependency on interface
+		// dependency on plu
 
-			if id.ID==dependency.ID{
-				constraints, err := dependency.GetConstraint()
-				if err != nil {
-					return meta.ID{}, err
-				}
-				version, err := id.GetVersion()
-				if err != nil {
-					return meta.ID{}, err
-				}
-				if constraints.Check(version) {
-					return id, nil
-				}
+		if id.ID==dependency.ID{
+			constraints, err := dependency.GetConstraint()
+			if err != nil {
+				return meta.ID{}, err
 			}
-
-
-			if (m.GetInterface() == dependency.Interface)&&(dependency.Interface!="Custom") {
-				constraints, err := dependency.GetConstraint()
-				if err != nil {
-					return meta.ID{}, err
-				}
-				version, err := id.GetVersion()
-				if err != nil {
-					return meta.ID{}, err
-				}
-				if constraints.Check(version) {
-					return id, nil
-				}
+			version, err := id.GetVersion()
+			if err != nil {
+				return meta.ID{}, err
 			}
-			if id.ID != dependency.ID {
-				if m.GetInterface() != dependency.Interface {
-				continue}
+			if constraints.Check(version) {
+				return id, nil
 			}
-
-
 		}
+
+
+		if (m.GetInterface() == dependency.Interface)&&(dependency.Interface!="Custom") {
+			constraints, err := dependency.GetConstraint()
+			if err != nil {
+				return meta.ID{}, err
+			}
+			version, err := id.GetVersion()
+			if err != nil {
+				return meta.ID{}, err
+			}
+			if constraints.Check(version) {
+				return id, nil
+			}
+		}
+		if id.ID != dependency.ID {
+			if m.GetInterface() != dependency.Interface {
+				continue}
+		}
+
+
+	}
 
 
 

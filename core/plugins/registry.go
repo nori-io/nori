@@ -1,4 +1,4 @@
-// Copyright © 2018 Secure2Work info@secure2work.com
+// Copyright © 2018 Nori info@nori.io
 //
 // This program is free software: you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -16,11 +16,11 @@
 package plugins
 
 import (
-	"github.com/secure2work/nori-common/config"
-	"github.com/secure2work/nori-common/interfaces"
-	"github.com/secure2work/nori-common/meta"
-	"github.com/secure2work/nori-common/plugin"
-	"github.com/secure2work/nori/core/errors"
+	"github.com/nori-io/nori-common/config"
+	"github.com/nori-io/nori-common/interfaces"
+	"github.com/nori-io/nori-common/meta"
+	"github.com/nori-io/nori-common/plugin"
+	"github.com/nori-io/nori/core/errors"
 	"github.com/sirupsen/logrus"
 )
 
