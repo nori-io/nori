@@ -32,7 +32,7 @@ func TestNewRegistry(t *testing.T) {
 		Dependencies: []meta.Dependency{},
 		Interface:    meta.Custom,
 		Core: meta.Core{
-			VersionConstraint: "~1.0",
+			VersionConstraint: "~1.0.0",
 		},
 	}
 
@@ -40,7 +40,7 @@ func TestNewRegistry(t *testing.T) {
 
 	dep := meta.Dependency{
 		ID:         "nori/test",
-		Constraint: ">=1.0",
+		Constraint: ">=1.0.0",
 	}
 
 	found := r.Resolve(dep)

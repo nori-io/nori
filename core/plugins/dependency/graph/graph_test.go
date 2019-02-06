@@ -12,13 +12,13 @@ func plugin1(deps ...meta.Dependency) meta.Meta {
 	data := meta.Data{
 		ID: meta.ID{
 			ID:      "plugin1",
-			Version: "1.0",
+			Version: "1.0.0",
 		},
 		Core: meta.Core{
-			VersionConstraint: ">=1.0, <2.0",
+			VersionConstraint: ">=1.0.0, <2.0.0",
 		},
 		Dependencies: []meta.Dependency{
-			{"plugin2", ">=1.0, <2.0", meta.Custom},
+			{"plugin2", ">=1.0.0, <2.0.0", meta.Custom},
 		},
 		Interface: meta.Custom,
 	}
@@ -33,13 +33,13 @@ func plugin2(deps ...meta.Dependency) meta.Meta {
 	data := meta.Data{
 		ID: meta.ID{
 			ID:      "plugin2",
-			Version: "1.0",
+			Version: "1.0.0",
 		},
 		Core: meta.Core{
-			VersionConstraint: ">=1.0, <2.0",
+			VersionConstraint: ">=1.0.0, <2.0.0",
 		},
 		Dependencies: []meta.Dependency{
-			{"plugin3", ">=1.0, <2.0", meta.Custom},
+			{"plugin3", ">=1.0.0, <2.0.0", meta.Custom},
 		},
 		Interface: meta.Custom,
 	}
@@ -54,10 +54,10 @@ func plugin3(deps ...meta.Dependency) meta.Meta {
 	data := meta.Data{
 		ID: meta.ID{
 			ID:      "plugin3",
-			Version: "1.0",
+			Version: "1.0.0",
 		},
 		Core: meta.Core{
-			VersionConstraint: ">=1.0, <2.0",
+			VersionConstraint: ">=1.0.0, <2.0.0",
 		},
 		Interface: meta.Custom,
 	}
@@ -72,10 +72,10 @@ func plugin4(deps ...meta.Dependency) meta.Meta {
 	data := meta.Data{
 		ID: meta.ID{
 			ID:      "plugin4",
-			Version: "1.0",
+			Version: "1.0.0",
 		},
 		Core: meta.Core{
-			VersionConstraint: ">=1.0, <2.0",
+			VersionConstraint: ">=1.0.0, <2.0.0",
 		},
 		Interface: meta.Custom,
 	}
@@ -90,10 +90,10 @@ func pluginHttp(deps ...meta.Dependency) meta.Meta {
 	data := meta.Data{
 		ID: meta.ID{
 			ID:      "pluginHttp",
-			Version: "1.0",
+			Version: "1.0.0",
 		},
 		Core: meta.Core{
-			VersionConstraint: ">=1.0, <2.0",
+			VersionConstraint: ">=1.0.0, <2.0.0",
 		},
 		Interface: meta.HTTP,
 	}
@@ -108,10 +108,10 @@ func pluginMysql(deps ...meta.Dependency) meta.Meta {
 	data := meta.Data{
 		ID: meta.ID{
 			ID:      "pluginMysql",
-			Version: "1.0",
+			Version: "1.0.0",
 		},
 		Core: meta.Core{
-			VersionConstraint: ">=1.0, <2.0",
+			VersionConstraint: ">=1.0.0, <2.0.0",
 		},
 		Interface: meta.SQL,
 	}
@@ -126,11 +126,11 @@ func pluginCms(deps ...meta.Dependency) meta.Meta {
 	data := meta.Data{
 		ID: meta.ID{
 			ID:      "pluginCms",
-			Version: "1.0",
+			Version: "1.0.0",
 		},
-		Dependencies: []meta.Dependency{meta.HTTP.Dependency("1.0"), meta.SQL.Dependency("1.0")},
+		Dependencies: []meta.Dependency{meta.HTTP.Dependency("1.0.0"), meta.SQL.Dependency("1.0.0")},
 		Core: meta.Core{
-			VersionConstraint: ">=1.0, <2.0",
+			VersionConstraint: ">=1.0.0, <2.0.0",
 		},
 		Interface: meta.Custom,
 	}
@@ -254,7 +254,7 @@ func TestDependencyGraph_Sort4(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	managerPlugin.Add(plugin1(
-		meta.HTTP.Dependency("1.0")))
+		meta.HTTP.Dependency("1.0.0")))
 	managerPlugin.Add(pluginHttp())
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
@@ -303,7 +303,7 @@ func TestDependencyGraph_Sort4(t *testing.T) {
 func TestDependencyGraph_Sort5(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
-	managerPlugin.Add(plugin1(meta.HTTP.Dependency("1.0")))
+	managerPlugin.Add(plugin1(meta.HTTP.Dependency("1.0.0")))
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
 	i := 0
@@ -332,8 +332,8 @@ func TestDependencyGraph_Sort6(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	managerPlugin.Add(plugin1())
-	managerPlugin.Add(plugin2(meta.Dependency{"plugin4", ">=1.0, <2.0", meta.Custom}))
-	managerPlugin.Add(plugin3(meta.Dependency{"plugin2", ">=1.0, <2.0", meta.Custom}))
+	managerPlugin.Add(plugin2(meta.Dependency{"plugin4", ">=1.0.0, <2.0.0", meta.Custom}))
+	managerPlugin.Add(plugin3(meta.Dependency{"plugin2", ">=1.0.0, <2.0.0", meta.Custom}))
 	managerPlugin.Add(plugin4())
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
@@ -392,7 +392,7 @@ func TestDependencyGraph_Sort7(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	managerPlugin.Add(plugin1())
-	managerPlugin.Add(plugin3(meta.Dependency{"plugin2", ">=1.0, <2.0", meta.Custom}))
+	managerPlugin.Add(plugin3(meta.Dependency{"plugin2", ">=1.0.0, <2.0.0", meta.Custom}))
 
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
@@ -474,7 +474,7 @@ func TestDependencyGraph_Sort8(t *testing.T) {
 func TestDependencyGraph_Sort9(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
-	managerPlugin.Add(plugin1(meta.Dependency{"plugin1", ">=1.0, <2.0", meta.Custom}))
+	managerPlugin.Add(plugin1(meta.Dependency{"plugin1", ">=1.0.0, <2.0.0", meta.Custom}))
 
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
@@ -503,7 +503,7 @@ func TestDependencyGraph_Sort10(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	managerPlugin.Add(plugin2())
-	managerPlugin.Add(plugin3(meta.Dependency{"plugin2", ">=1.0, <2.0", meta.Custom}))
+	managerPlugin.Add(plugin3(meta.Dependency{"plugin2", ">=1.0.0, <2.0.0", meta.Custom}))
 
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
@@ -533,12 +533,12 @@ func TestDependencyGraph_Sort10(t *testing.T) {
 func TestDependencyGraph_Sort11(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
-	managerPlugin.Add(plugin1(meta.Dependency{"plugin2", ">=1.0, <2.0", meta.Custom},
-		meta.HTTP.Dependency("1.0")))
-	managerPlugin.Add(pluginHttp(meta.Dependency{"plugin3", ">=1.0, <2.0", meta.Custom},meta.SQL.Dependency("1.0")))
+	managerPlugin.Add(plugin1(meta.Dependency{"plugin2", ">=1.0.0, <2.0.0", meta.Custom},
+		meta.HTTP.Dependency("1.0.0")))
+	managerPlugin.Add(pluginHttp(meta.Dependency{"plugin3", ">=1.0.0, <2.0.0", meta.Custom},meta.SQL.Dependency("1.0.0")))
 	managerPlugin.Add(plugin3())
-	managerPlugin.Add(plugin2(meta.Dependency{"plugin3", ">=1.0, <2.0", meta.Custom}))
-	managerPlugin.Add(pluginMysql(meta.Dependency{"plugin3", ">=1.0, <2.0", meta.Custom}))
+	managerPlugin.Add(plugin2(meta.Dependency{"plugin3", ">=1.0.0, <2.0.0", meta.Custom}))
+	managerPlugin.Add(pluginMysql(meta.Dependency{"plugin3", ">=1.0.0, <2.0.0", meta.Custom}))
 	managerPlugin.Add(pluginCms())
 
 	t.Log("Plugins' order until sorting:")
@@ -611,13 +611,13 @@ func TestDependencyGraph_Sort11(t *testing.T) {
 func TestDependencyGraph_Sort12(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
-	managerPlugin.Add(plugin1(meta.Dependency{"plugin2", ">=1.0, <2.0", meta.Custom},
-		meta.HTTP.Dependency("1.0")))
-	managerPlugin.Add(pluginHttp(meta.Dependency{"plugin3", ">=1.0, <2.0", meta.Custom}))
+	managerPlugin.Add(plugin1(meta.Dependency{"plugin2", ">=1.0.0, <2.0.0", meta.Custom},
+		meta.HTTP.Dependency("1.0.0")))
+	managerPlugin.Add(pluginHttp(meta.Dependency{"plugin3", ">=1.0.0, <2.0.0", meta.Custom}))
 	managerPlugin.Add(plugin3())
 	managerPlugin.Add(plugin2())
-	managerPlugin.Add(pluginMysql(meta.Dependency{"plugin3", ">=1.0, <2.0", meta.Custom}))
-	managerPlugin.Add(pluginCms(meta.Dependency{"pluginCms", ">=1.0, <2.0", meta.Custom}))
+	managerPlugin.Add(pluginMysql(meta.Dependency{"plugin3", ">=1.0.0, <2.0.0", meta.Custom}))
+	managerPlugin.Add(pluginCms(meta.Dependency{"pluginCms", ">=1.0.0, <2.0.0", meta.Custom}))
 
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
@@ -647,12 +647,12 @@ func TestDependencyGraph_Sort12(t *testing.T) {
 func TestDependencyGraph_Sort13(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
-	managerPlugin.Add(plugin1(meta.Dependency{"plugin2", ">=1.0, <2.0", meta.Custom},
-		meta.HTTP.Dependency("1.0")))
-	managerPlugin.Add(pluginHttp(meta.Dependency{"plugin3", ">=1.0, <2.0", meta.Custom}))
-	managerPlugin.Add(plugin3(meta.Dependency{"pluginHttp", ">=1.0, <2.0", meta.Custom}))
-	managerPlugin.Add(plugin2(meta.Dependency{"plugin3", ">=1.0, <2.0", meta.Custom}))
-	managerPlugin.Add(pluginMysql(meta.Dependency{"plugin3", ">=1.0, <2.0", meta.Custom}))
+	managerPlugin.Add(plugin1(meta.Dependency{"plugin2", ">=1.0.0, <2.0.0", meta.Custom},
+		meta.HTTP.Dependency("1.0.0")))
+	managerPlugin.Add(pluginHttp(meta.Dependency{"plugin3", ">=1.0.0, <2.0.0", meta.Custom}))
+	managerPlugin.Add(plugin3(meta.Dependency{"pluginHttp", ">=1.0.0, <2.0.0", meta.Custom}))
+	managerPlugin.Add(plugin2(meta.Dependency{"plugin3", ">=1.0.0, <2.0.0", meta.Custom}))
+	managerPlugin.Add(pluginMysql(meta.Dependency{"plugin3", ">=1.0.0, <2.0.0", meta.Custom}))
 	managerPlugin.Add(pluginCms())
 
 	t.Log("Plugins' order until sorting:")
@@ -682,12 +682,12 @@ func TestDependencyGraph_Sort13(t *testing.T) {
 func TestDependencyGraph_Sort14(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
-	managerPlugin.Add(plugin1(meta.Dependency{"plugin2", ">=1.0, <2.0", meta.Custom},
-		meta.HTTP.Dependency("1.0")))
-	managerPlugin.Add(pluginHttp(meta.Dependency{"plugin3", ">=1.0, <2.0", meta.Custom}))
-	managerPlugin.Add(plugin3(meta.Dependency{"pluginCms",">=1.0, <2.0", meta.Custom}))
-	managerPlugin.Add(plugin2(meta.Dependency{"plugin3", ">=1.0, <2.0", meta.Custom}))
-	managerPlugin.Add(pluginMysql(meta.Dependency{"plugin3", ">=1.0, <2.0", meta.Custom}))
+	managerPlugin.Add(plugin1(meta.Dependency{"plugin2", ">=1.0.0, <2.0.0", meta.Custom},
+		meta.HTTP.Dependency("1.0.0")))
+	managerPlugin.Add(pluginHttp(meta.Dependency{"plugin3", ">=1.0.0, <2.0.0", meta.Custom}))
+	managerPlugin.Add(plugin3(meta.Dependency{"pluginCms",">=1.0.0, <2.0.0", meta.Custom}))
+	managerPlugin.Add(plugin2(meta.Dependency{"plugin3", ">=1.0.0, <2.0.0", meta.Custom}))
+	managerPlugin.Add(pluginMysql(meta.Dependency{"plugin3", ">=1.0.0, <2.0.0", meta.Custom}))
 	managerPlugin.Add(pluginCms())
 
 	t.Log("Plugins' order until sorting:")
@@ -720,7 +720,7 @@ func TestDependencyGraph_Sort15(t *testing.T) {
 	managerPlugin := dependency.NewManager()
 	managerPlugin.Add(plugin1())
 	managerPlugin.Add(plugin2())
-	managerPlugin.Add(plugin3(meta.Dependency{"plugin1", ">=1.0, <2.0", meta.Custom}))
+	managerPlugin.Add(plugin3(meta.Dependency{"plugin1", ">=1.0.0, <2.0.0", meta.Custom}))
 
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()

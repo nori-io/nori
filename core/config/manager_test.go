@@ -20,7 +20,7 @@ func TestManager_Register(t *testing.T) {
 	pluginMeta := meta.Data{
 		ID: meta.ID{
 			ID:      meta.PluginID(id),
-			Version: "1.0",
+			Version: "1.0.0",
 		},
 	}
 

@@ -19,7 +19,7 @@ func TestManager_Add(t *testing.T) {
 
 	id := meta.ID{
 		ID:      "nori/test",
-		Version: "1.0",
+		Version: "1.0.0",
 	}
 
 	mt := &metaMock.Meta{}
@@ -39,7 +39,7 @@ func TestManager_Remove(t *testing.T) {
 
 	id := meta.ID{
 		ID:      "nori/test",
-		Version: "1.0",
+		Version: "1.0.0",
 	}
 
 	mt := &metaMock.Meta{}
@@ -61,17 +61,17 @@ func TestManager_Resolve(t *testing.T) {
 
 	id1 := meta.ID{
 		ID:      "nori/test",
-		Version: "1.0",
+		Version: "1.0.0",
 	}
 
 	id2 := meta.ID{
 		ID:      "nori/mocks",
-		Version: "1.0",
+		Version: "1.0.0",
 	}
 
 	dep := meta.Dependency{
 		ID:         "nori/mocks",
-		Constraint: ">=1.0",
+		Constraint: ">=1.0.0",
 	}
 
 	unresolved := map[meta.ID][]meta.Dependency{
@@ -109,17 +109,17 @@ func TestManager_Sort(t *testing.T) {
 
 	id1 := meta.ID{
 		ID:      "nori/test",
-		Version: "1.0",
+		Version: "1.0.0",
 	}
 
 	id2 := meta.ID{
 		ID:      "nori/mocks",
-		Version: "1.0",
+		Version: "1.0.0",
 	}
 
 	dep := meta.Dependency{
 		ID:         "nori/mocks",
-		Constraint: ">=1.0",
+		Constraint: ">=1.0.0",
 	}
 
 	mt1 := &metaMock.Meta{}
