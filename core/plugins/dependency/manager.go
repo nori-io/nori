@@ -88,7 +88,7 @@ func (m *manager) Add(mt meta.Meta) error {
 			m.unresolved[mt.Id()] = append(m.unresolved[mt.Id()], dep)
 			continue
 		}
-		if depId.ID==mt.Id().ID{
+		if depId.ID == mt.Id().ID {
 			m.unresolved[mt.Id()] = append(m.unresolved[mt.Id()], dep)
 			continue
 		}
@@ -133,45 +133,28 @@ func (m *manager) Remove(id meta.ID) {
 func (m *manager) Resolve(dependency meta.Dependency) (meta.ID, error) {
 	for id, m := range m.plugins {
 		// dependency on interface
-		// dependency on plu
-
-		if id.ID==dependency.ID{
-			constraints, err := dependency.GetConstraint()
-			if err != nil {
-				return meta.ID{}, err
-			}
-			version, err := id.GetVersion()
-			if err != nil {
-				return meta.ID{}, err
-			}
-			if constraints.Check(version) {
-				return id, nil
-			}
-		}
-
-
-		if (m.GetInterface() == dependency.Interface)&&(dependency.Interface!="Custom") {
-			constraints, err := dependency.GetConstraint()
-			if err != nil {
-				return meta.ID{}, err
-			}
-			version, err := id.GetVersion()
-			if err != nil {
-				return meta.ID{}, err
-			}
-			if constraints.Check(version) {
-				return id, nil
-			}
-		}
+		// dependency on plugin
 		if id.ID != dependency.ID {
 			if m.GetInterface() != dependency.Interface {
-				continue}
+				continue
+			}
 		}
 
+		if (id.ID == dependency.ID) || (m.GetInterface() == dependency.Interface) && (dependency.Interface != "Custom") {
+			constraints, err := dependency.GetConstraint()
+			if err != nil {
+				return meta.ID{}, err
+			}
+			version, err := id.GetVersion()
+			if err != nil {
+				return meta.ID{}, err
+			}
+			if constraints.Check(version) {
+				return id, nil
+			}
+		}
 
 	}
-
-
 
 	return meta.ID{}, errors.DependencyNotFound{
 		Dependency: dependency,
