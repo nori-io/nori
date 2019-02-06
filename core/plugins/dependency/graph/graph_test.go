@@ -218,7 +218,7 @@ func TestDependencyGraph_Sort2(t *testing.T) {
 	t.Log()
 	_, err := managerPlugin.Sort()
 	a.Error(err, "Error in sorting")
-
+	t.Log(err)
 }
 
 //3) plugin1 -> plugin2 -> plugin3 (2nd is unavailable)
@@ -246,7 +246,7 @@ func TestDependencyGraph_Sort3(t *testing.T) {
 	t.Log()
 	_, err := managerPlugin.Sort()
 	a.Error(err, "Error in sorting")
-
+	t.Log(err)
 }
 
 //4) plugin1 -> interfaceHttp (all available)
@@ -323,6 +323,7 @@ func TestDependencyGraph_Sort5(t *testing.T) {
 	t.Log()
 	_, err := managerPlugin.Sort()
 	a.Error(err, "Error in sorting")
+	t.Log(err)
 
 }
 
@@ -359,7 +360,6 @@ func TestDependencyGraph_Sort6(t *testing.T) {
 	for index, _ := range pluginsSorted {
 		t.Log("Plugin n.", index+1, " in list for start:", pluginsSorted[index].String())
 	}
-
 	var (
 		index1 int
 		index2 int
@@ -385,7 +385,6 @@ func TestDependencyGraph_Sort6(t *testing.T) {
 	a.Equal(true, index2 < index3)
 	a.Equal(true, index2 < index1)
 	a.Equal(4, len(pluginsSorted))
-
 }
 
 //7) plugin1 -> plugin2, plugin 3 -> plugin2, (plugin 2 is unavailable)
@@ -414,6 +413,7 @@ func TestDependencyGraph_Sort7(t *testing.T) {
 	t.Log()
 	_, err := managerPlugin.Sort()
 	a.Error(err, "Error in sorting")
+	t.Log(err)
 
 }
 
@@ -569,6 +569,9 @@ func TestDependencyGraph_Sort11(t *testing.T) {
 		index1 int
 		index2 int
 		index3 int
+		indexHttp int
+		indexMysql int
+		indexCms int
 	)
 	for index, value := range pluginsSorted {
 		if value.ID == "plugin1" {
@@ -580,9 +583,24 @@ func TestDependencyGraph_Sort11(t *testing.T) {
 		if value.ID == "plugin3" {
 			index3 = index
 		}
+		if value.ID=="pluginCms"{
+			indexCms=index
+		}
+		if value.ID=="pluginHttp"{
+			indexHttp=index
+		}
+		if value.ID=="pluginMysql"{
+			indexMysql=index
+		}
 	}
+	a.Equal(true,index3<indexMysql)
+	a.Equal(true,index3<indexHttp)
+	a.Equal(true,indexHttp<indexCms)
+	a.Equal(true,indexMysql<indexCms)
 	a.Equal(true, index3 < index2)
 	a.Equal(true, index2 < index1)
+	a.Equal(true,indexHttp<index1)
+
 	a.Equal(6, len(pluginsSorted))
 }
 
