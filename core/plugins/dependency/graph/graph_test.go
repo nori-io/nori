@@ -528,13 +528,14 @@ func TestDependencyGraph_Sort10(t *testing.T) {
 
 }
 
-//11) plugin1 -> plugin2 -> plugin3 order for adding - 1 3 2, plugin1->Interface Http, pluginCms->interfaceHttp and interfaceMysql (plugins with such interfaces added),pluginHttp and pluginMysql -> plugin3
+//11) plugin1 -> plugin2 -> plugin3 order for adding - 1 3 2, plugin1->Interface Http, pluginCms->interfaceHttp and interfaceMysql
+// (plugins with such interfaces added),pluginHttp and pluginMysql -> plugin3, pluginHttp->interface SQL
 func TestDependencyGraph_Sort11(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	managerPlugin.Add(plugin1(meta.Dependency{"plugin2", ">=1.0, <2.0", meta.Custom},
 		meta.HTTP.Dependency("1.0")))
-	managerPlugin.Add(pluginHttp(meta.Dependency{"plugin3", ">=1.0, <2.0", meta.Custom}))
+	managerPlugin.Add(pluginHttp(meta.Dependency{"plugin3", ">=1.0, <2.0", meta.Custom},meta.SQL.Dependency("1.0")))
 	managerPlugin.Add(plugin3())
 	managerPlugin.Add(plugin2(meta.Dependency{"plugin3", ">=1.0, <2.0", meta.Custom}))
 	managerPlugin.Add(pluginMysql(meta.Dependency{"plugin3", ">=1.0, <2.0", meta.Custom}))
@@ -596,6 +597,7 @@ func TestDependencyGraph_Sort11(t *testing.T) {
 	a.Equal(true,index3<indexMysql)
 	a.Equal(true,index3<indexHttp)
 	a.Equal(true,indexHttp<indexCms)
+	a.Equal(true, indexHttp>indexMysql)
 	a.Equal(true,indexMysql<indexCms)
 	a.Equal(true, index3 < index2)
 	a.Equal(true, index2 < index1)
