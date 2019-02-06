@@ -711,3 +711,33 @@ func TestDependencyGraph_Sort14(t *testing.T) {
 }
 
 
+// ring through 1 plugin, between plugin1 and plugin3
+//15) plugin1 -> plugin2 -> plugin3, plugin3->1 (all available) order for adding - 1 2 3
+func TestDependencyGraph_Sort15(t *testing.T) {
+	a := assert.New(t)
+	managerPlugin := dependency.NewManager()
+	managerPlugin.Add(plugin1())
+	managerPlugin.Add(plugin2())
+	managerPlugin.Add(plugin3(meta.Dependency{"plugin1", ">=1.0, <2.0", meta.Custom}))
+
+	t.Log("Plugins' order until sorting:")
+	pluginsList := managerPlugin.GetPluginsList()
+	i := 0
+	for _, value := range pluginsList {
+		i++
+		if len(value.GetDependencies()) > 0 {
+			t.Log("Plugin n.", i, " in list until sotring:", value.Id(), " Dependencies:")
+			j := 0
+			for _, depvalue := range value.GetDependencies() {
+				j++
+				t.Log("Dependence n.", j, "for", value.Id().ID, "is", depvalue.String())
+			}
+		} else {
+			t.Log("Plugin n.", i, " in list until sotring:", value.Id(), "Plugin doesn't have dependencies")
+		}
+	}
+	t.Log()
+	_, err := managerPlugin.Sort()
+	a.Error(err, "Error in sorting")
+	t.Log(err)
+}
