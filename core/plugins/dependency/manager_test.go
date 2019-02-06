@@ -9,7 +9,7 @@ import (
 	"github.com/nori-io/nori-common/meta"
 
 	"github.com/nori-io/nori/core/plugins/dependency"
-	metaMock "github.com/nori-io/nori/core/plugins/meta/mock"
+	metaMock "github.com/nori-io/nori/core/plugins/mocks"
 )
 
 func TestManager_Add(t *testing.T) {
