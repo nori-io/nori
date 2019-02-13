@@ -28,16 +28,20 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type theStorage struct {
-	Source string
-	Log    *logrus.Logger
+type Storage interface {
+	Plugins() Plugins
 }
 
-type Storage interface {
-	GetPluginMetas() ([]meta.Meta, error)
-	SavePluginMeta(meta meta.Meta) error
-	DeletePluginMeta(id meta.ID) error
+type Plugins interface {
+	All() ([]meta.Meta, error)
+	Save(meta meta.Meta) error
+	Delete(meta meta.ID) error
 }
+
+//type storage struct {
+//	Source string
+//	Log    *logrus.Logger
+//}
 
 const (
 	storageTypeNone  = "none"

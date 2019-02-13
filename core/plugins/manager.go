@@ -294,7 +294,7 @@ func (m *manager) UnInstall(id meta.ID, ctx context.Context) error {
 		m.log.Error(err)
 		return err
 	}
-	err = m.storage.DeletePluginMeta(id)
+	err = m.storage.Plugins().Delete(id)
 	if err != nil {
 		m.log.Error(err)
 		return err

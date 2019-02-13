@@ -16,26 +16,43 @@
 package storage
 
 import (
-	"errors"
-
 	"github.com/nori-io/nori-common/meta"
 )
 
 type none struct {
+	plugins Plugins
+}
+
+type nonePlugins struct {
+	metas map[meta.ID]meta.Meta
 }
 
 func getNoneStorage() (Storage, error) {
-	return none{}, nil
+	return none{
+		plugins: &nonePlugins{
+			metas: map[meta.ID]meta.Meta{},
+		},
+	}, nil
 }
 
-func (n none) GetPluginMetas() ([]meta.Meta, error) {
+func (n none) Plugins() Plugins {
+	return n.plugins
+}
+
+func (n *nonePlugins) All() ([]meta.Meta, error) {
+	var metas []meta.Meta
+	for _, meta := range n.metas {
+		metas = append(metas, meta)
+	}
 	return []meta.Meta{}, nil
 }
 
-func (n none) SavePluginMeta(meta meta.Meta) error {
-	return errors.New("Can't save to None storage")
+func (n *nonePlugins) Save(meta meta.Meta) error {
+	n.metas[meta.Id()] = meta
+	return nil
 }
 
-func (n none) DeletePluginMeta(id meta.ID) error {
-	return errors.New("Can't delete from None storage")
+func (n *nonePlugins) Delete(id meta.ID) error {
+	delete(n.metas, id)
+	return nil
 }

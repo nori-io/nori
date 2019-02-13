@@ -26,6 +26,12 @@ import (
 )
 
 type mysql struct {
+	plugins Plugins
+	db      *sql.DB
+	log     *logrus.Logger
+}
+
+type mysqlPlugins struct {
 	db  *sql.DB
 	log *logrus.Logger
 }
@@ -35,58 +41,35 @@ func getMySqlStorage(source string, log *logrus.Logger) (Storage, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	err = db.Ping()
 	if err != nil {
 		db.Close()
 		return nil, err
 	}
 
-	db.Exec(`CREATE TABLE IF NOT EXISTS nori_plugins (
-		    id varchar(255) NOT NULL ,
-		    version varchar(32) not null ,
-		    
-		    author text ,
-		    
-		    deps text ,
-		    
-		    description text ,
-		    
-		    core text,
-		    
-		    interface int ,
-		    
-		    license text ,
-		    
-		    links text ,
-		    
-		    tags varchar(255) ,
-		    
-		    installed bigint ,
-		    hash varchar(255) ,
-		    PRIMARY KEY (id, version)
-		)  ENGINE=MyISAM;`)
+	_, err = db.Exec(sqlCreateTablePlugins)
+	if err != nil {
+		return nil, err
+	}
 
 	return &mysql{
+		plugins: &mysqlPlugins{
+			db:  db,
+			log: log,
+		},
 		db:  db,
 		log: log,
 	}, nil
 }
 
-func (m *mysql) GetPluginMetas() ([]meta.Meta, error) {
+func (m *mysql) Plugins() Plugins {
+	return m.plugins
+}
+
+func (m *mysqlPlugins) All() ([]meta.Meta, error) {
 	var metas []meta.Meta
-	rows, err := m.db.Query(
-		`SELECT id,
-				version,
-				author,
-				deps,
-				description,
-				core,
-				interface,
-				license,
-				links,
-				tags,
-				installed, 
-				hash FROM nori_plugins`)
+	rows, err := m.db.Query(sqlQueryPluginsAll)
 	if err != nil {
 		return metas, err
 	}
@@ -161,8 +144,8 @@ func (m *mysql) GetPluginMetas() ([]meta.Meta, error) {
 	return metas, nil
 }
 
-func (m *mysql) SavePluginMeta(meta meta.Meta) error {
-	statement, err := m.db.Prepare("INSERT INTO nori_plugins VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+func (m *mysqlPlugins) Save(meta meta.Meta) error {
+	statement, err := m.db.Prepare(sqlInsertPlugin)
 	if err != nil {
 		return err
 	}
@@ -175,7 +158,6 @@ func (m *mysql) SavePluginMeta(meta meta.Meta) error {
 	license, err = json.Marshal(meta.GetLicense())
 	links, err = json.Marshal(meta.GetLinks())
 
-	// @todo store file hash (?)
 	_, err = statement.Exec(
 		meta.Id().ID,
 		meta.Id().Version,
@@ -191,9 +173,29 @@ func (m *mysql) SavePluginMeta(meta meta.Meta) error {
 	return err
 }
 
-func (m *mysql) DeletePluginMeta(id meta.ID) error {
-	_, err := m.db.Exec(
-		"DELETE FROM nori_plugins WHERE id = ? AND version = ? LIMIT 1",
-		id.ID, id.Version)
+func (m *mysqlPlugins) Delete(id meta.ID) error {
+	_, err := m.db.Exec(sqlDeletePlugin, id.ID, id.Version)
 	return err
 }
+
+const sqlQueryPluginsAll = `SELECT id, version, author, deps, description, core, interface, license, links, tags, installed, hash FROM nori_plugins`
+const sqlInsertPlugin = `INSERT INTO nori_plugins VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+const sqlDeletePlugin = `DELETE FROM nori_plugins WHERE id = ? AND version = ? LIMIT 1`
+
+const sqlCreateTablePlugins = `
+CREATE TABLE IF NOT EXISTS nori_plugins (
+	id varchar(255) NOT NULL ,
+	version varchar(32) not null ,
+	author text ,
+	deps text ,
+	description text ,
+	core text,
+	interface int ,
+	license text ,
+	links text ,
+	tags varchar(255) ,
+	installed bigint ,
+	hash varchar(255) ,
+	PRIMARY KEY (id, version)
+)  ENGINE=MyISAM;
+`
