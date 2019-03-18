@@ -30,6 +30,15 @@ func (e NotFound) Error() string {
 	return fmt.Sprintf("plugin [%s] not found", e.ID.String())
 }
 
+type FileDoesNotExist struct {
+	Path string
+	Err  error
+}
+
+func (e FileDoesNotExist) Error() string {
+	return fmt.Sprintf("file [%s] does not exist", e.Path)
+}
+
 type FileOpenError struct {
 	Path string
 	Err  error
@@ -48,11 +57,11 @@ func (e LookupError) Error() string {
 	return fmt.Sprintf("error on lookup in [%s]: %s", e.Path, e.Err.Error())
 }
 
-type TypeAssertError struct {
+type NoPluginInterfaceError struct {
 	Path string
 }
 
-func (e TypeAssertError) Error() string {
+func (e NoPluginInterfaceError) Error() string {
 	return fmt.Sprintf("plugin [%s] does not implement Plugin interface", e.Path)
 }
 

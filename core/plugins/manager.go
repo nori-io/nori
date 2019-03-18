@@ -17,11 +17,6 @@ package plugins
 
 import (
 	"context"
-	"io/ioutil"
-	"os"
-	"path"
-	"path/filepath"
-	stdplugin "plugin"
 
 	"github.com/nori-io/nori/core/plugins/dependency"
 	"github.com/nori-io/nori/core/storage"
@@ -57,65 +52,51 @@ func NewManager(
 	storage storage.Storage,
 	configManager commonCfg.Manager,
 	version version.Version,
+	pluginExtractor PluginExtractor,
 	logger *logrus.Logger,
 ) Manager {
+	// @todo make as func param
 	rm := NewRegistryManager(
 		configManager,
 		logger.WithField("component", "RegistryManager").Logger)
+
 	return &manager{
 		files:         map[string]meta.ID{},
 		configManager: configManager,
-		depManager:    dependency.NewManager(),
-		regManager:    rm,
-		registry:      NewRegistry(rm, configManager, logger),
-		storage:       storage,
-		version:       version,
-		log:           logger,
+
+		// @todo make as func param
+		depManager:      dependency.NewManager(),
+		pluginExtractor: pluginExtractor,
+		regManager:      rm,
+
+		// @todo make as func param
+		registry: NewRegistry(rm, configManager, logger),
+		storage:  storage,
+		version:  version,
+		log:      logger,
 	}
 }
 
 type manager struct {
-	files         FileTable
-	configManager commonCfg.Manager
-	depManager    dependency.Manager
-	regManager    RegistryManager
-	registry      plugin.Registry
-	storage       storage.Storage
-	version       version.Version
-	log           *logrus.Logger
+	files           FileTable
+	configManager   commonCfg.Manager
+	depManager      dependency.Manager
+	pluginExtractor PluginExtractor
+	regManager      RegistryManager
+	registry        plugin.Registry
+	storage         storage.Storage
+	version         version.Version
+	log             *logrus.Logger
 }
 
 func (m *manager) AddFile(path string) (plugin.Plugin, error) {
-	file, err := stdplugin.Open(path)
+	p, err := m.pluginExtractor.Get(path)
 	if err != nil {
-		e := errors.FileOpenError{
-			Path: path,
-			Err:  err,
-		}
-		m.log.WithField("file", path).Error(e.Error())
-		return nil, e
+		m.log.Error(err)
+		return nil, err
 	}
 
-	instance, err := file.Lookup("Plugin")
-	if err != nil {
-		e := errors.LookupError{
-			Path: path,
-			Err:  err,
-		}
-		m.log.WithField("file", path).Error(e.Error())
-		return nil, e
-	}
-
-	p, ok := instance.(plugin.Plugin)
-	if !ok {
-		e := errors.TypeAssertError{
-			Path: path,
-		}
-		m.log.WithField("file", path).Error(e.Error())
-		return nil, e
-	}
-
-	// check needed Nori version
+	// check needed Nori Core version
 	cons, err := p.Meta().GetCore().GetConstraint()
 	if err != nil {
 		return nil, err
@@ -128,7 +109,12 @@ func (m *manager) AddFile(path string) (plugin.Plugin, error) {
 		}
 	}
 
-	// @todo check installed or not
+	// check installed or not
+	if _, ok := p.(plugin.Installable); ok {
+		// @todo check installed or not
+		// if not installed - then
+	}
+
 	// add to dependency manager
 	err = m.depManager.Add(p.Meta())
 	if err != nil {
@@ -147,34 +133,25 @@ func (m *manager) AddFile(path string) (plugin.Plugin, error) {
 }
 
 func (m *manager) AddDir(paths []string) error {
-	var err error
-	for _, dir := range paths {
-		var dirs []os.FileInfo
-		if dirs, err = ioutil.ReadDir(dir); err != nil {
-			return err
-		}
-		for _, d := range dirs {
-			if d.IsDir() {
-				continue
-			}
-			if path.Ext(d.Name()) != ".so" {
-				continue
-			}
+	files, err := m.pluginExtractor.Files(paths)
+	if err != nil {
+		return err
+	}
 
-			// load plugin
-			filePath := filepath.Join(dir, d.Name())
-			p, err := m.AddFile(filePath)
-			if err != nil {
-				m.log.Error(err)
-				continue
-			}
-
-			m.log.Infof(
-				"Found '%s' by '%s'",
-				p.Meta().Id().String(),
-				p.Meta().GetAuthor().Name,
-			)
+	for _, file := range files {
+		// load plugin
+		p, err := m.AddFile(file)
+		if err != nil {
+			m.log.Error(err)
+			continue
 		}
+
+		m.log.Infof(
+			"Found '%s' implements '%s' by '%s'",
+			p.Meta().Id().String(),
+			p.Meta().GetInterface(),
+			p.Meta().GetAuthor().Name,
+		)
 	}
 	return nil
 }

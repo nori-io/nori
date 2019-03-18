@@ -3,9 +3,11 @@
 
 package commands
 
-import proto "github.com/golang/protobuf/proto"
-import fmt "fmt"
-import math "math"
+import (
+	fmt "fmt"
+	proto "github.com/golang/protobuf/proto"
+	math "math"
+)
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
@@ -16,7 +18,7 @@ var _ = math.Inf
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
-const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 type ErrorReply struct {
 	Status               bool     `protobuf:"varint,1,opt,name=status,proto3" json:"status,omitempty"`
@@ -30,16 +32,17 @@ func (m *ErrorReply) Reset()         { *m = ErrorReply{} }
 func (m *ErrorReply) String() string { return proto.CompactTextString(m) }
 func (*ErrorReply) ProtoMessage()    {}
 func (*ErrorReply) Descriptor() ([]byte, []int) {
-	return fileDescriptor_plugin_commands_2735544750f7d704, []int{0}
+	return fileDescriptor_624b1b3aaae9ee4a, []int{0}
 }
+
 func (m *ErrorReply) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ErrorReply.Unmarshal(m, b)
 }
 func (m *ErrorReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ErrorReply.Marshal(b, m, deterministic)
 }
-func (dst *ErrorReply) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ErrorReply.Merge(dst, src)
+func (m *ErrorReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ErrorReply.Merge(m, src)
 }
 func (m *ErrorReply) XXX_Size() int {
 	return xxx_messageInfo_ErrorReply.Size(m)
@@ -77,16 +80,17 @@ func (m *PluginListRequest) Reset()         { *m = PluginListRequest{} }
 func (m *PluginListRequest) String() string { return proto.CompactTextString(m) }
 func (*PluginListRequest) ProtoMessage()    {}
 func (*PluginListRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_plugin_commands_2735544750f7d704, []int{1}
+	return fileDescriptor_624b1b3aaae9ee4a, []int{1}
 }
+
 func (m *PluginListRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PluginListRequest.Unmarshal(m, b)
 }
 func (m *PluginListRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_PluginListRequest.Marshal(b, m, deterministic)
 }
-func (dst *PluginListRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_PluginListRequest.Merge(dst, src)
+func (m *PluginListRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PluginListRequest.Merge(m, src)
 }
 func (m *PluginListRequest) XXX_Size() int {
 	return xxx_messageInfo_PluginListRequest.Size(m)
@@ -123,16 +127,17 @@ func (m *PluginDependency) Reset()         { *m = PluginDependency{} }
 func (m *PluginDependency) String() string { return proto.CompactTextString(m) }
 func (*PluginDependency) ProtoMessage()    {}
 func (*PluginDependency) Descriptor() ([]byte, []int) {
-	return fileDescriptor_plugin_commands_2735544750f7d704, []int{2}
+	return fileDescriptor_624b1b3aaae9ee4a, []int{2}
 }
+
 func (m *PluginDependency) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PluginDependency.Unmarshal(m, b)
 }
 func (m *PluginDependency) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_PluginDependency.Marshal(b, m, deterministic)
 }
-func (dst *PluginDependency) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_PluginDependency.Merge(dst, src)
+func (m *PluginDependency) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PluginDependency.Merge(m, src)
 }
 func (m *PluginDependency) XXX_Size() int {
 	return xxx_messageInfo_PluginDependency.Size(m)
@@ -173,16 +178,17 @@ func (m *PluginList) Reset()         { *m = PluginList{} }
 func (m *PluginList) String() string { return proto.CompactTextString(m) }
 func (*PluginList) ProtoMessage()    {}
 func (*PluginList) Descriptor() ([]byte, []int) {
-	return fileDescriptor_plugin_commands_2735544750f7d704, []int{3}
+	return fileDescriptor_624b1b3aaae9ee4a, []int{3}
 }
+
 func (m *PluginList) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PluginList.Unmarshal(m, b)
 }
 func (m *PluginList) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_PluginList.Marshal(b, m, deterministic)
 }
-func (dst *PluginList) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_PluginList.Merge(dst, src)
+func (m *PluginList) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PluginList.Merge(m, src)
 }
 func (m *PluginList) XXX_Size() int {
 	return xxx_messageInfo_PluginList.Size(m)
@@ -247,16 +253,17 @@ func (m *PluginListReply) Reset()         { *m = PluginListReply{} }
 func (m *PluginListReply) String() string { return proto.CompactTextString(m) }
 func (*PluginListReply) ProtoMessage()    {}
 func (*PluginListReply) Descriptor() ([]byte, []int) {
-	return fileDescriptor_plugin_commands_2735544750f7d704, []int{4}
+	return fileDescriptor_624b1b3aaae9ee4a, []int{4}
 }
+
 func (m *PluginListReply) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PluginListReply.Unmarshal(m, b)
 }
 func (m *PluginListReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_PluginListReply.Marshal(b, m, deterministic)
 }
-func (dst *PluginListReply) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_PluginListReply.Merge(dst, src)
+func (m *PluginListReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PluginListReply.Merge(m, src)
 }
 func (m *PluginListReply) XXX_Size() int {
 	return xxx_messageInfo_PluginListReply.Size(m)
@@ -294,16 +301,17 @@ func (m *PluginGetRequest) Reset()         { *m = PluginGetRequest{} }
 func (m *PluginGetRequest) String() string { return proto.CompactTextString(m) }
 func (*PluginGetRequest) ProtoMessage()    {}
 func (*PluginGetRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_plugin_commands_2735544750f7d704, []int{5}
+	return fileDescriptor_624b1b3aaae9ee4a, []int{5}
 }
+
 func (m *PluginGetRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PluginGetRequest.Unmarshal(m, b)
 }
 func (m *PluginGetRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_PluginGetRequest.Marshal(b, m, deterministic)
 }
-func (dst *PluginGetRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_PluginGetRequest.Merge(dst, src)
+func (m *PluginGetRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PluginGetRequest.Merge(m, src)
 }
 func (m *PluginGetRequest) XXX_Size() int {
 	return xxx_messageInfo_PluginGetRequest.Size(m)
@@ -340,16 +348,17 @@ func (m *PluginRemoveRequest) Reset()         { *m = PluginRemoveRequest{} }
 func (m *PluginRemoveRequest) String() string { return proto.CompactTextString(m) }
 func (*PluginRemoveRequest) ProtoMessage()    {}
 func (*PluginRemoveRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_plugin_commands_2735544750f7d704, []int{6}
+	return fileDescriptor_624b1b3aaae9ee4a, []int{6}
 }
+
 func (m *PluginRemoveRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PluginRemoveRequest.Unmarshal(m, b)
 }
 func (m *PluginRemoveRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_PluginRemoveRequest.Marshal(b, m, deterministic)
 }
-func (dst *PluginRemoveRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_PluginRemoveRequest.Merge(dst, src)
+func (m *PluginRemoveRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PluginRemoveRequest.Merge(m, src)
 }
 func (m *PluginRemoveRequest) XXX_Size() int {
 	return xxx_messageInfo_PluginRemoveRequest.Size(m)
@@ -379,16 +388,17 @@ func (m *PluginInstallRequest) Reset()         { *m = PluginInstallRequest{} }
 func (m *PluginInstallRequest) String() string { return proto.CompactTextString(m) }
 func (*PluginInstallRequest) ProtoMessage()    {}
 func (*PluginInstallRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_plugin_commands_2735544750f7d704, []int{7}
+	return fileDescriptor_624b1b3aaae9ee4a, []int{7}
 }
+
 func (m *PluginInstallRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PluginInstallRequest.Unmarshal(m, b)
 }
 func (m *PluginInstallRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_PluginInstallRequest.Marshal(b, m, deterministic)
 }
-func (dst *PluginInstallRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_PluginInstallRequest.Merge(dst, src)
+func (m *PluginInstallRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PluginInstallRequest.Merge(m, src)
 }
 func (m *PluginInstallRequest) XXX_Size() int {
 	return xxx_messageInfo_PluginInstallRequest.Size(m)
@@ -418,16 +428,17 @@ func (m *PluginUninstallRequest) Reset()         { *m = PluginUninstallRequest{}
 func (m *PluginUninstallRequest) String() string { return proto.CompactTextString(m) }
 func (*PluginUninstallRequest) ProtoMessage()    {}
 func (*PluginUninstallRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_plugin_commands_2735544750f7d704, []int{8}
+	return fileDescriptor_624b1b3aaae9ee4a, []int{8}
 }
+
 func (m *PluginUninstallRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PluginUninstallRequest.Unmarshal(m, b)
 }
 func (m *PluginUninstallRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_PluginUninstallRequest.Marshal(b, m, deterministic)
 }
-func (dst *PluginUninstallRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_PluginUninstallRequest.Merge(dst, src)
+func (m *PluginUninstallRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PluginUninstallRequest.Merge(m, src)
 }
 func (m *PluginUninstallRequest) XXX_Size() int {
 	return xxx_messageInfo_PluginUninstallRequest.Size(m)
@@ -458,16 +469,17 @@ func (m *PluginUploadRequest) Reset()         { *m = PluginUploadRequest{} }
 func (m *PluginUploadRequest) String() string { return proto.CompactTextString(m) }
 func (*PluginUploadRequest) ProtoMessage()    {}
 func (*PluginUploadRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_plugin_commands_2735544750f7d704, []int{9}
+	return fileDescriptor_624b1b3aaae9ee4a, []int{9}
 }
+
 func (m *PluginUploadRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PluginUploadRequest.Unmarshal(m, b)
 }
 func (m *PluginUploadRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_PluginUploadRequest.Marshal(b, m, deterministic)
 }
-func (dst *PluginUploadRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_PluginUploadRequest.Merge(dst, src)
+func (m *PluginUploadRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PluginUploadRequest.Merge(m, src)
 }
 func (m *PluginUploadRequest) XXX_Size() int {
 	return xxx_messageInfo_PluginUploadRequest.Size(m)
@@ -506,16 +518,17 @@ func (m *PluginMetaRequest) Reset()         { *m = PluginMetaRequest{} }
 func (m *PluginMetaRequest) String() string { return proto.CompactTextString(m) }
 func (*PluginMetaRequest) ProtoMessage()    {}
 func (*PluginMetaRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_plugin_commands_2735544750f7d704, []int{10}
+	return fileDescriptor_624b1b3aaae9ee4a, []int{10}
 }
+
 func (m *PluginMetaRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PluginMetaRequest.Unmarshal(m, b)
 }
 func (m *PluginMetaRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_PluginMetaRequest.Marshal(b, m, deterministic)
 }
-func (dst *PluginMetaRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_PluginMetaRequest.Merge(dst, src)
+func (m *PluginMetaRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PluginMetaRequest.Merge(m, src)
 }
 func (m *PluginMetaRequest) XXX_Size() int {
 	return xxx_messageInfo_PluginMetaRequest.Size(m)
@@ -558,16 +571,17 @@ func (m *PluginMetaReply) Reset()         { *m = PluginMetaReply{} }
 func (m *PluginMetaReply) String() string { return proto.CompactTextString(m) }
 func (*PluginMetaReply) ProtoMessage()    {}
 func (*PluginMetaReply) Descriptor() ([]byte, []int) {
-	return fileDescriptor_plugin_commands_2735544750f7d704, []int{11}
+	return fileDescriptor_624b1b3aaae9ee4a, []int{11}
 }
+
 func (m *PluginMetaReply) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PluginMetaReply.Unmarshal(m, b)
 }
 func (m *PluginMetaReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_PluginMetaReply.Marshal(b, m, deterministic)
 }
-func (dst *PluginMetaReply) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_PluginMetaReply.Merge(dst, src)
+func (m *PluginMetaReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PluginMetaReply.Merge(m, src)
 }
 func (m *PluginMetaReply) XXX_Size() int {
 	return xxx_messageInfo_PluginMetaReply.Size(m)
@@ -600,11 +614,9 @@ func init() {
 	proto.RegisterType((*PluginMetaReply)(nil), "commands.PluginMetaReply")
 }
 
-func init() {
-	proto.RegisterFile("plugin_commands.proto", fileDescriptor_plugin_commands_2735544750f7d704)
-}
+func init() { proto.RegisterFile("plugin_commands.proto", fileDescriptor_624b1b3aaae9ee4a) }
 
-var fileDescriptor_plugin_commands_2735544750f7d704 = []byte{
+var fileDescriptor_624b1b3aaae9ee4a = []byte{
 	// 431 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x53, 0x5f, 0xab, 0xd3, 0x30,
 	0x1c, 0xa5, 0x7f, 0xee, 0xdc, 0x7e, 0x5e, 0xae, 0xd7, 0xac, 0x5e, 0x8a, 0xf8, 0x30, 0x02, 0x57,

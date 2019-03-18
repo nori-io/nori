@@ -178,7 +178,21 @@ func (m *mysqlPlugins) Delete(id meta.ID) error {
 	return err
 }
 
+func (m *mysqlPlugins) IsInstalled([]meta.Meta) (bool, error) {
+	rows, err := m.db.Query(sqlQueryPluginsAll)
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		return true, nil
+	}
+
+	return false, nil
+}
+
 const sqlQueryPluginsAll = `SELECT id, version, author, deps, description, core, interface, license, links, tags, installed, hash FROM nori_plugins`
+const sqlQueryIsInstalled = `SELECT id FROM nori_plugins WHERE id = ? AND version = ?`
 const sqlInsertPlugin = `INSERT INTO nori_plugins VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
 const sqlDeletePlugin = `DELETE FROM nori_plugins WHERE id = ? AND version = ? LIMIT 1`
 

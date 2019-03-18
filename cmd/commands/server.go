@@ -57,7 +57,10 @@ var serverCmd = &cobra.Command{
 
 		// plugin manager
 		pluginManager := plugins.NewManager(
-			storage, configManager, noriVersion,
+			storage,
+			configManager,
+			noriVersion,
+			plugins.NewPluginExtractor(),
 			logger.WithField("component", "PluginManager").Logger)
 
 		// Load Plugins

@@ -34,8 +34,9 @@ type Storage interface {
 
 type Plugins interface {
 	All() ([]meta.Meta, error)
-	Save(meta meta.Meta) error
 	Delete(meta meta.ID) error
+	IsInstalled([]meta.Meta) (bool, error)
+	Save(meta meta.Meta) error
 }
 
 //type storage struct {

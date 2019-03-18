@@ -22,12 +22,12 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const NoriMajorVersion = "1.0.0"
+const CurrentVersion = "1.0.0"
 
 func NoriVersion(log *logrus.Logger) Version {
 	return Version{
 		logger:  log,
-		version: "1.0.0.0",
+		version: CurrentVersion,
 	}
 }
 

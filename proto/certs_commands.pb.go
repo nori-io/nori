@@ -3,9 +3,11 @@
 
 package commands
 
-import proto "github.com/golang/protobuf/proto"
-import fmt "fmt"
-import math "math"
+import (
+	fmt "fmt"
+	proto "github.com/golang/protobuf/proto"
+	math "math"
+)
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
@@ -16,7 +18,7 @@ var _ = math.Inf
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
-const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 // []bs = {len_hmac(1 byte), hmac..., body_file...}
 type CertsUploadRequest struct {
@@ -31,16 +33,17 @@ func (m *CertsUploadRequest) Reset()         { *m = CertsUploadRequest{} }
 func (m *CertsUploadRequest) String() string { return proto.CompactTextString(m) }
 func (*CertsUploadRequest) ProtoMessage()    {}
 func (*CertsUploadRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_certs_commands_082965a71d13d7a2, []int{0}
+	return fileDescriptor_8839626868052056, []int{0}
 }
+
 func (m *CertsUploadRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CertsUploadRequest.Unmarshal(m, b)
 }
 func (m *CertsUploadRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_CertsUploadRequest.Marshal(b, m, deterministic)
 }
-func (dst *CertsUploadRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CertsUploadRequest.Merge(dst, src)
+func (m *CertsUploadRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CertsUploadRequest.Merge(m, src)
 }
 func (m *CertsUploadRequest) XXX_Size() int {
 	return xxx_messageInfo_CertsUploadRequest.Size(m)
@@ -69,11 +72,9 @@ func init() {
 	proto.RegisterType((*CertsUploadRequest)(nil), "commands.CertsUploadRequest")
 }
 
-func init() {
-	proto.RegisterFile("certs_commands.proto", fileDescriptor_certs_commands_082965a71d13d7a2)
-}
+func init() { proto.RegisterFile("certs_commands.proto", fileDescriptor_8839626868052056) }
 
-var fileDescriptor_certs_commands_082965a71d13d7a2 = []byte{
+var fileDescriptor_8839626868052056 = []byte{
 	// 102 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x12, 0x49, 0x4e, 0x2d, 0x2a,
 	0x29, 0x8e, 0x4f, 0xce, 0xcf, 0xcd, 0x4d, 0xcc, 0x4b, 0x29, 0xd6, 0x2b, 0x28, 0xca, 0x2f, 0xc9,

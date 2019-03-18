@@ -56,3 +56,7 @@ func (n *nonePlugins) Delete(id meta.ID) error {
 	delete(n.metas, id)
 	return nil
 }
+
+func (n *nonePlugins) IsInstalled([]meta.Meta) (bool, error) {
+	return true, nil
+}

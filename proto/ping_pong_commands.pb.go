@@ -3,9 +3,11 @@
 
 package commands
 
-import proto "github.com/golang/protobuf/proto"
-import fmt "fmt"
-import math "math"
+import (
+	fmt "fmt"
+	proto "github.com/golang/protobuf/proto"
+	math "math"
+)
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
@@ -16,7 +18,7 @@ var _ = math.Inf
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
-const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 type PingRequest struct {
 	Message              string   `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
@@ -29,16 +31,17 @@ func (m *PingRequest) Reset()         { *m = PingRequest{} }
 func (m *PingRequest) String() string { return proto.CompactTextString(m) }
 func (*PingRequest) ProtoMessage()    {}
 func (*PingRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_ping_pong_commands_586882ca1037effa, []int{0}
+	return fileDescriptor_2c623b0f40e876aa, []int{0}
 }
+
 func (m *PingRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PingRequest.Unmarshal(m, b)
 }
 func (m *PingRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_PingRequest.Marshal(b, m, deterministic)
 }
-func (dst *PingRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_PingRequest.Merge(dst, src)
+func (m *PingRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PingRequest.Merge(m, src)
 }
 func (m *PingRequest) XXX_Size() int {
 	return xxx_messageInfo_PingRequest.Size(m)
@@ -67,16 +70,17 @@ func (m *PongReply) Reset()         { *m = PongReply{} }
 func (m *PongReply) String() string { return proto.CompactTextString(m) }
 func (*PongReply) ProtoMessage()    {}
 func (*PongReply) Descriptor() ([]byte, []int) {
-	return fileDescriptor_ping_pong_commands_586882ca1037effa, []int{1}
+	return fileDescriptor_2c623b0f40e876aa, []int{1}
 }
+
 func (m *PongReply) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PongReply.Unmarshal(m, b)
 }
 func (m *PongReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_PongReply.Marshal(b, m, deterministic)
 }
-func (dst *PongReply) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_PongReply.Merge(dst, src)
+func (m *PongReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PongReply.Merge(m, src)
 }
 func (m *PongReply) XXX_Size() int {
 	return xxx_messageInfo_PongReply.Size(m)
@@ -99,11 +103,9 @@ func init() {
 	proto.RegisterType((*PongReply)(nil), "commands.PongReply")
 }
 
-func init() {
-	proto.RegisterFile("ping_pong_commands.proto", fileDescriptor_ping_pong_commands_586882ca1037effa)
-}
+func init() { proto.RegisterFile("ping_pong_commands.proto", fileDescriptor_2c623b0f40e876aa) }
 
-var fileDescriptor_ping_pong_commands_586882ca1037effa = []byte{
+var fileDescriptor_2c623b0f40e876aa = []byte{
 	// 107 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x92, 0x28, 0xc8, 0xcc, 0x4b,
 	0x8f, 0x2f, 0xc8, 0xcf, 0x4b, 0x8f, 0x4f, 0xce, 0xcf, 0xcd, 0x4d, 0xcc, 0x4b, 0x29, 0xd6, 0x2b,
