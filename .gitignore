@@ -4,3 +4,4 @@ vendor/
 Gopkg.lock
 *.so
 bin/
+proto/*.pb.go
