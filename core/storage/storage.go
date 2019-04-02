@@ -16,13 +16,9 @@
 package storage
 
 import (
-	"sync"
-
 	"github.com/nori-io/nori-common/meta"
 
 	"strings"
-
-	"fmt"
 
 	go_config "github.com/cheebo/go-config"
 	"github.com/sirupsen/logrus"
@@ -34,61 +30,39 @@ type Storage interface {
 
 type Plugins interface {
 	All() ([]meta.Meta, error)
-	Delete(meta meta.ID) error
-	IsInstalled([]meta.Meta) (bool, error)
-	Save(meta meta.Meta) error
+	Delete(meta.ID) error
+	Get(meta.ID) (meta.Meta, error)
+	IsInstalled(meta.Meta) (bool, error)
+	Save(meta.Meta) error
 }
 
-//type storage struct {
-//	Source string
-//	Log    *logrus.Logger
-//}
-
 const (
-	storageTypeNone  = "none"
+	storageTypeDummy = "dummy"
 	storageTypeMysql = "mysql"
 
-	cfgStorageType   = "nori.storage.type"
-	cfgStorageSource = "nori.storage.source"
+	configKeyStorageType   = "nori.storage.type"
+	configKeyStorageSource = "nori.storage.source"
 )
 
-var instance Storage
-var once sync.Once
+func NewStorage(cfg go_config.Config, log *logrus.Logger) (Storage, error) {
+	storageType := cfg.String(configKeyStorageType)
+	if len(storageType) == 0 {
+		storageType = storageTypeDummy
+	}
 
-func GetStorage(cfg go_config.Config, log *logrus.Logger) Storage {
-	once.Do(func() {
-		storageType := cfg.String(cfgStorageType)
-		if len(storageType) == 0 {
-			storageType = storageTypeNone
+	storageSource := cfg.String(configKeyStorageSource)
+	if len(storageSource) == 0 {
+		return nil, UndefinedStorageSource{
+			path: configKeyStorageSource,
 		}
+	}
 
-		storageType = strings.ToLower(storageType)
-
-		if storageType == storageTypeNone {
-			instance, _ = getNoneStorage()
-			return
-		}
-
-		storageSource := cfg.String(cfgStorageSource)
-		if len(storageSource) == 0 {
-			log.Error(fmt.Errorf("%s not defined", cfgStorageSource))
-		}
-
-		var storage Storage
-		var err error
-
-		switch storageType {
-		case storageTypeMysql:
-			storage, err = getMySqlStorage(storageSource, log)
-			break
-		default:
-			log.Error(fmt.Errorf("unknown %s: %s", cfgStorageType, storageType))
-		}
-		if err != nil {
-			log.Error(err)
-			return
-		}
-		instance = storage
-	})
-	return instance
+	switch strings.ToLower(storageType) {
+	case storageTypeDummy:
+		return newDummyStorage()
+	case storageTypeMysql:
+		return newMySqlStorage(storageSource, log)
+	default:
+		return nil, UnknownStorageType{storageType: storageType}
+	}
 }

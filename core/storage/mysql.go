@@ -36,7 +36,7 @@ type mysqlPlugins struct {
 	log *logrus.Logger
 }
 
-func getMySqlStorage(source string, log *logrus.Logger) (Storage, error) {
+func newMySqlStorage(source string, log *logrus.Logger) (Storage, error) {
 	db, err := sql.Open("mysql", source)
 	if err != nil {
 		return nil, err
@@ -48,7 +48,22 @@ func getMySqlStorage(source string, log *logrus.Logger) (Storage, error) {
 		return nil, err
 	}
 
-	_, err = db.Exec(sqlCreateTablePlugins)
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS nori_plugins (
+	id varchar(255) NOT NULL ,
+	version varchar(32) not null ,
+	author text ,
+	deps text ,
+	description text ,
+	core text,
+	interface varchar(255) ,
+	license text ,
+	links text ,
+	tags varchar(255) ,
+	installed bigint ,
+	hash varchar(255) ,
+	PRIMARY KEY (id, version)
+)  ENGINE=MyISAM;`)
+
 	if err != nil {
 		return nil, err
 	}
@@ -69,73 +84,21 @@ func (m *mysql) Plugins() Plugins {
 
 func (m *mysqlPlugins) All() ([]meta.Meta, error) {
 	var metas []meta.Meta
-	rows, err := m.db.Query(sqlQueryPluginsAll)
+	rows, err := m.db.Query("SELECT id, version, author, deps, description, core, interface, license, links, tags, installed, hash FROM nori_plugins")
 	if err != nil {
 		return metas, err
 	}
 
 	defer rows.Close()
 	for rows.Next() {
-		var mt meta.Data
-		var iface int
-		var author, description, dependencies, core, license, links, tags string
-		err := rows.Scan(
-			&mt.ID.ID, &mt.ID.Version,
-			&author,
-			&dependencies,
-			&description,
-			&core,
-			&iface,
-			&license,
-			&links,
-			&tags,
-		)
+		mt, err := mysqlParseRow(rows.Scan)
 		if err != nil {
 			m.log.Error(err)
 			continue
 		}
-
-		var authData meta.Author
-		err = json.Unmarshal([]byte(author), authData)
-		if err == nil {
-			mt.Author = authData
-		}
-
-		var depSet []meta.Dependency
-		err = json.Unmarshal([]byte(dependencies), depSet)
-		if err == nil {
-			mt.Dependencies = depSet
-		}
-
-		var descData meta.Description
-		err = json.Unmarshal([]byte(description), descData)
-		if err == nil {
-			mt.Description = descData
-		}
-
-		var coreData meta.Core
-		err = json.Unmarshal([]byte(core), coreData)
-		if err == nil {
-			mt.Core = coreData
-		}
-
-		mt.Interface = meta.Interface(iface)
-
-		var licenseData meta.License
-		err = json.Unmarshal([]byte(license), &licenseData)
-		if err == nil {
-			mt.License = licenseData
-		}
-
-		var linkSet []meta.Link
-		err = json.Unmarshal([]byte(links), &linkSet)
-		if err == nil {
-			mt.Links = linkSet
-		}
-		mt.Tags = strings.Split(tags, ",")
-
-		metas = append(metas, &mt)
+		metas = append(metas, mt)
 	}
+
 	err = rows.Err()
 	if err != nil {
 		return nil, err
@@ -144,8 +107,17 @@ func (m *mysqlPlugins) All() ([]meta.Meta, error) {
 	return metas, nil
 }
 
+func (m *mysqlPlugins) Get(id meta.ID) (meta.Meta, error) {
+	stmtGet, err := m.db.Prepare("SELECT * FROM nori_plugins WHERE id = $1 AND version = $2")
+	if err != nil {
+		return nil, err
+	}
+
+	return mysqlParseRow(stmtGet.QueryRow(id.ID, id.Version).Scan)
+}
+
 func (m *mysqlPlugins) Save(meta meta.Meta) error {
-	statement, err := m.db.Prepare(sqlInsertPlugin)
+	statement, err := m.db.Prepare("INSERT INTO nori_plugins VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
 	if err != nil {
 		return err
 	}
@@ -174,42 +146,85 @@ func (m *mysqlPlugins) Save(meta meta.Meta) error {
 }
 
 func (m *mysqlPlugins) Delete(id meta.ID) error {
-	_, err := m.db.Exec(sqlDeletePlugin, id.ID, id.Version)
+	stmtDelete, err := m.db.Prepare("DELETE FROM nori_plugins WHERE id = $1 AND version = $2")
+	if err != nil {
+		return err
+	}
+
+	_, err = stmtDelete.Exec(id.ID, id.Version)
 	return err
 }
 
-func (m *mysqlPlugins) IsInstalled([]meta.Meta) (bool, error) {
-	rows, err := m.db.Query(sqlQueryPluginsAll)
-	if err != nil {
+func (m *mysqlPlugins) IsInstalled(mt meta.Meta) (bool, error) {
+	var exists bool
+	err := m.db.QueryRow(
+		"SELECT exists (SELECT id FROM nori_plugins WHERE id = $1 AND version = $2)",
+		mt.Id().ID,
+		mt.Id().Version,
+	).Scan(&exists)
+
+	if err != nil && err != sql.ErrNoRows {
 		return false, err
 	}
-	defer rows.Close()
-	for rows.Next() {
-		return true, nil
-	}
-
-	return false, nil
+	return exists, nil
 }
 
-const sqlQueryPluginsAll = `SELECT id, version, author, deps, description, core, interface, license, links, tags, installed, hash FROM nori_plugins`
-const sqlQueryIsInstalled = `SELECT id FROM nori_plugins WHERE id = ? AND version = ?`
-const sqlInsertPlugin = `INSERT INTO nori_plugins VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
-const sqlDeletePlugin = `DELETE FROM nori_plugins WHERE id = ? AND version = ? LIMIT 1`
+func mysqlParseRow(scan func(dest ...interface{}) error) (meta.Meta, error) {
+	var m meta.Data
+	var author, description, dependencies, core, iface, license, links, tags string
+	err := scan(
+		&m.ID.ID, &m.ID.Version,
+		&author,
+		&dependencies,
+		&description,
+		&core,
+		&iface,
+		&license,
+		&links,
+		&tags,
+	)
+	if err != nil {
+		return nil, err
+	}
 
-const sqlCreateTablePlugins = `
-CREATE TABLE IF NOT EXISTS nori_plugins (
-	id varchar(255) NOT NULL ,
-	version varchar(32) not null ,
-	author text ,
-	deps text ,
-	description text ,
-	core text,
-	interface int ,
-	license text ,
-	links text ,
-	tags varchar(255) ,
-	installed bigint ,
-	hash varchar(255) ,
-	PRIMARY KEY (id, version)
-)  ENGINE=MyISAM;
-`
+	var authData meta.Author
+	err = json.Unmarshal([]byte(author), authData)
+	if err == nil {
+		m.Author = authData
+	}
+
+	var depSet []meta.Dependency
+	err = json.Unmarshal([]byte(dependencies), depSet)
+	if err == nil {
+		m.Dependencies = depSet
+	}
+
+	var descData meta.Description
+	err = json.Unmarshal([]byte(description), descData)
+	if err == nil {
+		m.Description = descData
+	}
+
+	var coreData meta.Core
+	err = json.Unmarshal([]byte(core), coreData)
+	if err == nil {
+		m.Core = coreData
+	}
+
+	m.Interface = meta.Interface(iface)
+
+	var licenseData meta.License
+	err = json.Unmarshal([]byte(license), &licenseData)
+	if err == nil {
+		m.License = licenseData
+	}
+
+	var linkSet []meta.Link
+	err = json.Unmarshal([]byte(links), &linkSet)
+	if err == nil {
+		m.Links = linkSet
+	}
+	m.Tags = strings.Split(tags, ",")
+
+	return m, nil
+}

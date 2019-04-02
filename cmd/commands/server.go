@@ -45,10 +45,10 @@ var serverCmd = &cobra.Command{
 
 		logger.Infof("Nori Engine [version %s]", noriVersion.Version().String())
 
-		// nori core storage
-		storage := storage.GetStorage(config, logger)
-		if storage == nil {
-			logger.Error("can't create NoriStorage")
+		// nori storage
+		storage, err := storage.NewStorage(config, logger)
+		if err != nil {
+			logger.Error(err)
 			os.Exit(1)
 		}
 
@@ -66,13 +66,12 @@ var serverCmd = &cobra.Command{
 		// Load Plugins
 		dirs := getPluginsDir(config, logger)
 		logger.Infof("Plugin dir(s): %s", strings.Join(dirs, ",\n"))
-		err := pluginManager.AddDir(dirs)
+		err = pluginManager.AddDir(dirs)
 		if err != nil {
 			logger.Error(err)
 		}
 
 		// check
-
 		err = pluginManager.StartAll(context.Background())
 		if err != nil {
 			os.Exit(1)

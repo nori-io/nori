@@ -19,44 +19,53 @@ import (
 	"github.com/nori-io/nori-common/meta"
 )
 
-type none struct {
+type dummy struct {
 	plugins Plugins
 }
 
-type nonePlugins struct {
+type dummyPlugins struct {
 	metas map[meta.ID]meta.Meta
 }
 
-func getNoneStorage() (Storage, error) {
-	return none{
-		plugins: &nonePlugins{
+func newDummyStorage() (Storage, error) {
+	return dummy{
+		plugins: &dummyPlugins{
 			metas: map[meta.ID]meta.Meta{},
 		},
 	}, nil
 }
 
-func (n none) Plugins() Plugins {
+func (n dummy) Plugins() Plugins {
 	return n.plugins
 }
 
-func (n *nonePlugins) All() ([]meta.Meta, error) {
+func (n *dummyPlugins) All() ([]meta.Meta, error) {
 	var metas []meta.Meta
-	for _, meta := range n.metas {
-		metas = append(metas, meta)
+	for _, m := range n.metas {
+		metas = append(metas, m)
 	}
 	return []meta.Meta{}, nil
 }
 
-func (n *nonePlugins) Save(meta meta.Meta) error {
+func (n *dummyPlugins) Get(id meta.ID) (meta.Meta, error) {
+	m, ok := n.metas[id]
+	if !ok {
+		return nil, NotFound{id: id}
+	}
+	return m, nil
+}
+
+func (n *dummyPlugins) Save(meta meta.Meta) error {
 	n.metas[meta.Id()] = meta
 	return nil
 }
 
-func (n *nonePlugins) Delete(id meta.ID) error {
+func (n *dummyPlugins) Delete(id meta.ID) error {
 	delete(n.metas, id)
 	return nil
 }
 
-func (n *nonePlugins) IsInstalled([]meta.Meta) (bool, error) {
-	return true, nil
+func (n *dummyPlugins) IsInstalled(meta meta.Meta) (bool, error) {
+	_, ok := n.metas[meta.Id()]
+	return ok, nil
 }
