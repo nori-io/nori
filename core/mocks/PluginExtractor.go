@@ -24,6 +24,29 @@ type PluginExtractor struct {
 	mock.Mock
 }
 
+// Files provides a mock function with given fields: dirs
+func (_m *PluginExtractor) Files(dirs []string) ([]string, error) {
+	ret := _m.Called(dirs)
+
+	var r0 []string
+	if rf, ok := ret.Get(0).(func([]string) []string); ok {
+		r0 = rf(dirs)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]string)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func([]string) error); ok {
+		r1 = rf(dirs)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Get provides a mock function with given fields: file
 func (_m *PluginExtractor) Get(file string) (plugin.Plugin, error) {
 	ret := _m.Called(file)

@@ -19,6 +19,7 @@ import (
 	"github.com/nori-io/nori-common/meta"
 	"github.com/nori-io/nori/core/errors"
 	"github.com/nori-io/nori/core/plugins/dependency/graph"
+	"github.com/nori-io/nori/core/plugins/types"
 )
 
 type Manager interface {
@@ -26,10 +27,16 @@ type Manager interface {
 	Add(m meta.Meta) error
 
 	GetPluginsList() map[meta.ID]meta.Meta
+
+	// get dependent plugins ids
+	GetDependent(id meta.ID) []meta.ID
+
 	// returns whether the ID exists in dependency list
 	Has(id meta.ID) bool
+
 	// removes meta from dependency list
 	Remove(id meta.ID)
+
 	// returns ID of plugin that fits given dependency spec
 	Resolve(dependency meta.Dependency) (meta.ID, error)
 
@@ -37,23 +44,13 @@ type Manager interface {
 	// unresolved dependency: no plugins match dependency spec
 	UnResolvedDependencies() map[meta.ID][]meta.Dependency
 
-	// returns list of running plugin IDs
-	Running() []meta.ID
-	// return whether the plugin running or not
-	IsRunning(id meta.ID) bool
-
-	// marks the plugin as started
-	Start(id meta.ID)
-	// marks the plugin as stopped
-	Stop(id meta.ID)
-
 	// returns sorted consistent list of ID ready to start
 	Sort() ([]meta.ID, error)
 }
 
 type manager struct {
 	plugins    map[meta.ID]meta.Meta
-	running    map[meta.ID]bool
+	running    types.MetaList
 	errors     []error
 	graph      graph.DependencyGraph
 	unresolved map[meta.ID][]meta.Dependency
@@ -62,7 +59,7 @@ type manager struct {
 func NewManager() Manager {
 	return &manager{
 		plugins:    map[meta.ID]meta.Meta{},
-		running:    map[meta.ID]bool{},
+		running:    types.MetaList{},
 		errors:     []error{},
 		graph:      graph.NewDependencyGraph(),
 		unresolved: map[meta.ID][]meta.Dependency{},
@@ -171,27 +168,6 @@ func (m *manager) UnResolvedDependencies() map[meta.ID][]meta.Dependency {
 	return unresolved
 }
 
-func (m *manager) Running() []meta.ID {
-	var list []meta.ID
-	for id := range m.running {
-		list = append(list, id)
-	}
-	return list
-}
-
-func (m *manager) IsRunning(id meta.ID) bool {
-	_, ok := m.running[id]
-	return ok
-}
-
-func (m *manager) Start(id meta.ID) {
-	m.running[id] = true
-}
-
-func (m *manager) Stop(id meta.ID) {
-	delete(m.running, id)
-}
-
 func (m *manager) Sort() ([]meta.ID, error) {
 
 	if len(m.unresolved) > 0 {
@@ -205,4 +181,11 @@ func (m *manager) Sort() ([]meta.ID, error) {
 
 func (m *manager) GetPluginsList() map[meta.ID]meta.Meta {
 	return m.plugins
+}
+
+func (m *manager) GetDependent(id meta.ID) []meta.ID {
+	if m.graph.Has(id) {
+		return m.graph.To(id)
+	}
+	return []meta.ID{}
 }

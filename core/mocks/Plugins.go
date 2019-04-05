@@ -61,20 +61,43 @@ func (_m *Plugins) Delete(_a0 meta.ID) error {
 	return r0
 }
 
-// IsInstalled provides a mock function with given fields: _a0
-func (_m *Plugins) IsInstalled(_a0 []meta.Meta) (bool, error) {
+// Get provides a mock function with given fields: _a0
+func (_m *Plugins) Get(_a0 meta.ID) (meta.Meta, error) {
 	ret := _m.Called(_a0)
 
-	var r0 bool
-	if rf, ok := ret.Get(0).(func([]meta.Meta) bool); ok {
+	var r0 meta.Meta
+	if rf, ok := ret.Get(0).(func(meta.ID) meta.Meta); ok {
 		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(meta.Meta)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(meta.ID) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// IsInstalled provides a mock function with given fields: id
+func (_m *Plugins) IsInstalled(id meta.ID) (bool, error) {
+	ret := _m.Called(id)
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(meta.ID) bool); ok {
+		r0 = rf(id)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func([]meta.Meta) error); ok {
-		r1 = rf(_a0)
+	if rf, ok := ret.Get(1).(func(meta.ID) error); ok {
+		r1 = rf(id)
 	} else {
 		r1 = ret.Error(1)
 	}

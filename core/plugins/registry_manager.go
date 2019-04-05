@@ -17,6 +17,7 @@ package plugins
 
 import (
 	"github.com/nori-io/nori/core/errors"
+	"github.com/nori-io/nori/core/plugins/types"
 
 	"github.com/nori-io/nori-common/config"
 	"github.com/nori-io/nori-common/meta"
@@ -28,14 +29,14 @@ type RegistryManager interface {
 	Add(p plugin.Plugin) error
 	Get(id meta.ID) (plugin.Plugin, error)
 	GetInterface(alias meta.Interface) (interface{}, error)
-	Plugins() PluginList
+	Plugins() types.PluginList
 	Resolve(dep meta.Dependency) plugin.Plugin
 	Remove(p plugin.Plugin)
 }
 
 type registryManager struct {
 	log           *logrus.Logger
-	plugins       *PluginList
+	plugins       *types.PluginList
 	interfaces    map[meta.Interface]meta.ID
 	configManager config.Manager
 	registry      plugin.Registry
@@ -44,7 +45,7 @@ type registryManager struct {
 func NewRegistryManager(cm config.Manager, logger *logrus.Logger) RegistryManager {
 	rm := &registryManager{
 		log:        logger,
-		plugins:    &PluginList{},
+		plugins:    &types.PluginList{},
 		interfaces: map[meta.Interface]meta.ID{},
 	}
 	rm.registry = NewRegistry(rm, cm, logger)
@@ -123,7 +124,7 @@ func (r registryManager) Remove(p plugin.Plugin) {
 	}
 }
 
-func (r registryManager) Plugins() PluginList {
+func (r registryManager) Plugins() types.PluginList {
 	return *r.plugins
 }
 

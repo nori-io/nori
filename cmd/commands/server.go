@@ -18,22 +18,36 @@ package commands
 import (
 	"context"
 	"log"
+	"net/http"
 	"os"
+
+	"github.com/gobuffalo/packr"
+
+	"github.com/gorilla/mux"
 
 	"github.com/nori-io/nori/version"
 
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-
 	"strings"
 
+	"github.com/spf13/cobra"
+
 	"github.com/cheebo/go-config"
+	"github.com/nori-io/nori/core/client/rest"
 	configManager "github.com/nori-io/nori/core/config"
 	"github.com/nori-io/nori/core/grpc"
 	"github.com/nori-io/nori/core/plugins"
 	"github.com/nori-io/nori/core/storage"
 	"github.com/sirupsen/logrus"
 )
+
+func init() {
+	rootCmd.AddCommand(serverCmd)
+
+	config.SetDefault("nori.grpc.enable", true)
+	config.SetDefault("nori.grpc.address", "0.0.0.0:29876")
+	config.SetDefault("nori.rest.enable", false)
+	config.SetDefault("nori.rest.address", "0.0.0.0:28541")
+}
 
 // serverCmd represents the server command
 var serverCmd = &cobra.Command{
@@ -74,7 +88,31 @@ var serverCmd = &cobra.Command{
 		// check
 		err = pluginManager.StartAll(context.Background())
 		if err != nil {
+			logger.Error(err)
 			os.Exit(1)
+		}
+
+		if config.Bool("nori.rest.enable") {
+			go func(m plugins.Manager) {
+				addr := config.String("nori.rest.address")
+				logger.Infof("Starts Nori Core REST API on %s", addr)
+				r := mux.NewRouter()
+				rest.RegisterRoutes(config, r, m)
+
+				box := packr.NewBox("../../html")
+				fs := http.FileServer(box)
+				r.Handle("/", fs)
+
+				server := &http.Server{
+					Addr:    addr,
+					Handler: r,
+				}
+				err := server.ListenAndServe()
+				if err != nil {
+					logger.Error(err)
+				}
+
+			}(pluginManager)
 		}
 
 		// gRPC Config
@@ -93,19 +131,6 @@ var serverCmd = &cobra.Command{
 			}
 		}
 	},
-}
-
-func init() {
-	rootCmd.AddCommand(serverCmd)
-
-	config.SetDefault("nori.grpc.enable", true)
-	config.SetDefault("nori.grpc.address", "0.0.0.0:29876")
-
-	serverCmd.Flags().String("pem", "server.pem", "path to pem file")
-	serverCmd.Flags().String("key", "server.key", "path to key file")
-
-	viper.BindPFlag("pem", serverCmd.Flags().Lookup("pem"))
-	viper.BindPFlag("key", serverCmd.Flags().Lookup("key"))
 }
 
 func getPluginsDir(config go_config.Config, logger *logrus.Logger) []string {

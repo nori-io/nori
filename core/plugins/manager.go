@@ -17,8 +17,10 @@ package plugins
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/nori-io/nori/core/plugins/dependency"
+	"github.com/nori-io/nori/core/plugins/types"
 	"github.com/nori-io/nori/core/storage"
 	"github.com/nori-io/nori/version"
 
@@ -31,13 +33,13 @@ import (
 )
 
 type Manager interface {
-	AddFile(path string) (plugin.Plugin, error)
+	AddFile(path string) (meta.Meta, error)
 	AddDir(paths []string) error
 
 	Install(id meta.ID, ctx context.Context) error
 
 	Meta(id meta.ID) (meta.Meta, error)
-	Metas() []meta.Meta
+	Metas(filter MetaFilter) types.MetaList
 
 	Start(id meta.ID, ctx context.Context) error
 	StartAll(ctx context.Context) error
@@ -47,6 +49,14 @@ type Manager interface {
 
 	UnInstall(id meta.ID, ctx context.Context) error
 }
+
+type MetaFilter int
+
+const (
+	FilterRunnable MetaFilter = iota
+	FilterInstallable
+	FilterRunning
+)
 
 func NewManager(
 	storage storage.Storage,
@@ -61,13 +71,13 @@ func NewManager(
 		logger.WithField("component", "RegistryManager").Logger)
 
 	return &manager{
-		files:         map[string]meta.ID{},
+		files:         map[string]meta.Meta{},
 		configManager: configManager,
 
 		// @todo make as func param
 		depManager:      dependency.NewManager(),
 		pluginExtractor: pluginExtractor,
-		regManager:      rm,
+		registryManager: rm,
 
 		// @todo make as func param
 		registry: NewRegistry(rm, configManager, logger),
@@ -78,23 +88,28 @@ func NewManager(
 }
 
 type manager struct {
-	files           FileTable
-	configManager   commonCfg.Manager
-	depManager      dependency.Manager
-	pluginExtractor PluginExtractor
-	regManager      RegistryManager
-	registry        plugin.Registry
-	storage         storage.Storage
-	version         version.Version
-	log             *logrus.Logger
+	files              FileTable
+	installablePlugins types.PluginList
+	runningPlugins     types.MetaList
+	configManager      commonCfg.Manager
+	depManager         dependency.Manager
+	pluginExtractor    PluginExtractor
+	registryManager    RegistryManager
+	registry           plugin.Registry
+	storage            storage.Storage
+	version            version.Version
+	log                *logrus.Logger
 }
 
-func (m *manager) AddFile(path string) (plugin.Plugin, error) {
+func (m *manager) AddFile(path string) (meta.Meta, error) {
 	p, err := m.pluginExtractor.Get(path)
 	if err != nil {
 		m.log.Error(err)
 		return nil, err
 	}
+
+	// plugins files
+	m.files[path] = p.Meta()
 
 	// check needed Nori Core version
 	cons, err := p.Meta().GetCore().GetConstraint()
@@ -110,9 +125,17 @@ func (m *manager) AddFile(path string) (plugin.Plugin, error) {
 	}
 
 	// check installed or not
+	// if plugin not installed then added plugin to list of installable plugins
+	// and exit function
 	if _, ok := p.(plugin.Installable); ok {
-		// @todo check installed or not
-		// if not installed - then
+		installed, err := m.storage.Plugins().IsInstalled(p.Meta().Id())
+		if err != nil {
+			return nil, err
+		}
+		if !installed {
+			m.installablePlugins.Add(p)
+			return p.Meta(), nil
+		}
 	}
 
 	// add to dependency manager
@@ -121,15 +144,13 @@ func (m *manager) AddFile(path string) (plugin.Plugin, error) {
 		return nil, err
 	}
 
-	err = m.regManager.Add(p)
+	err = m.registryManager.Add(p)
 	if err != nil {
 		m.depManager.Remove(p.Meta().Id())
 		return nil, err
 	}
 
-	m.files[path] = p.Meta().Id()
-
-	return p, nil
+	return p.Meta(), nil
 }
 
 func (m *manager) AddDir(paths []string) error {
@@ -140,7 +161,7 @@ func (m *manager) AddDir(paths []string) error {
 
 	for _, file := range files {
 		// load plugin
-		p, err := m.AddFile(file)
+		mt, err := m.AddFile(file)
 		if err != nil {
 			m.log.Error(err)
 			continue
@@ -148,9 +169,9 @@ func (m *manager) AddDir(paths []string) error {
 
 		m.log.Infof(
 			"Found '%s' implements '%s' by '%s'",
-			p.Meta().Id().String(),
-			p.Meta().GetInterface(),
-			p.Meta().GetAuthor().Name,
+			mt.Id().String(),
+			mt.GetInterface(),
+			mt.GetAuthor().Name,
 		)
 	}
 	return nil
@@ -158,7 +179,7 @@ func (m *manager) AddDir(paths []string) error {
 
 func (m *manager) Install(id meta.ID, ctx context.Context) error {
 	// @todo check depManager for dependencies
-	p, err := m.regManager.Get(id)
+	p, err := m.installablePlugins.Find(id)
 	if err != nil {
 		return err
 	}
@@ -173,38 +194,88 @@ func (m *manager) Install(id meta.ID, ctx context.Context) error {
 }
 
 func (m *manager) Meta(id meta.ID) (meta.Meta, error) {
-	p, err := m.regManager.Get(id)
+	p, err := m.registryManager.Get(id)
 	if err != nil {
 		return nil, err
 	}
 	return p.Meta(), nil
 }
 
-func (m *manager) Metas() []meta.Meta {
-	var metas []meta.Meta
-	for _, p := range m.regManager.Plugins() {
-		metas = append(metas, p.Meta())
+func (m *manager) Metas(filter MetaFilter) types.MetaList {
+	var metas types.MetaList
+
+	switch filter {
+	case FilterRunning:
+		for _, v := range m.runningPlugins {
+			metas.Add(v)
+		}
+	case FilterInstallable:
+		for _, v := range m.installablePlugins {
+			metas.Add(v.Meta())
+		}
+	case FilterRunnable:
+		for _, p := range m.registryManager.Plugins() {
+			metas = append(metas, p.Meta())
+		}
 	}
+
 	return metas
 }
 
 func (m *manager) Start(id meta.ID, ctx context.Context) error {
-	// @todo check depManager for dependencies
-	p, err := m.regManager.Get(id)
+	p, err := m.registryManager.Get(id)
 	if err != nil {
 		return err
 	}
 
-	// @todo
-	// - all deps must be resolved
-	// - all deps must be already started
-	// -- start non-started deps
+	println(id.ID, id.Version)
+
+	// all dependencies must be resolvable
+	// all dependencies must be started, otherwise start dependency
+	var depErrs errors.DependenciesNotFound
+	for _, dep := range p.Meta().GetDependencies() {
+		did, err := m.depManager.Resolve(dep)
+		if err != nil {
+			depErrs.Add(p.Meta().Id(), dep)
+			continue
+		}
+		if _, err := m.runningPlugins.Find(did); err != nil {
+			err = m.Start(did, ctx)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	if depErrs.HasErrors() {
+		return depErrs
+	}
 
 	err = p.Init(ctx, m.configManager)
 	if err != nil {
 		return err
 	}
-	return p.Start(ctx, m.registry)
+
+	var startErr error
+	var recovered interface{}
+	func() {
+		defer func() {
+			recovered = recover()
+		}()
+		startErr = p.Start(ctx, m.registry)
+	}()
+
+	if recovered != nil {
+		return fmt.Errorf("%v", recovered)
+	}
+
+	if startErr != nil {
+		return startErr
+	}
+
+	m.runningPlugins.Add(p.Meta())
+
+	return nil
 }
 
 func (m *manager) StartAll(ctx context.Context) error {
@@ -224,18 +295,46 @@ func (m *manager) StartAll(ctx context.Context) error {
 }
 
 func (m *manager) Stop(id meta.ID, ctx context.Context) error {
-	// @todo stop dependent plugins
-	p, err := m.regManager.Get(id)
+	p, err := m.registryManager.Get(id)
 	if err != nil {
 		return err
 	}
 
-	return p.Stop(ctx, m.registry)
+	// stop dependent plugins before stop the plugin
+	//for _, dep := range m.depManager.GetDependent(id) {
+	//did, err := m.registryManager.Get(dep)
+	//if err != nil {
+	//	return err
+	//}
+	// @todo collect errors
+	//m.Stop(dep, ctx)
+	//}
+
+	var stopErr error
+	var recovered interface{}
+	func() {
+		defer func() {
+			recovered = recover()
+		}()
+		stopErr = p.Stop(ctx, m.registry)
+	}()
+
+	m.runningPlugins.Remove(id)
+
+	if recovered != nil {
+		return fmt.Errorf("%s", recovered)
+	}
+
+	if stopErr != nil {
+		return stopErr
+	}
+
+	return nil
 }
 
 func (m *manager) StopAll(ctx context.Context) error {
 	// todo stop running plugins in reverse order
-	plugins := m.regManager.Plugins()
+	plugins := m.registryManager.Plugins()
 	for i := len(plugins) - 1; i >= 0; i-- {
 		p := plugins[i]
 		err := m.Stop(p.Meta().Id(), ctx)
@@ -248,7 +347,7 @@ func (m *manager) StopAll(ctx context.Context) error {
 
 func (m *manager) UnInstall(id meta.ID, ctx context.Context) error {
 	// @todo check depManager for dependent plugins
-	p, err := m.regManager.Get(id)
+	p, err := m.registryManager.Get(id)
 	if err != nil {
 		return err
 	}
@@ -276,5 +375,8 @@ func (m *manager) UnInstall(id meta.ID, ctx context.Context) error {
 		m.log.Error(err)
 		return err
 	}
+
+	m.installablePlugins.Add(p)
+
 	return nil
 }

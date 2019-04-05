@@ -108,7 +108,7 @@ func (m *mysqlPlugins) All() ([]meta.Meta, error) {
 }
 
 func (m *mysqlPlugins) Get(id meta.ID) (meta.Meta, error) {
-	stmtGet, err := m.db.Prepare("SELECT * FROM nori_plugins WHERE id = $1 AND version = $2")
+	stmtGet, err := m.db.Prepare("SELECT * FROM nori_plugins WHERE id = ? AND version = ?")
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +146,7 @@ func (m *mysqlPlugins) Save(meta meta.Meta) error {
 }
 
 func (m *mysqlPlugins) Delete(id meta.ID) error {
-	stmtDelete, err := m.db.Prepare("DELETE FROM nori_plugins WHERE id = $1 AND version = $2")
+	stmtDelete, err := m.db.Prepare("DELETE FROM nori_plugins WHERE id = ? AND version = ?")
 	if err != nil {
 		return err
 	}
@@ -155,12 +155,12 @@ func (m *mysqlPlugins) Delete(id meta.ID) error {
 	return err
 }
 
-func (m *mysqlPlugins) IsInstalled(mt meta.Meta) (bool, error) {
+func (m *mysqlPlugins) IsInstalled(id meta.ID) (bool, error) {
 	var exists bool
 	err := m.db.QueryRow(
-		"SELECT exists (SELECT id FROM nori_plugins WHERE id = $1 AND version = $2)",
-		mt.Id().ID,
-		mt.Id().Version,
+		"SELECT exists (SELECT id FROM nori_plugins WHERE id = ? AND version = ?)",
+		id.ID,
+		id.Version,
 	).Scan(&exists)
 
 	if err != nil && err != sql.ErrNoRows {

@@ -55,17 +55,17 @@ func (n *dummyPlugins) Get(id meta.ID) (meta.Meta, error) {
 	return m, nil
 }
 
-func (n *dummyPlugins) Save(meta meta.Meta) error {
-	n.metas[meta.Id()] = meta
-	return nil
-}
-
 func (n *dummyPlugins) Delete(id meta.ID) error {
 	delete(n.metas, id)
 	return nil
 }
 
-func (n *dummyPlugins) IsInstalled(meta meta.Meta) (bool, error) {
-	_, ok := n.metas[meta.Id()]
+func (n *dummyPlugins) IsInstalled(id meta.ID) (bool, error) {
+	_, ok := n.metas[id]
 	return ok, nil
+}
+
+func (n *dummyPlugins) Save(meta meta.Meta) error {
+	n.metas[meta.Id()] = meta
+	return nil
 }

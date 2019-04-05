@@ -114,6 +114,17 @@ type DependenciesNotFound struct {
 	Dependencies map[meta.ID][]meta.Dependency
 }
 
+func (e DependenciesNotFound) Add(id meta.ID, dep meta.Dependency) {
+	if e.Dependencies == nil {
+		e.Dependencies = map[meta.ID][]meta.Dependency{}
+	}
+	e.Dependencies[id] = append(e.Dependencies[id], dep)
+}
+
+func (e DependenciesNotFound) HasErrors() bool {
+	return len(e.Dependencies) > 0
+}
+
 func (e DependenciesNotFound) Error() string {
 	var msg []string
 	for id, deps := range e.Dependencies {

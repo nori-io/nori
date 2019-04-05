@@ -32,7 +32,7 @@ type Plugins interface {
 	All() ([]meta.Meta, error)
 	Delete(meta.ID) error
 	Get(meta.ID) (meta.Meta, error)
-	IsInstalled(meta.Meta) (bool, error)
+	IsInstalled(id meta.ID) (bool, error)
 	Save(meta.Meta) error
 }
 

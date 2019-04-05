@@ -19,11 +19,11 @@ import (
 	"github.com/nori-io/nori-common/meta"
 )
 
-type FileTable map[string]meta.ID
+type FileTable map[string]meta.Meta
 
 func (ft FileTable) Find(id meta.ID) string {
 	for p, i := range ft {
-		if i == id {
+		if i.Id() == id {
 			return p
 		}
 	}

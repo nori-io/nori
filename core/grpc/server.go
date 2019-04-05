@@ -161,7 +161,7 @@ func (s Server) PluginListCommand(_ context.Context, _ *commands.PluginListReque
 	reply := new(commands.PluginListReply)
 	reply.Data = make([]*commands.PluginList, 0)
 
-	for _, m := range s.pluginManager.Metas() {
+	for _, m := range s.pluginManager.Metas(plugins.FilterRunnable) {
 		reply.Data = append(reply.Data, &commands.PluginList{
 			Id:     m.Id().String(),
 			Name:   m.GetDescription().Name,
@@ -290,11 +290,11 @@ func (s Server) PluginUploadCommand(_ context.Context, c *commands.PluginUploadR
 
 	s.log.Infof("plugin %s uploaded", c.Name)
 
-	if pe, _ := s.pluginManager.AddFile(path); pe != nil {
+	if m, _ := s.pluginManager.AddFile(path); m != nil {
 		s.log.Infof(
 			"Found: '%s' by '%s'",
-			pe.Meta().Id().String(),
-			pe.Meta().GetAuthor(),
+			m.Id().String(),
+			m.GetAuthor(),
 		)
 	} else {
 		s.log.Errorf("can't load plugin %s", c.Name)
