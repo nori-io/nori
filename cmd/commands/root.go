@@ -23,7 +23,7 @@ import (
 	"github.com/cheebo/go-config"
 	"github.com/cheebo/go-config/sources/env"
 	"github.com/cheebo/go-config/sources/file"
-	homedir "github.com/mitchellh/go-homedir"
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 
 	"github.com/sirupsen/logrus"
@@ -36,13 +36,6 @@ const (
 	configName = "nori.json"
 )
 
-// rootCmd represents the base command when called without any subcommands
-// config
-var config = go_config.New()
-
-// logger
-var logger = logrus.New()
-
 // root command
 var rootCmd = &cobra.Command{
 	Use:   "nori",
@@ -52,41 +45,50 @@ var rootCmd = &cobra.Command{
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
+	config := go_config.New()
+	logger := logrus.New()
+
+	cobra.OnInitialize(initConfig(config, logger))
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", fmt.Sprintf("config file (default is $HOME/%s/%s)", configDir, configName))
+
+	rootCmd.AddCommand(serverCmd(config, logger))
+
 	if err := rootCmd.Execute(); err != nil {
 		logger.Error(err)
 		os.Exit(1)
 	}
 }
 
-func init() {
-	cobra.OnInitialize(initConfig)
-
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", fmt.Sprintf("config file (default is $HOME/%s/%s)", configDir, configName))
-}
-
 // initConfig reads in config file and ENV variables if set.
-func initConfig() {
-	if cfgFile == "" {
-		// Find home directory.
-		home, err := homedir.Dir()
+func initConfig(config go_config.Config, logger *logrus.Logger) func() {
+	return func() {
+		config.SetDefault("nori.grpc.enable", true)
+		config.SetDefault("nori.grpc.address", "0.0.0.0:29876")
+		config.SetDefault("nori.rest.enable", false)
+		config.SetDefault("nori.rest.address", "0.0.0.0:28541")
+
+		if cfgFile == "" {
+			// Find home directory.
+			home, err := homedir.Dir()
+			if err != nil {
+				logger.Error(err)
+				os.Exit(1)
+			}
+			// build config file path
+			cfgFile = filepath.Join(home, configDir, configName)
+		}
+
+		fileSource, err := file.Source(
+			file.File{Path: cfgFile, Type: go_config.JSON, Namespace: ""},
+		)
 		if err != nil {
 			logger.Error(err)
 			os.Exit(1)
 		}
-		// build config file path
-		cfgFile = filepath.Join(home, configDir, configName)
+		config.UseSource(fileSource)
+
+		logger.Infof("Using config file: %s", cfgFile)
+
+		config.UseSource(env.Source("NORI"))
 	}
-
-	fileSource, err := file.Source(
-		file.File{Path: cfgFile, Type: go_config.JSON, Namespace: ""},
-	)
-	if err != nil {
-		logger.Error(err)
-		os.Exit(1)
-	}
-	config.UseSource(fileSource)
-
-	logger.Infof("Using config file: %s", cfgFile)
-
-	config.UseSource(env.Source("NORI"))
 }

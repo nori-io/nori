@@ -7,12 +7,12 @@ test:
 build:
 	@cd ./proto; protoc --go_out=plugins=grpc:. *.proto
 	@mkdir -p ./bin
-	@go build -o bin/nori ./cmd/main.go
+	@go build -o bin/nori ./cmd/nori.go
 
 build-web:
 	@cd ./proto; protoc --go_out=plugins=grpc:. *.proto
 	@mkdir -p ./bin
-	@packr build -o bin/nori ./cmd/main.go
+	@packr build -o bin/nori ./cmd/nori.go
 	@packr clean
 
 clean:

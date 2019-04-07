@@ -40,97 +40,89 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func init() {
-	rootCmd.AddCommand(serverCmd)
-
-	config.SetDefault("nori.grpc.enable", true)
-	config.SetDefault("nori.grpc.address", "0.0.0.0:29876")
-	config.SetDefault("nori.rest.enable", false)
-	config.SetDefault("nori.rest.address", "0.0.0.0:28541")
-}
-
 // serverCmd represents the server command
-var serverCmd = &cobra.Command{
-	Use:   "server",
-	Short: "server",
-	Run: func(cmd *cobra.Command, args []string) {
-		logger := logrus.New()
-		noriVersion := version.NoriVersion(logger)
+func serverCmd(config go_config.Config, logger *logrus.Logger) *cobra.Command {
+	return &cobra.Command{
+		Use:   "server",
+		Short: "server",
+		Run: func(cmd *cobra.Command, args []string) {
+			noriVersion := version.NoriVersion(logger)
 
-		logger.Infof("Nori Engine [version %s]", noriVersion.Version().String())
+			logger.Infof("Nori Engine [version %s]", noriVersion.Version().String())
 
-		// nori storage
-		storage, err := storage.NewStorage(config, logger)
-		if err != nil {
-			logger.Error(err)
-			os.Exit(1)
-		}
-
-		// config manager: wrapper around go-config
-		configManager := configManager.NewManager(config)
-
-		// plugin manager
-		pluginManager := plugins.NewManager(
-			storage,
-			configManager,
-			noriVersion,
-			plugins.NewPluginExtractor(),
-			logger.WithField("component", "PluginManager").Logger)
-
-		// Load Plugins
-		dirs := getPluginsDir(config, logger)
-		logger.Infof("Plugin dir(s): %s", strings.Join(dirs, ",\n"))
-		err = pluginManager.AddDir(dirs)
-		if err != nil {
-			logger.Error(err)
-		}
-
-		// check
-		err = pluginManager.StartAll(context.Background())
-		if err != nil {
-			logger.Error(err)
-			os.Exit(1)
-		}
-
-		if config.Bool("nori.rest.enable") {
-			go func(m plugins.Manager) {
-				addr := config.String("nori.rest.address")
-				logger.Infof("Starts Nori Core REST API on %s", addr)
-				r := mux.NewRouter()
-				rest.RegisterRoutes(config, r, m)
-
-				box := packr.NewBox("../../html")
-				fs := http.FileServer(box)
-				r.Handle("/", fs)
-
-				server := &http.Server{
-					Addr:    addr,
-					Handler: r,
-				}
-				err := server.ListenAndServe()
-				if err != nil {
-					logger.Error(err)
-				}
-
-			}(pluginManager)
-		}
-
-		// gRPC Config
-		if config.Bool("nori.grpc.enable") {
-			addr := config.String("nori.grpc.address")
-			server := grpc.NewServer(
-				dirs,
-				addr,
-				true,
-				pluginManager,
-				logger)
-			server.SetCertificates(config.String("nori.grpc.tls.ca"), config.String("nori.grpc.tls.private"))
-			err = server.Run()
+			// nori storage
+			storage, err := storage.NewStorage(config, logger)
 			if err != nil {
-				log.Fatal(err)
+				logger.Error(err)
+				os.Exit(1)
 			}
-		}
-	},
+
+			// config manager: wrapper around go-config
+			configManager := configManager.NewManager(config)
+
+			// plugin manager
+			pluginManager := plugins.NewManager(
+				storage,
+				configManager,
+				noriVersion,
+				plugins.NewPluginExtractor(),
+				logger.WithField("component", "PluginManager").Logger)
+
+			// Load Plugins
+			dirs := getPluginsDir(config, logger)
+			logger.Infof("Plugin dir(s): %s", strings.Join(dirs, ",\n"))
+			err = pluginManager.AddDir(dirs)
+			if err != nil {
+				logger.Error(err)
+			}
+
+			// check
+			err = pluginManager.StartAll(context.Background())
+			if err != nil {
+				logger.Error(err)
+				os.Exit(1)
+			}
+
+			if config.Bool("nori.rest.enable") {
+				go func(m plugins.Manager) {
+					addr := config.String("nori.rest.address")
+					logger.Infof("Starts Nori Core REST API on %s", addr)
+					r := mux.NewRouter()
+					rest.RegisterRoutes(config, r, m)
+
+					box := packr.NewBox("../../html")
+					fs := http.FileServer(box)
+					r.Handle("/", fs)
+
+					server := &http.Server{
+						Addr:    addr,
+						Handler: r,
+					}
+					err := server.ListenAndServe()
+					if err != nil {
+						logger.Error(err)
+					}
+
+				}(pluginManager)
+			}
+
+			// gRPC Config
+			if config.Bool("nori.grpc.enable") {
+				addr := config.String("nori.grpc.address")
+				server := grpc.NewServer(
+					dirs,
+					addr,
+					true,
+					pluginManager,
+					logger)
+				server.SetCertificates(config.String("nori.grpc.tls.ca"), config.String("nori.grpc.tls.private"))
+				err = server.Run()
+				if err != nil {
+					log.Fatal(err)
+				}
+			}
+		},
+	}
 }
 
 func getPluginsDir(config go_config.Config, logger *logrus.Logger) []string {
