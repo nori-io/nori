@@ -228,8 +228,6 @@ func (m *manager) Start(id meta.ID, ctx context.Context) error {
 		return err
 	}
 
-	println(id.ID, id.Version)
-
 	// all dependencies must be resolvable
 	// all dependencies must be started, otherwise start dependency
 	var depErrs errors.DependenciesNotFound

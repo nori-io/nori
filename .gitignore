@@ -1,7 +1,26 @@
-.idea/
+# OS
+.DS_Store
+.vscode
+.idea
 *.so
-vendor/
-Gopkg.lock
-*.so
-bin/
+
+# Build
+bin
+vendor
+build
+dist
 proto/*.pb.go
+
+# Dep manager
+Gopkg.lock
+
+# Testing
+coverage.txt
+profile.out
+
+# IDE
+.idea/
+*.iml
+
+# Graphviz
+dependency-graph.png
