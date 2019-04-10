@@ -20,11 +20,9 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"os/signal"
 	"path/filepath"
 	"strings"
 	"sync"
-	"syscall"
 
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
@@ -56,9 +54,9 @@ type Server struct {
 	pluginManager plugins.Manager
 	passkey       *Passkey
 	grpcServer    *grpc.Server
-	gShutdown     chan struct{}
+	wg            *sync.WaitGroup
+	gShutdown     <-chan struct{}
 	secure        bool
-	done          bool
 	log           *logrus.Logger
 }
 
@@ -67,6 +65,8 @@ func NewServer(
 	addr string,
 	enable bool,
 	pluginManager plugins.Manager,
+	wg *sync.WaitGroup,
+	shutdownCh <-chan struct{},
 	log *logrus.Logger,
 ) *Server {
 	return &Server{
@@ -74,7 +74,8 @@ func NewServer(
 		pluginDirs:    dirs,
 		gRPCAddress:   addr,
 		gRPCEnable:    enable,
-		gShutdown:     make(chan struct{}, 1),
+		wg:            wg,
+		gShutdown:     shutdownCh,
 		log:           log,
 	}
 }
@@ -94,57 +95,48 @@ func (s *Server) Run() error {
 
 	s.log.Infof("Passkey: %s", s.passkey)
 
-	wg := new(sync.WaitGroup)
-
-	wg.Add(1)
+	s.wg.Add(1)
 	go func(s *Server) {
-		defer wg.Done()
-		for !s.done {
-			listener, err := net.Listen("tcp", s.gRPCAddress)
-			if err != nil {
-				s.log.Fatal(err)
-			}
+		listener, err := net.Listen("tcp", s.gRPCAddress)
+		if err != nil {
+			s.log.Fatal(err)
+		}
 
-			var opts []grpc.ServerOption
+		var opts []grpc.ServerOption
 
-			opts = append(opts, grpc.MaxMsgSize(MaxMessageSize))
+		opts = append(opts, grpc.MaxMsgSize(MaxMessageSize))
 
-			if opt, err := s.CheckTLS(); err == nil {
-				opts = append(opts, opt)
-				s.secure = true
-			}
+		if opt, err := s.CheckTLS(); err == nil {
+			opts = append(opts, opt)
+			s.secure = true
+		}
 
-			s.grpcServer = grpc.NewServer(opts...)
-			commands.RegisterCommandsServer(s.grpcServer, s)
-			logrus.WithField("Secure", s.secure).Infof("Starting gRPC server on %s", s.gRPCAddress)
-			s.grpcServer.Serve(listener)
+		s.grpcServer = grpc.NewServer(opts...)
+		commands.RegisterCommandsServer(s.grpcServer, s)
+
+		s.log.WithField("Secure", s.secure).Infof("Starting Nori gRPC server on %s", s.gRPCAddress)
+		if err := s.grpcServer.Serve(listener); err != nil && err != grpc.ErrServerStopped {
+			s.log.Errorf("Nori gRPC server error: %v", err)
+			s.wg.Done()
+			return
 		}
 	}(s)
 
-	signalCh := make(chan os.Signal, 1)
-	signal.Notify(signalCh, os.Interrupt, syscall.SIGTERM)
-
 	go func(s *Server) {
-		for {
-			select {
-			case sig := <-signalCh:
-				logrus.Infof("Graceful stop gRPC server with signal: %s", sig)
-				s.Stop()
-			case <-s.gShutdown:
-				s.grpcServer.GracefulStop()
-			}
-		}
+		<-s.gShutdown
+		s.grpcServer.GracefulStop()
+		s.log.Info("Nori gRPC server stopped")
+		s.wg.Done()
 	}(s)
-
-	wg.Wait()
 
 	return nil
 }
 
-func (s *Server) Stop() {
-	s.done = true
-	s.gShutdown <- struct{}{}
-}
+//
+//func (s *Server) Stop() {
+//	s.done = true
+//	s.gShutdown <- struct{}{}
+//}
 
 func (s Server) GetPasskey() string {
 	return s.passkey.String()
@@ -378,7 +370,7 @@ func (s Server) CertsUploadCommand(_ context.Context, c *commands.CertsUploadReq
 		}, err
 	}
 
-	s.gShutdown <- struct{}{}
+	// @todo shutdown (?) or restart gRPC server
 
 	return &commands.ErrorReply{
 		Status: true,

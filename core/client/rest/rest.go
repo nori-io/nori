@@ -5,18 +5,56 @@ import (
 	"encoding/json"
 	"net/http"
 	"path"
+	"sync"
 
+	"github.com/gobuffalo/packr"
 	"github.com/nori-io/nori-common/meta"
+	"github.com/sirupsen/logrus"
 
 	"github.com/nori-io/nori/core/plugins"
 
-	"github.com/cheebo/go-config"
 	"github.com/gorilla/mux"
 )
 
-func RegisterRoutes(c go_config.Config, r *mux.Router, m plugins.Manager) {
-	base := c.String("nori.rest.base")
-	//r.Handle(path.Join(base, "/"), noriHome(m))
+func New(addr, base string,
+	manager plugins.Manager,
+	wg *sync.WaitGroup,
+	shutdownCh <-chan struct{},
+	logger *logrus.Logger,
+) {
+	r := mux.NewRouter()
+
+	RegisterRoutes(base, r, manager)
+	server := &http.Server{
+		Addr:    addr,
+		Handler: r,
+	}
+
+	wg.Add(1)
+
+	go func() {
+		<-shutdownCh
+		if err := server.Shutdown(context.Background()); err != nil {
+			logger.Errorf("Nori REST API server error: %v", err)
+		}
+		logger.Infof("Stopped Nori Core REST API Service")
+		wg.Done()
+	}()
+
+	go func() {
+		logger.Infof("Starting Nori REST API server on %s", addr)
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			logger.Errorf("Nori REST API server error: %v", err)
+			wg.Done()
+		}
+	}()
+}
+
+func RegisterRoutes(base string, r *mux.Router, m plugins.Manager) {
+	box := packr.NewBox("../../../html")
+	fs := http.FileServer(box)
+
+	r.Handle(base, fs)
 	r.Handle(path.Join(base, "/plugins"), restPlugins(m))
 	r.Handle(path.Join(base, "/plugins/installable"), restPluginsInstallable(m))
 	r.Handle(path.Join(base, "/plugins/running"), restPluginsRunning(m))

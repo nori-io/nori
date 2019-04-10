@@ -17,13 +17,14 @@ package commands
 
 import (
 	"context"
-	"log"
-	"net/http"
 	"os"
+	"os/signal"
+	"sync"
+	"syscall"
 
-	"github.com/gobuffalo/packr"
+	"github.com/nori-io/nori/core/grpc"
 
-	"github.com/gorilla/mux"
+	"github.com/nori-io/nori/core/client/rest"
 
 	"github.com/nori-io/nori/version"
 
@@ -32,33 +33,36 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/cheebo/go-config"
-	"github.com/nori-io/nori/core/client/rest"
-	configManager "github.com/nori-io/nori/core/config"
-	"github.com/nori-io/nori/core/grpc"
+	"github.com/nori-io/nori/core/config"
 	"github.com/nori-io/nori/core/plugins"
 	"github.com/nori-io/nori/core/storage"
 	"github.com/sirupsen/logrus"
 )
 
 // serverCmd represents the server command
-func serverCmd(config go_config.Config, logger *logrus.Logger) *cobra.Command {
+func serverCmd(goConfig go_config.Config, logger *logrus.Logger) *cobra.Command {
 	return &cobra.Command{
 		Use:   "server",
 		Short: "server",
 		Run: func(cmd *cobra.Command, args []string) {
+			shutdownCh := make(chan struct{})
+			interruptCh := make(chan os.Signal, 1)
+			signal.Notify(interruptCh, syscall.SIGTERM)
+			signal.Notify(interruptCh, syscall.SIGINT)
+
 			noriVersion := version.NoriVersion(logger)
 
 			logger.Infof("Nori Engine [version %s]", noriVersion.Version().String())
 
 			// nori storage
-			storage, err := storage.NewStorage(config, logger)
+			storage, err := storage.NewStorage(goConfig, logger)
 			if err != nil {
 				logger.Error(err)
 				os.Exit(1)
 			}
 
-			// config manager: wrapper around go-config
-			configManager := configManager.NewManager(config)
+			// goConfig manager: wrapper around go-goConfig
+			configManager := config.NewManager(goConfig)
 
 			// plugin manager
 			pluginManager := plugins.NewManager(
@@ -69,7 +73,7 @@ func serverCmd(config go_config.Config, logger *logrus.Logger) *cobra.Command {
 				logger.WithField("component", "PluginManager").Logger)
 
 			// Load Plugins
-			dirs := getPluginsDir(config, logger)
+			dirs := getPluginsDir(goConfig, logger)
 			logger.Infof("Plugin dir(s): %s", strings.Join(dirs, ",\n"))
 			err = pluginManager.AddDir(dirs)
 			if err != nil {
@@ -83,44 +87,43 @@ func serverCmd(config go_config.Config, logger *logrus.Logger) *cobra.Command {
 				os.Exit(1)
 			}
 
-			if config.Bool("nori.rest.enable") {
-				go func(m plugins.Manager) {
-					addr := config.String("nori.rest.address")
-					logger.Infof("Starts Nori Core REST API on %s", addr)
-					r := mux.NewRouter()
-					rest.RegisterRoutes(config, r, m)
+			wg := &sync.WaitGroup{}
 
-					box := packr.NewBox("../../html")
-					fs := http.FileServer(box)
-					r.Handle("/", fs)
-
-					server := &http.Server{
-						Addr:    addr,
-						Handler: r,
-					}
-					err := server.ListenAndServe()
-					if err != nil {
-						logger.Error(err)
-					}
-
-				}(pluginManager)
+			// REST API
+			if goConfig.Bool("nori.rest.enable") {
+				rest.New(goConfig.String("nori.rest.base"),
+					goConfig.String("nori.rest.address"),
+					pluginManager,
+					wg,
+					shutdownCh,
+					logger,
+				)
 			}
 
-			// gRPC Config
-			if config.Bool("nori.grpc.enable") {
-				addr := config.String("nori.grpc.address")
+			// gRPC
+			if goConfig.Bool("nori.grpc.enable") {
 				server := grpc.NewServer(
 					dirs,
-					addr,
+					goConfig.String("nori.grpc.address"),
 					true,
 					pluginManager,
+					wg,
+					shutdownCh,
 					logger)
-				server.SetCertificates(config.String("nori.grpc.tls.ca"), config.String("nori.grpc.tls.private"))
+				server.SetCertificates(goConfig.String("nori.grpc.tls.ca"), goConfig.String("nori.grpc.tls.private"))
 				err = server.Run()
 				if err != nil {
-					log.Fatal(err)
+					logger.Fatal(err)
 				}
 			}
+
+			go func() {
+				<-interruptCh
+				close(shutdownCh)
+			}()
+
+			wg.Wait()
+			logger.Info("Nori Plugin Engine stopped")
 		},
 	}
 }
