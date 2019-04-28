@@ -18,19 +18,19 @@ package plugins
 import (
 	"github.com/nori-io/nori-common/config"
 	"github.com/nori-io/nori-common/interfaces"
+	"github.com/nori-io/nori-common/logger"
 	"github.com/nori-io/nori-common/meta"
 	"github.com/nori-io/nori-common/plugin"
 	"github.com/nori-io/nori/core/errors"
-	"github.com/sirupsen/logrus"
 )
 
 type registry struct {
 	registryManager RegistryManager
-	log             *logrus.Logger
+	log             logger.Logger
 	configManager   config.Manager
 }
 
-func NewRegistry(rm RegistryManager, cm config.Manager, logger *logrus.Logger) plugin.Registry {
+func NewRegistry(rm RegistryManager, cm config.Manager, logger logger.Logger) plugin.Registry {
 	return registry{
 		log:             logger,
 		registryManager: rm,
@@ -122,8 +122,9 @@ func (r registry) HTTPTransport() (interfaces.HTTPTransport, error) {
 	return i, nil
 }
 
-func (r registry) Logger(meta meta.Meta) *logrus.Logger {
-	return r.log.WithField("plugin", meta.Id().String()).Logger
+func (r registry) Logger(meta meta.Meta) interfaces.Logger {
+	//return r.log.WithFields(LogFieldsMeta(meta))
+	return r.log
 }
 
 func (r registry) Mail() (interfaces.Mail, error) {

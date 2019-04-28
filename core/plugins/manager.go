@@ -19,6 +19,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/nori-io/nori-common/logger"
+
 	"github.com/nori-io/nori/core/plugins/dependency"
 	"github.com/nori-io/nori/core/plugins/types"
 	"github.com/nori-io/nori/core/storage"
@@ -28,8 +30,6 @@ import (
 	"github.com/nori-io/nori-common/meta"
 	"github.com/nori-io/nori-common/plugin"
 	"github.com/nori-io/nori/core/errors"
-
-	"github.com/sirupsen/logrus"
 )
 
 type Manager interface {
@@ -63,12 +63,12 @@ func NewManager(
 	configManager commonCfg.Manager,
 	version version.Version,
 	pluginExtractor PluginExtractor,
-	logger *logrus.Logger,
+	logger logger.Logger,
 ) Manager {
 	// @todo make as func param
 	rm := NewRegistryManager(
 		configManager,
-		logger.WithField("component", "RegistryManager").Logger)
+		logger.WithField("component", "RegistryManager"))
 
 	return &manager{
 		files:         map[string]meta.Meta{},
@@ -98,13 +98,12 @@ type manager struct {
 	registry           plugin.Registry
 	storage            storage.Storage
 	version            version.Version
-	log                *logrus.Logger
+	log                logger.Logger
 }
 
 func (m *manager) AddFile(path string) (meta.Meta, error) {
 	p, err := m.pluginExtractor.Get(path)
 	if err != nil {
-		m.log.Error(err)
 		return nil, err
 	}
 
@@ -169,7 +168,7 @@ func (m *manager) AddDir(paths []string) error {
 
 		m.log.Infof(
 			"Found '%s' implements '%s' by '%s'",
-			mt.Id().String(),
+			mt.Id().ID,
 			mt.GetInterface(),
 			mt.GetAuthor().Name,
 		)
@@ -237,7 +236,11 @@ func (m *manager) Start(id meta.ID, ctx context.Context) error {
 			depErrs.Add(p.Meta().Id(), dep)
 			continue
 		}
-		if _, err := m.runningPlugins.Find(did); err != nil {
+
+		if depMeta, err := m.runningPlugins.Find(did); depMeta == nil {
+			if err != nil {
+				return err
+			}
 			err = m.Start(did, ctx)
 			if err != nil {
 				return err
@@ -264,7 +267,7 @@ func (m *manager) Start(id meta.ID, ctx context.Context) error {
 	}()
 
 	if recovered != nil {
-		return fmt.Errorf("%v", recovered)
+		//return fmt.Errorf("%v", recovered)
 	}
 
 	if startErr != nil {
@@ -272,6 +275,8 @@ func (m *manager) Start(id meta.ID, ctx context.Context) error {
 	}
 
 	m.runningPlugins.Add(p.Meta())
+
+	m.log.WithFields(LogFieldsMeta(p.Meta())).Infof("Plugin successfully started")
 
 	return nil
 }
@@ -293,20 +298,26 @@ func (m *manager) StartAll(ctx context.Context) error {
 }
 
 func (m *manager) Stop(id meta.ID, ctx context.Context) error {
+	if running, _ := m.runningPlugins.Find(id); running == nil {
+		return nil
+	}
+
 	p, err := m.registryManager.Get(id)
 	if err != nil {
 		return err
 	}
 
 	// stop dependent plugins before stop the plugin
-	//for _, dep := range m.depManager.GetDependent(id) {
-	//did, err := m.registryManager.Get(dep)
-	//if err != nil {
-	//	return err
-	//}
-	// @todo collect errors
-	//m.Stop(dep, ctx)
-	//}
+	for _, dep := range m.depManager.GetDependent(id) {
+		depPlugin, err := m.registryManager.Get(dep)
+		if err != nil {
+			return err
+		}
+		//@todo collect errors
+		if err := m.Stop(depPlugin.Meta().Id(), ctx); err != nil {
+			m.log.WithFields(LogFieldsMeta(depPlugin.Meta())).Error(err)
+		}
+	}
 
 	var stopErr error
 	var recovered interface{}
@@ -326,6 +337,12 @@ func (m *manager) Stop(id meta.ID, ctx context.Context) error {
 	if stopErr != nil {
 		return stopErr
 	}
+
+	m.log.WithFields(logger.Fields{
+		"plugin_id":      id.ID,
+		"plugin_version": id.Version,
+		"interface":      p.Meta().GetInterface(),
+	}).Info("Plugin successfully stopped")
 
 	return nil
 }

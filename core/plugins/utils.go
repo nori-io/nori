@@ -16,6 +16,7 @@
 package plugins
 
 import (
+	"github.com/nori-io/nori-common/logger"
 	"github.com/nori-io/nori-common/meta"
 )
 
@@ -28,4 +29,19 @@ func (ft FileTable) Find(id meta.ID) string {
 		}
 	}
 	return ""
+}
+
+func LogFieldsMeta(m meta.Meta) logger.Fields {
+	return logger.Fields{
+		"plugin_id":      string(m.Id().ID),
+		"plugin_version": m.Id().Version,
+		"interface":      string(m.GetInterface()),
+	}
+}
+
+func LogFieldsId(id meta.ID) logger.Fields {
+	return logger.Fields{
+		"plugin_id":      string(id.ID),
+		"plugin_version": id.Version,
+	}
 }

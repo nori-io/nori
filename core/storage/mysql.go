@@ -20,23 +20,24 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/nori-io/nori-common/logger"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/nori-io/nori-common/meta"
-	"github.com/sirupsen/logrus"
 )
 
 type mysql struct {
 	plugins Plugins
 	db      *sql.DB
-	log     *logrus.Logger
+	log     logger.Logger
 }
 
 type mysqlPlugins struct {
 	db  *sql.DB
-	log *logrus.Logger
+	log logger.Logger
 }
 
-func newMySqlStorage(source string, log *logrus.Logger) (Storage, error) {
+func newMySqlStorage(source string, log logger.Logger) (Storage, error) {
 	db, err := sql.Open("mysql", source)
 	if err != nil {
 		return nil, err

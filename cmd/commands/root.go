@@ -20,13 +20,14 @@ import (
 	"os"
 	"path/filepath"
 
+	commonLogger "github.com/nori-io/nori-common/logger"
+	"github.com/nori-io/nori/core/log"
+
 	"github.com/cheebo/go-config"
 	"github.com/cheebo/go-config/sources/env"
 	"github.com/cheebo/go-config/sources/file"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
-
-	"github.com/sirupsen/logrus"
 )
 
 var cfgFile string
@@ -46,7 +47,7 @@ var rootCmd = &cobra.Command{
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	config := go_config.New()
-	logger := logrus.New()
+	logger := log.New()
 
 	cobra.OnInitialize(initConfig(config, logger))
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", fmt.Sprintf("config file (default is $HOME/%s/%s)", configDir, configName))
@@ -60,11 +61,13 @@ func Execute() {
 }
 
 // initConfig reads in config file and ENV variables if set.
-func initConfig(config go_config.Config, logger *logrus.Logger) func() {
+func initConfig(config go_config.Config, logger commonLogger.Logger) func() {
 	return func() {
 		config.SetDefault("nori.grpc.enable", true)
 		config.SetDefault("nori.grpc.address", "0.0.0.0:29876")
-		config.SetDefault("nori.rest.enable", false)
+
+		config.SetDefault("nori.rest.enable", true)
+		config.SetDefault("nori.rest.base", "/")
 		config.SetDefault("nori.rest.address", "0.0.0.0:28541")
 
 		if cfgFile == "" {

@@ -7,10 +7,12 @@ import (
 	"path"
 	"sync"
 
+	"github.com/nori-io/nori-common/logger"
+
+	"github.com/cheebo/gorest"
+
 	"github.com/gobuffalo/packr"
 	"github.com/nori-io/nori-common/meta"
-	"github.com/sirupsen/logrus"
-
 	"github.com/nori-io/nori/core/plugins"
 
 	"github.com/gorilla/mux"
@@ -20,7 +22,7 @@ func New(addr, base string,
 	manager plugins.Manager,
 	wg *sync.WaitGroup,
 	shutdownCh <-chan struct{},
-	logger *logrus.Logger,
+	logger logger.Logger,
 ) {
 	r := mux.NewRouter()
 
@@ -37,7 +39,7 @@ func New(addr, base string,
 		if err := server.Shutdown(context.Background()); err != nil {
 			logger.Errorf("Nori REST API server error: %v", err)
 		}
-		logger.Infof("Stopped Nori Core REST API Service")
+		logger.Info("Stopped Nori Core REST API Service")
 		wg.Done()
 	}()
 
@@ -57,6 +59,7 @@ func RegisterRoutes(base string, r *mux.Router, m plugins.Manager) {
 	r.Handle(base, fs)
 	r.Handle(path.Join(base, "/plugins"), restPlugins(m))
 	r.Handle(path.Join(base, "/plugins/installable"), restPluginsInstallable(m))
+	r.Handle(path.Join(base, "/plugins/install"), restPluginsInstall(m))
 	r.Handle(path.Join(base, "/plugins/running"), restPluginsRunning(m))
 	r.Handle(path.Join(base, "/plugins/stop"), restPluginsStop(m))
 	r.Handle(path.Join(base, "/plugins/start"), restPluginsStart(m))
@@ -82,6 +85,38 @@ func restPluginsInstallable(m plugins.Manager) http.HandlerFunc {
 
 		var output []byte
 		output, err := json.MarshalIndent(m.Metas(plugins.FilterInstallable), "", "\t")
+		if err != nil {
+			w.Write([]byte(err.Error()))
+		} else {
+			w.Write(output)
+		}
+	}
+}
+
+func restPluginsInstall(m plugins.Manager) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		ID := meta.ID{
+			ID:      meta.PluginID(r.URL.Query().Get("id")),
+			Version: r.URL.Query().Get("ver"),
+		}
+
+		err := m.Install(ID, context.Background())
+		if err != nil {
+			w.Write([]byte(err.Error()))
+		}
+
+		var output []byte
+		output, err = json.MarshalIndent(rest.ListResp{
+			Items: []interface{}{
+				struct {
+					Msg string
+				}{
+					Msg: "Plugin successfully installed",
+				},
+			},
+		}, "", "\t")
 		if err != nil {
 			w.Write([]byte(err.Error()))
 		} else {

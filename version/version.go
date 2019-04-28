@@ -18,13 +18,14 @@ package version
 import (
 	"os"
 
+	"github.com/nori-io/nori-common/logger"
+
 	"github.com/hashicorp/go-version"
-	"github.com/sirupsen/logrus"
 )
 
 const CurrentVersion = "1.0.0"
 
-func NoriVersion(log *logrus.Logger) Version {
+func NoriVersion(log logger.Logger) Version {
 	return Version{
 		logger:  log,
 		version: CurrentVersion,
@@ -32,7 +33,7 @@ func NoriVersion(log *logrus.Logger) Version {
 }
 
 type Version struct {
-	logger  *logrus.Logger
+	logger  logger.Logger
 	version string
 }
 

@@ -20,9 +20,9 @@ import (
 	"github.com/nori-io/nori/core/plugins/types"
 
 	"github.com/nori-io/nori-common/config"
+	"github.com/nori-io/nori-common/logger"
 	"github.com/nori-io/nori-common/meta"
 	"github.com/nori-io/nori-common/plugin"
-	"github.com/sirupsen/logrus"
 )
 
 type RegistryManager interface {
@@ -35,14 +35,14 @@ type RegistryManager interface {
 }
 
 type registryManager struct {
-	log           *logrus.Logger
+	log           logger.Logger
 	plugins       *types.PluginList
 	interfaces    map[meta.Interface]meta.ID
 	configManager config.Manager
 	registry      plugin.Registry
 }
 
-func NewRegistryManager(cm config.Manager, logger *logrus.Logger) RegistryManager {
+func NewRegistryManager(cm config.Manager, logger logger.Logger) RegistryManager {
 	rm := &registryManager{
 		log:        logger,
 		plugins:    &types.PluginList{},

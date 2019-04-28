@@ -16,12 +16,12 @@
 package storage
 
 import (
+	"github.com/nori-io/nori-common/logger"
 	"github.com/nori-io/nori-common/meta"
 
 	"strings"
 
 	go_config "github.com/cheebo/go-config"
-	"github.com/sirupsen/logrus"
 )
 
 type Storage interface {
@@ -44,7 +44,7 @@ const (
 	configKeyStorageSource = "nori.storage.source"
 )
 
-func NewStorage(cfg go_config.Config, log *logrus.Logger) (Storage, error) {
+func NewStorage(cfg go_config.Config, log logger.Logger) (Storage, error) {
 	storageType := cfg.String(configKeyStorageType)
 	if len(storageType) == 0 {
 		storageType = storageTypeDummy

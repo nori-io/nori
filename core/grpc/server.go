@@ -24,7 +24,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/sirupsen/logrus"
+	"github.com/nori-io/nori-common/logger"
+
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -57,7 +58,7 @@ type Server struct {
 	wg            *sync.WaitGroup
 	gShutdown     <-chan struct{}
 	secure        bool
-	log           *logrus.Logger
+	log           logger.Logger
 }
 
 func NewServer(
@@ -67,7 +68,7 @@ func NewServer(
 	pluginManager plugins.Manager,
 	wg *sync.WaitGroup,
 	shutdownCh <-chan struct{},
-	log *logrus.Logger,
+	log logger.Logger,
 ) *Server {
 	return &Server{
 		pluginManager: pluginManager,
