@@ -100,7 +100,8 @@ func (s *Server) Run() error {
 	go func(s *Server) {
 		listener, err := net.Listen("tcp", s.gRPCAddress)
 		if err != nil {
-			s.log.Fatal(err)
+			s.log.Error(err)
+			os.Exit(1)
 		}
 
 		var opts []grpc.ServerOption

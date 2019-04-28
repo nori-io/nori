@@ -130,7 +130,8 @@ func serverCmd(goConfig go_config.Config, logger logger.Logger) *cobra.Command {
 				server.SetCertificates(goConfig.String("nori.grpc.tls.ca"), goConfig.String("nori.grpc.tls.private"))
 				err = server.Run()
 				if err != nil {
-					logger.Fatal(err)
+					logger.Error(err)
+					os.Exit(1)
 				}
 			}
 
