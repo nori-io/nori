@@ -98,8 +98,8 @@ type DependencyNotFound struct {
 }
 
 func (e DependencyNotFound) Error() string {
-	return fmt.Sprintf("Dependency [%s][%s] not found",
-		e.Dependency.ID, e.Dependency.Constraint)
+	return fmt.Sprintf("Dependency [%s][%s][%s] not found",
+		e.Dependency.ID, e.Dependency.Interface, e.Dependency.Constraint)
 }
 
 type DependenciesNotFound struct {
