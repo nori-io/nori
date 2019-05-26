@@ -26,7 +26,8 @@ import (
 
 	"github.com/nori-io/nori-common/logger"
 
-	"golang.org/x/net/context"
+	"context"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 

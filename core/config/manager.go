@@ -16,17 +16,17 @@
 package config
 
 import (
+	"github.com/cheebo/go-config"
 	commonCfg "github.com/nori-io/nori-common/config"
-	"github.com/nori-io/nori-common/interfaces"
 	"github.com/nori-io/nori-common/meta"
 )
 
 type manager struct {
 	configs map[meta.ID]*[]commonCfg.Variable
-	config  interfaces.Config
+	config  go_config.Fields
 }
 
-func NewManager(config interfaces.Config) commonCfg.Manager {
+func NewManager(config go_config.Fields) commonCfg.Manager {
 	m := new(manager)
 	m.configs = make(map[meta.ID]*[]commonCfg.Variable)
 	m.config = config
@@ -52,7 +52,7 @@ func (m *manager) PluginVariables(id meta.ID) []commonCfg.Variable {
 
 type config struct {
 	cfgs   *[]commonCfg.Variable
-	config interfaces.Config
+	config go_config.Fields
 }
 
 func (c *config) Bool(key string, desc string) commonCfg.Bool {

@@ -3,6 +3,7 @@ package rest
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"path"
 	"sync"
@@ -102,21 +103,30 @@ func restPluginsInstall(m plugins.Manager) http.HandlerFunc {
 			Version: r.URL.Query().Get("ver"),
 		}
 
+		var output []byte
+
 		err := m.Install(ID, context.Background())
+		var resp interface{}
 		if err != nil {
-			w.Write([]byte(err.Error()))
+			resp = rest.ErrResp{
+				Meta: rest.ErrMeta{
+					ErrCode:    500,
+					ErrMessage: err.Error(),
+				},
+			}
+		} else {
+			resp = rest.ListResp{
+				Items: []interface{}{
+					struct {
+						Msg string
+					}{
+						Msg: fmt.Sprintf("Plugin %s successfully installed", ID.String()),
+					},
+				},
+			}
 		}
 
-		var output []byte
-		output, err = json.MarshalIndent(rest.ListResp{
-			Items: []interface{}{
-				struct {
-					Msg string
-				}{
-					Msg: "Plugin successfully installed",
-				},
-			},
-		}, "", "\t")
+		output, err = json.MarshalIndent(resp, "", "\t")
 		if err != nil {
 			w.Write([]byte(err.Error()))
 		} else {
@@ -145,13 +155,12 @@ func restPluginsStop(m plugins.Manager) http.HandlerFunc {
 		w.Header().Set("Content-Type", "text/html")
 
 		id := meta.ID{
-			ID:      meta.PluginID(r.URL.Query().Get("pid")),
+			ID:      meta.PluginID(r.URL.Query().Get("id")),
 			Version: r.URL.Query().Get("ver"),
 		}
 
 		_, err := m.Meta(id)
 		if err == nil {
-			//println("stop: ", id.String())
 			err = m.Stop(id, context.Background())
 		}
 
@@ -169,7 +178,7 @@ func restPluginsStart(m plugins.Manager) http.HandlerFunc {
 		w.Header().Set("Content-Type", "text/html")
 
 		id := meta.ID{
-			ID:      meta.PluginID(r.URL.Query().Get("pid")),
+			ID:      meta.PluginID(r.URL.Query().Get("id")),
 			Version: r.URL.Query().Get("ver"),
 		}
 

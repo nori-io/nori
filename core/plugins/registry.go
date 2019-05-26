@@ -17,7 +17,6 @@ package plugins
 
 import (
 	"github.com/nori-io/nori-common/config"
-	"github.com/nori-io/nori-common/interfaces"
 	"github.com/nori-io/nori-common/logger"
 	"github.com/nori-io/nori-common/meta"
 	"github.com/nori-io/nori-common/plugin"
@@ -38,6 +37,19 @@ func NewRegistry(rm RegistryManager, cm config.Manager, logger logger.Logger) pl
 	}
 }
 
+func (r registry) Config() config.Manager {
+	return r.configManager
+}
+
+func (r registry) Interface(i meta.Interface) (interface{}, error) {
+	return r.registryManager.GetInterface(i)
+}
+
+func (r registry) Logger(meta meta.Meta) logger.Writer {
+	//return r.log.WithFields(LogFieldsMeta(meta))
+	return r.log
+}
+
 func (r registry) Resolve(dep meta.Dependency) (interface{}, error) {
 	plugin := r.registryManager.Resolve(dep)
 	if plugin != nil {
@@ -48,6 +60,7 @@ func (r registry) Resolve(dep meta.Dependency) (interface{}, error) {
 	}
 }
 
+/*
 func (r registry) Auth() (interfaces.Auth, error) {
 	item, err := r.registryManager.GetInterface(meta.Auth)
 	if err != nil {
@@ -90,10 +103,6 @@ func (r registry) Cache() (interfaces.Cache, error) {
 	return i, nil
 }
 
-func (r registry) Config() config.Manager {
-	return r.configManager
-}
-
 func (r registry) Http() (interfaces.Http, error) {
 	item, err := r.registryManager.GetInterface(meta.HTTP)
 	if err != nil {
@@ -120,11 +129,6 @@ func (r registry) HTTPTransport() (interfaces.HTTPTransport, error) {
 		}
 	}
 	return i, nil
-}
-
-func (r registry) Logger(meta meta.Meta) interfaces.Logger {
-	//return r.log.WithFields(LogFieldsMeta(meta))
-	return r.log
 }
 
 func (r registry) Mail() (interfaces.Mail, error) {
@@ -196,3 +200,4 @@ func (r registry) Templates() (interfaces.Templates, error) {
 	}
 	return i, nil
 }
+*/

@@ -24,6 +24,7 @@ import (
 
 	"github.com/nori-io/nori-common/logger"
 
+	"github.com/nori-io/nori/core/config"
 	"github.com/nori-io/nori/core/grpc"
 
 	"github.com/nori-io/nori/core/client/rest"
@@ -36,7 +37,6 @@ import (
 
 	"github.com/cheebo/go-config"
 	noriConfig "github.com/nori-io/nori-common/config"
-	"github.com/nori-io/nori/core/config"
 	"github.com/nori-io/nori/core/plugins"
 	noriStorage "github.com/nori-io/nori/core/storage"
 )
@@ -70,15 +70,15 @@ func serverCmd(goConfig go_config.Config, logger logger.Logger) *cobra.Command {
 
 			logger.Infof("Nori Engine [version %s]", noriVersion.Version().String())
 
+			// goConfig manager: wrapper around go-goConfig
+			configManager := config.NewManager(goConfig)
+
 			// nori storage
 			storage, err := noriStorage.NewStorage(goConfig, logger)
 			if err != nil {
 				logger.Error(err)
 				os.Exit(1)
 			}
-
-			// goConfig manager: wrapper around go-goConfig
-			configManager := config.NewManager(goConfig)
 
 			// plugin manager
 			pluginManager := plugins.NewManager(

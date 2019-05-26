@@ -25,7 +25,7 @@ import (
 
 const CurrentVersion = "1.0.0"
 
-func NoriVersion(log logger.Logger) Version {
+func NoriVersion(log logger.Writer) Version {
 	return Version{
 		logger:  log,
 		version: CurrentVersion,
@@ -33,12 +33,13 @@ func NoriVersion(log logger.Logger) Version {
 }
 
 type Version struct {
-	logger  logger.Logger
+	logger  logger.Writer
 	version string
 }
 
 func (v Version) Version() *version.Version {
 	ver, err := version.NewVersion(v.version)
+	ver.Segments()
 	if err != nil {
 		v.logger.Infof("Can't process Nori version [%s]", v.version)
 		os.Exit(1)

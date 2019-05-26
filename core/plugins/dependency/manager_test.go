@@ -8,8 +8,8 @@ import (
 
 	"github.com/nori-io/nori-common/meta"
 
+	metaMock "github.com/nori-io/nori-common/mocks"
 	"github.com/nori-io/nori/core/plugins/dependency"
-	metaMock "github.com/nori-io/nori/core/plugins/mocks"
 )
 
 func TestManager_Add(t *testing.T) {
@@ -81,10 +81,12 @@ func TestManager_Resolve(t *testing.T) {
 	mt1 := &metaMock.Meta{}
 	mt1.On("Id").Return(id1)
 	mt1.On("GetDependencies").Return([]meta.Dependency{dep})
+	mt1.On("GetInterface").Return(meta.Interface(""))
 
 	mt2 := &metaMock.Meta{}
 	mt2.On("Id").Return(id2)
 	mt2.On("GetDependencies").Return([]meta.Dependency{})
+	mt2.On("GetInterface").Return(meta.Interface(""))
 
 	a.NoError(manager.Add(mt1))
 
@@ -118,7 +120,7 @@ func TestManager_Sort(t *testing.T) {
 	}
 
 	dep := meta.Dependency{
-		ID:         "nori/mocks",
+		ID:         "nori/test",
 		Constraint: ">=1.0.0",
 	}
 

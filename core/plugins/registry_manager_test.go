@@ -3,6 +3,8 @@ package plugins_test
 import (
 	"testing"
 
+	"github.com/nori-io/nori/core/log"
+
 	noriPlugin "github.com/nori-io/nori-common/plugin"
 
 	"github.com/nori-io/nori-common/config"
@@ -11,7 +13,6 @@ import (
 
 	"github.com/nori-io/nori-common/meta"
 	"github.com/nori-io/nori/core/plugins"
-	"github.com/sirupsen/logrus"
 
 	"context"
 )
@@ -19,7 +20,8 @@ import (
 func TestNewRegistry(t *testing.T) {
 	a := assert.New(t)
 
-	r := plugins.NewRegistryManager(nil, logrus.New())
+	logger := log.New()
+	r := plugins.NewRegistryManager(nil, logger)
 
 	id := meta.ID{
 		ID:      "nori/test",
@@ -30,7 +32,7 @@ func TestNewRegistry(t *testing.T) {
 	p.meta = meta.Data{
 		ID:           id,
 		Dependencies: []meta.Dependency{},
-		Interface:    meta.Custom,
+		Interface:    meta.Interface(""),
 		Core: meta.Core{
 			VersionConstraint: "~1.0.0",
 		},

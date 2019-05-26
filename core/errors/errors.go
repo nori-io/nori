@@ -65,14 +65,6 @@ func (e NoPluginInterfaceError) Error() string {
 	return fmt.Sprintf("plugin [%s] does not implement Plugin interface", e.Path)
 }
 
-type UnknownInterface struct {
-	Path string
-}
-
-func (e UnknownInterface) Error() string {
-	return fmt.Sprintf("plugin [%s] implements unknown interface", e.Path)
-}
-
 type NonInstallablePlugin struct {
 	Id   meta.ID
 	Path string
@@ -149,12 +141,4 @@ func (e DependencyCycleFound) Error() string {
 		deps = append(deps, d.String())
 	}
 	return strings.Join(deps, "\n")
-}
-
-type InterfaceAssertError struct {
-	Interface meta.Interface
-}
-
-func (e InterfaceAssertError) Error() string {
-	return fmt.Sprintf("can's assert %s to interface %s", e.Interface)
 }

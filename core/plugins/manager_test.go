@@ -3,13 +3,12 @@ package plugins_test
 import (
 	"testing"
 
-	"github.com/nori-io/nori-common/meta"
+	"github.com/nori-io/nori/core/log"
 
+	"github.com/nori-io/nori-common/meta"
 	"github.com/nori-io/nori/core/mocks"
 
 	ncmocks "github.com/nori-io/nori-common/mocks"
-	"github.com/sirupsen/logrus"
-
 	"github.com/nori-io/nori/core/plugins"
 	"github.com/nori-io/nori/version"
 	"github.com/stretchr/testify/assert"
@@ -25,7 +24,7 @@ func TestManager_AddFile(t *testing.T) {
 	// config manager
 	cfgManager := &ncmocks.Manager{}
 	// logger
-	logger := logrus.New()
+	logger := log.New()
 	// version
 	ver := version.NoriVersion(logger)
 	// plugin extractor
@@ -38,7 +37,7 @@ func TestManager_AddFile(t *testing.T) {
 		Core: meta.Core{
 			VersionConstraint: version.CurrentVersion,
 		},
-		Interface: meta.Custom,
+		Interface: meta.Interface(""),
 	})
 	pluginExtractor := &mocks.PluginExtractor{}
 	pluginExtractor.On("Get", "nori/plugin.so").Return(mockedPlugin, nil)

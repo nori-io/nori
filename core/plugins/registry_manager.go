@@ -57,7 +57,7 @@ func (r registryManager) Add(p plugin.Plugin) error {
 	id := p.Meta().Id()
 	r.plugins.Add(p)
 
-	if p.Meta().GetInterface() == meta.Custom {
+	if len(p.Meta().GetInterface()) == 0 {
 		return nil
 	}
 
@@ -118,7 +118,7 @@ func (r registryManager) Remove(p plugin.Plugin) {
 	r.plugins.Remove(p)
 
 	// remove alias for non Custom interface
-	if p.Meta().GetInterface() != meta.Custom {
+	if len(p.Meta().GetInterface()) != 0 {
 		// @todo (?) replace with another plugin from the plugins list
 		delete(r.interfaces, p.Meta().GetInterface())
 	}
@@ -129,7 +129,7 @@ func (r registryManager) Plugins() types.PluginList {
 }
 
 func (r registryManager) Resolve(dep meta.Dependency) plugin.Plugin {
-	if dep.Interface != meta.Custom {
+	if len(dep.Interface) != 0 {
 		id, ok := r.interfaces[dep.Interface]
 		if !ok {
 			return nil
