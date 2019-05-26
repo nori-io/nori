@@ -63,7 +63,7 @@ func newMySqlStorage(source string, log logger.Logger) (Storage, error) {
 	installed bigint ,
 	hash varchar(255) ,
 	PRIMARY KEY (id, version)
-)  ENGINE=MyISAM;`)
+)  ENGINE=InnoDB;`)
 
 	if err != nil {
 		return nil, err
