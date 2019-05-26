@@ -64,3 +64,4 @@ PATCH version when you make backwards-compatible bug fixes.
 
 - Sergei Che
 - Stan Shulga 
+- Anita Nabieva
