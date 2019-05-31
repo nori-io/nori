@@ -3,8 +3,8 @@ module github.com/nori-io/nori
 go 1.12
 
 require (
-	github.com/cheebo/go-config v0.0.0-20190424045734-05e3bf0a58e6
-	github.com/cheebo/gorest v0.0.0-20190507153626-582b2099b190
+	github.com/cheebo/go-config v0.9.0
+	github.com/cheebo/gorest v1.0.0
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/gobuffalo/packr v1.25.0
 	github.com/golang/protobuf v1.3.1
