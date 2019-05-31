@@ -11,7 +11,7 @@ import (
 
 // depend of plugin2
 func plugin1(deps ...meta.Dependency) meta.Meta {
-	var custom meta.Interface = "Custom"
+	var custom meta.Interface = ""
 	data := meta.Data{
 		ID: meta.ID{
 			ID:      "plugin1",
@@ -21,7 +21,7 @@ func plugin1(deps ...meta.Dependency) meta.Meta {
 			VersionConstraint: ">=1.0.0, <2.0.0",
 		},
 		Dependencies: []meta.Dependency{
-			{"plugin2", ">=1.0.0, <2.0.0", custom},
+			{"plugin2", ">=1.0.0, <2.0.0", ""},
 		},
 		Interface: custom,
 	}
@@ -33,7 +33,7 @@ func plugin1(deps ...meta.Dependency) meta.Meta {
 
 //depend of plugin3
 func plugin2(deps ...meta.Dependency) meta.Meta {
-	var custom meta.Interface = "Custom"
+	var custom meta.Interface = ""
 	data := meta.Data{
 		ID: meta.ID{
 			ID:      "plugin2",
@@ -43,7 +43,7 @@ func plugin2(deps ...meta.Dependency) meta.Meta {
 			VersionConstraint: ">=1.0.0, <2.0.0",
 		},
 		Dependencies: []meta.Dependency{
-			{"plugin3", ">=1.0.0, <2.0.0", custom},
+			{"plugin3", ">=1.0.0, <2.0.0", ""},
 		},
 		Interface: custom,
 	}
@@ -55,7 +55,7 @@ func plugin2(deps ...meta.Dependency) meta.Meta {
 
 // without dependencies
 func plugin3(deps ...meta.Dependency) meta.Meta {
-	var custom meta.Interface = "Custom"
+	var custom meta.Interface = ""
 	data := meta.Data{
 		ID: meta.ID{
 			ID:      "plugin3",
@@ -74,7 +74,7 @@ func plugin3(deps ...meta.Dependency) meta.Meta {
 
 //without dependencies
 func plugin4(deps ...meta.Dependency) meta.Meta {
-	var custom meta.Interface = "Custom"
+	var custom meta.Interface = ""
 	data := meta.Data{
 		ID: meta.ID{
 			ID:      "plugin4",

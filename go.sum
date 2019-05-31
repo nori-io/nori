@@ -104,8 +104,12 @@ github.com/mitchellh/mapstructure v0.0.0-20160808181253-ca63d7c062ee/go.mod h1:F
 github.com/mitchellh/mapstructure v1.1.2/go.mod h1:FVVH3fgwuzCH5S8UJGiWEs2h04kUh9fWfEaFds41c1Y=
 github.com/nori-io/nori-common v1.0.0 h1:UbEkdGHPwNncBcZsgXjB2tyWhzcwLIw1MidMJld//sY=
 github.com/nori-io/nori-common v1.0.0/go.mod h1:OhwkUGGfxuZCuuxHgBq8I5VA9BeBCRGZnuS45JweUvk=
+github.com/nori-io/nori-common v1.0.1 h1:MLm36RXGO6IVsgaIis3tcolqho64TWfA9O9OzilgRgQ=
+github.com/nori-io/nori-common v1.0.1/go.mod h1:OhwkUGGfxuZCuuxHgBq8I5VA9BeBCRGZnuS45JweUvk=
 github.com/nori-io/nori-interfaces v1.0.0 h1:N9vYF7ndsJu15i99RiYE9w2G4NUQLwLK8fw6+WQByLY=
 github.com/nori-io/nori-interfaces v1.0.0/go.mod h1:8VBe1F2cVl4nvu4Tf9l8mx5KYKL/3phSVCn390wSptk=
+github.com/nori-io/nori-interfaces v1.0.1 h1:eJEyGZgHO+NBg0lLAypMqGux/97yNk6Kch7xKkFq9dI=
+github.com/nori-io/nori-interfaces v1.0.1/go.mod h1:OtUnww3NNkLlFynXXv8kBMtgRsZ60c8Mr+fQQ1Ti18o=
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
 github.com/pelletier/go-toml v1.2.0 h1:T5zMGML61Wp+FlcbWjRDT7yAxhJNAiPPLOFECq181zc=
 github.com/pelletier/go-toml v1.2.0/go.mod h1:5z9KED0ma1S8pY6P1sdut58dfprrGBbd/94hg7ilaic=

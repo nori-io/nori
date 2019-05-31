@@ -110,27 +110,29 @@ func TestManager_Sort(t *testing.T) {
 	manager := dependency.NewManager()
 
 	id1 := meta.ID{
-		ID:      "nori/test",
+		ID:      "nori/main",
 		Version: "1.0.0",
 	}
 
 	id2 := meta.ID{
-		ID:      "nori/mocks",
+		ID:      "nori/dependency",
 		Version: "1.0.0",
 	}
 
 	dep := meta.Dependency{
-		ID:         "nori/test",
+		ID:         "nori/dependency",
 		Constraint: ">=1.0.0",
 	}
 
 	mt1 := &metaMock.Meta{}
 	mt1.On("Id").Return(id1)
 	mt1.On("GetDependencies").Return([]meta.Dependency{dep})
+	mt1.On("GetInterface").Return(meta.Interface(""))
 
 	mt2 := &metaMock.Meta{}
 	mt2.On("Id").Return(id2)
 	mt2.On("GetDependencies").Return([]meta.Dependency{})
+	mt1.On("GetInterface").Return(meta.Interface(""))
 
 	a.NoError(manager.Add(mt1))
 	a.NoError(manager.Add(mt2))
