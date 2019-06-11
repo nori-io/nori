@@ -36,10 +36,12 @@ func TestPluginExtractor_Get_FileDoesNotExist(t *testing.T) {
 
 func TestPluginExtractor_Get_FileOpenError(t *testing.T) {
 	a := assert.New(t)
+	dir, _ := os.Getwd()
 
 	pe := plugins.NewPluginExtractor()
 	// todo: build plugin before test
-	plugin, err := pe.Get("testdata/empty.so")
+	plugin, err := pe.Get(path.Join(dir, "/testdata/empty.so"))
+	println(path.Join(dir, "/testdata/empty.so"))
 
 	a.Error(err)
 	a.IsType(errors.FileOpenError{}, err)
@@ -48,20 +50,22 @@ func TestPluginExtractor_Get_FileOpenError(t *testing.T) {
 
 func TestPluginExtractor_GetLookupError(t *testing.T) {
 	a := assert.New(t)
+	dir, _ := os.Getwd()
 
 	pe := plugins.NewPluginExtractor()
 	// todo: build plugin before test
-	plugin, err := pe.Get("testdata/novariable.so")
+	plugin, err := pe.Get(path.Join(dir, "testdata/novariable.so"))
 	a.Error(err)
 	a.Nil(plugin)
 }
 
 func TestPluginExtractor_Get_NoPluginInterfaceError(t *testing.T) {
 	a := assert.New(t)
+	dir, _ := os.Getwd()
 
 	pe := plugins.NewPluginExtractor()
 	// todo: build plugin before test
-	plugin, err := pe.Get("testdata/interface.so")
+	plugin, err := pe.Get(path.Join(dir, "testdata/interface.so"))
 
 	a.Error(err)
 	a.IsType(errors.NoPluginInterfaceError{}, err)

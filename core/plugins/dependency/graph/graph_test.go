@@ -136,8 +136,8 @@ func pluginCms(deps ...meta.Dependency) meta.Meta {
 			Version: "1.0.0",
 		},
 		Dependencies: []meta.Dependency{
-			interfaces.HttpInterface.Dependency("1.0.0"),
-			interfaces.SQLInterface.Dependency("1.0.0"),
+			interfaces.HttpInterface.Dependency(),
+			interfaces.SQLInterface.Dependency(),
 		},
 		Core: meta.Core{
 			VersionConstraint: ">=1.0.0, <2.0.0",
@@ -264,7 +264,7 @@ func TestDependencyGraph_Sort4(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	managerPlugin.Add(plugin1(
-		interfaces.HttpInterface.Dependency("1.0.0")))
+		interfaces.HttpInterface.Dependency()))
 	managerPlugin.Add(pluginHttp())
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
@@ -313,7 +313,7 @@ func TestDependencyGraph_Sort4(t *testing.T) {
 func TestDependencyGraph_Sort5(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
-	managerPlugin.Add(plugin1(interfaces.HttpInterface.Dependency("1.0.0")))
+	managerPlugin.Add(plugin1(interfaces.HttpInterface.Dependency()))
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
 	i := 0
@@ -545,8 +545,8 @@ func TestDependencyGraph_Sort11(t *testing.T) {
 	var custom meta.Interface = ""
 	managerPlugin := dependency.NewManager()
 	managerPlugin.Add(plugin1(meta.Dependency{"plugin2", ">=1.0.0, <2.0.0", custom},
-		interfaces.HttpInterface.Dependency("1.0.0")))
-	managerPlugin.Add(pluginHttp(meta.Dependency{"plugin3", ">=1.0.0, <2.0.0", custom}, interfaces.SQLInterface.Dependency("1.0.0")))
+		interfaces.HttpInterface.Dependency()))
+	managerPlugin.Add(pluginHttp(meta.Dependency{"plugin3", ">=1.0.0, <2.0.0", custom}, interfaces.SQLInterface.Dependency()))
 	managerPlugin.Add(plugin3())
 	managerPlugin.Add(plugin2(meta.Dependency{"plugin3", ">=1.0.0, <2.0.0", custom}))
 	managerPlugin.Add(pluginMysql(meta.Dependency{"plugin3", ">=1.0.0, <2.0.0", custom}))
@@ -624,7 +624,7 @@ func TestDependencyGraph_Sort12(t *testing.T) {
 	var custom meta.Interface = ""
 	managerPlugin := dependency.NewManager()
 	managerPlugin.Add(plugin1(meta.Dependency{"plugin2", ">=1.0.0, <2.0.0", custom},
-		interfaces.HttpInterface.Dependency("1.0.0")))
+		interfaces.HttpInterface.Dependency()))
 	managerPlugin.Add(pluginHttp(meta.Dependency{"plugin3", ">=1.0.0, <2.0.0", custom}))
 	managerPlugin.Add(plugin3())
 	managerPlugin.Add(plugin2())
@@ -661,7 +661,7 @@ func TestDependencyGraph_Sort13(t *testing.T) {
 	var custom meta.Interface = ""
 	managerPlugin := dependency.NewManager()
 	managerPlugin.Add(plugin1(meta.Dependency{"plugin2", ">=1.0.0, <2.0.0", custom},
-		interfaces.HttpInterface.Dependency("1.0.0")))
+		interfaces.HttpInterface.Dependency()))
 	managerPlugin.Add(pluginHttp(meta.Dependency{"plugin3", ">=1.0.0, <2.0.0", custom}))
 	managerPlugin.Add(plugin3(meta.Dependency{"pluginHttp", ">=1.0.0, <2.0.0", custom}))
 	managerPlugin.Add(plugin2(meta.Dependency{"plugin3", ">=1.0.0, <2.0.0", custom}))
@@ -697,7 +697,7 @@ func TestDependencyGraph_Sort14(t *testing.T) {
 	var custom meta.Interface = ""
 	managerPlugin := dependency.NewManager()
 	managerPlugin.Add(plugin1(meta.Dependency{"plugin2", ">=1.0.0, <2.0.0", custom},
-		interfaces.HttpInterface.Dependency("1.0.0")))
+		interfaces.HttpInterface.Dependency()))
 	managerPlugin.Add(pluginHttp(meta.Dependency{"plugin3", ">=1.0.0, <2.0.0", custom}))
 	managerPlugin.Add(plugin3(meta.Dependency{"pluginCms", ">=1.0.0, <2.0.0", custom}))
 	managerPlugin.Add(plugin2(meta.Dependency{"plugin3", ">=1.0.0, <2.0.0", custom}))

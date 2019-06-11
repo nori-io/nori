@@ -11,8 +11,8 @@ require (
 	github.com/gorilla/mux v1.7.2
 	github.com/hashicorp/go-version v1.2.0
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/nori-io/nori-common v1.0.1
-	github.com/nori-io/nori-interfaces v1.0.1
+	github.com/nori-io/nori-common v1.0.0-rc1
+	github.com/nori-io/nori-interfaces v1.0.0-rc1
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.4
 	github.com/stretchr/testify v1.3.0
