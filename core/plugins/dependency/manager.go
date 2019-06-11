@@ -137,7 +137,11 @@ func (m *manager) Resolve(dependency meta.Dependency) (meta.ID, error) {
 			}
 		}
 
-		if (id.ID == dependency.ID) || (!dependency.Interface.IsUndefined() && (m.GetInterface() == dependency.Interface)) {
+		if !dependency.Interface.IsUndefined() && m.GetInterface().Equal(dependency.Interface) {
+			return id, nil
+		}
+
+		if id.ID == dependency.ID {
 			constraints, err := dependency.GetConstraint()
 			if err != nil {
 				return meta.ID{}, err
