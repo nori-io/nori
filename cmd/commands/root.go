@@ -21,7 +21,7 @@ import (
 	"path/filepath"
 
 	commonLogger "github.com/nori-io/nori-common/logger"
-	"github.com/nori-io/nori/core/log"
+	"github.com/nori-io/nori/internal/log"
 
 	"github.com/cheebo/go-config"
 	"github.com/cheebo/go-config/sources/env"
@@ -39,8 +39,8 @@ const (
 
 // root command
 var rootCmd = &cobra.Command{
-	Use:   "nori",
-	Short: "",
+	Use:   "nori [command]",
+	Short: fmt.Sprintf(Version()),
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -52,7 +52,7 @@ func Execute() {
 	cobra.OnInitialize(initConfig(config, logger))
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", fmt.Sprintf("config file (default is $HOME/%s/%s)", configDir, configName))
 
-	rootCmd.AddCommand(serverCmd(config, logger))
+	rootCmd.AddCommand(serverCmd(config, logger), versionCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		logger.Error(err)

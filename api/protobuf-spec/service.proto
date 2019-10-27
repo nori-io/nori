@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+import "plugin_commands.proto";
+import "certs_commands.proto";
+import "ping_pong_commands.proto";
+
+package protobuf;
+
+service Commands {
+    rpc PluginListCommand (PluginListRequest) returns (PluginListReply) {}
+    rpc PluginGetCommand (PluginGetRequest) returns (ErrorReply) {}
+    rpc PluginRemoveCommand (PluginRemoveRequest) returns (ErrorReply) {}
+    rpc PluginInstallCommand (PluginInstallRequest) returns (ErrorReply) {}
+    rpc PluginUninstallCommand (PluginUninstallRequest) returns (ErrorReply) {}
+    rpc PluginUploadCommand (PluginUploadRequest) returns (ErrorReply) {}
+    rpc PluginMetaCommand (PluginMetaRequest) returns (PluginMetaReply) {}
+
+    rpc CertsUploadCommand(CertsUploadRequest) returns (ErrorReply) {}
+
+    rpc SendPingCommand (PingRequest) returns (PongReply) {}
+}

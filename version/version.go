@@ -16,28 +16,43 @@
 package version
 
 import (
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/nori-io/nori-common/logger"
 
 	"github.com/hashicorp/go-version"
 )
 
-const CurrentVersion = "1.0.0"
+const CoreVersion = "1.0.0"
 
-func NoriVersion(log logger.Writer) Version {
-	return Version{
+var (
+	// The git commit that was compiled. These will be filled in by the compiler.
+	GitCommit string
+
+	// The main version number that is being run at the moment.
+	NoriVersion = "1.0.0"
+
+	// A pre-release marker for the version. If this is "" (empty string)
+	// then it means that it is a final release. Otherwise, this is a pre-release
+	// such as "dev" (in development), "beta", "rc1", etc.
+	VersionPrerelease = ""
+)
+
+func Version(log logger.Writer) core {
+	return core{
 		logger:  log,
-		version: CurrentVersion,
+		version: CoreVersion,
 	}
 }
 
-type Version struct {
+type core struct {
 	logger  logger.Writer
 	version string
 }
 
-func (v Version) Version() *version.Version {
+func (v core) Version() *version.Version {
 	ver, err := version.NewVersion(v.version)
 	ver.Segments()
 	if err != nil {
@@ -47,6 +62,26 @@ func (v Version) Version() *version.Version {
 	return ver
 }
 
-func (v Version) Original() string {
+func (v core) Original() string {
 	return v.version
+}
+
+// GetHumanVersion composes the parts of the version in a way that's suitable
+// for displaying to humans.
+func GetHumanVersion() string {
+	version := NoriVersion
+	release := VersionPrerelease
+	if release == "" {
+		release = "dev"
+	}
+
+	if release != "" {
+		if !strings.HasSuffix(version, "-"+release) {
+			version += fmt.Sprintf("-%s", release)
+		}
+		if GitCommit != "" {
+			version += fmt.Sprintf(" (%s)", GitCommit)
+		}
+	}
+	return strings.Replace(version, "'", "", -1)
 }

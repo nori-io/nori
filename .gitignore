@@ -5,7 +5,7 @@
 *.so
 
 # Build
-bin
+nori
 vendor
 build
 dist

@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package protobuf;
+
+// []bs = {len_hmac(1 byte), hmac..., body_file...}
+message CertsUploadRequest {
+    bytes pem = 1;
+    bytes key = 2;
+}

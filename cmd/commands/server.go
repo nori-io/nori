@@ -24,10 +24,10 @@ import (
 
 	"github.com/nori-io/nori-common/logger"
 
-	"github.com/nori-io/nori/core/config"
-	"github.com/nori-io/nori/core/grpc"
+	"github.com/nori-io/nori/internal/config"
+	"github.com/nori-io/nori/internal/server/grpc"
 
-	"github.com/nori-io/nori/core/client/rest"
+	"github.com/nori-io/nori/internal/client/rest"
 
 	"github.com/nori-io/nori/version"
 
@@ -36,16 +36,9 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/cheebo/go-config"
-	noriConfig "github.com/nori-io/nori-common/config"
-	"github.com/nori-io/nori/core/plugins"
-	noriStorage "github.com/nori-io/nori/core/storage"
+	"github.com/nori-io/nori/internal/plugins"
+	noriStorage "github.com/nori-io/nori/internal/storage"
 )
-
-type app struct {
-	pluginManager plugins.Manager
-	configManager noriConfig.Manager
-	storage       noriStorage.Storage
-}
 
 type channels struct {
 	shutdown  chan struct{}
