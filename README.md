@@ -38,19 +38,7 @@ Example config file:
 }
 ```
 
-
-#### MySQL Storage
-
-```json
-{
-  "nori": {
-    "storage": {
-      "type": "mysql",
-      "source": "nori:nori@/noridb"
-    }
-  }
-}
-```
+## Core Plugins
 
 ## Semantic Versioning
 

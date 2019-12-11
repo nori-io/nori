@@ -3,7 +3,7 @@ package commands
 import (
 	"fmt"
 
-	"github.com/nori-io/nori/version"
+	"github.com/nori-io/nori/internal/version"
 	"github.com/spf13/cobra"
 )
 

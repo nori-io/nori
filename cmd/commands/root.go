@@ -17,11 +17,10 @@ package commands
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 
+	"github.com/nori-io/logger"
 	commonLogger "github.com/nori-io/nori-common/logger"
-	"github.com/nori-io/nori/internal/log"
 
 	"github.com/cheebo/go-config"
 	"github.com/cheebo/go-config/sources/env"
@@ -40,14 +39,14 @@ const (
 // root command
 var rootCmd = &cobra.Command{
 	Use:   "nori [command]",
-	Short: fmt.Sprintf(Version()),
+	Short: fmt.Sprintf(`todo Version()`),
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	config := go_config.New()
-	logger := log.New()
+	logger := logger.New()
 
 	cobra.OnInitialize(initConfig(config, logger))
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", fmt.Sprintf("config file (default is $HOME/%s/%s)", configDir, configName))
@@ -55,8 +54,7 @@ func Execute() {
 	rootCmd.AddCommand(serverCmd(config, logger), versionCmd)
 
 	if err := rootCmd.Execute(); err != nil {
-		logger.Error(err)
-		os.Exit(1)
+		logger.Fatal(err.Error())
 	}
 }
 
@@ -74,8 +72,7 @@ func initConfig(config go_config.Config, logger commonLogger.Logger) func() {
 			// Find home directory.
 			home, err := homedir.Dir()
 			if err != nil {
-				logger.Error(err)
-				os.Exit(1)
+				logger.Fatal(err.Error())
 			}
 			// build config file path
 			cfgFile = filepath.Join(home, configDir, configName)
@@ -85,12 +82,11 @@ func initConfig(config go_config.Config, logger commonLogger.Logger) func() {
 			file.File{Path: cfgFile, Type: go_config.JSON, Namespace: ""},
 		)
 		if err != nil {
-			logger.Error(err)
-			os.Exit(1)
+			logger.Fatal(err.Error())
 		}
 		config.UseSource(fileSource)
 
-		logger.Infof("Using config file: %s", cfgFile)
+		logger.Info("Using config file: %s \n", cfgFile)
 
 		config.UseSource(env.Source("NORI"))
 	}

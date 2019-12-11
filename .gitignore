@@ -5,9 +5,8 @@
 *.so
 
 # Build
-nori
+/build/bin/
 vendor
-build
 dist
 proto/*.pb.go
 

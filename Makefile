@@ -2,6 +2,10 @@
 
 NORI_BUILD_CMD ?= build -o nori ./cmd/nori.go
 
+ifeq ($(GO111MODULE),auto)
+override GO111MODULE = on
+endif
+
 clean: ## remove generated files, tidy vendor dependencies
 	export GO111MODULE=on ;\
 	go mod tidy ;\
@@ -10,21 +14,25 @@ clean: ## remove generated files, tidy vendor dependencies
 	@packr clean
 .PHONY: clean
 
-test:
+build-test-plugins: ## build plugins to run tests with plugins
+	@echo "implement command to build test/testdata/plugins/* plugins"
+.PHONY: build-test-plugins
+
+test: ## run tests
 	@go test -v ./...
 .PHONY: test
 
-build: protoc-generate
+build: protoc-generate ## build nori binary
 	@go $(NORI_BUILD_CMD)
 .PHONY: build
 
-build-web: protoc-generate
+build-web: protoc-generate ## build nori binary with packr
 	@packr $(NORI_BUILD_CMD)
 	@packr clean
 .PHONY: build-web
 
-protoc-generate:
-	@protoc --proto_path=api/protobuf-spec/ --go_out=plugins=grpc:./internal/generated/protobuf api/protobuf-spec/*.proto
+protoc-generate: ## generate protobuf
+	@protoc --proto_path=api/protobuf/nori --go_out=plugins=grpc:./internal/generated/protobuf api/protobuf/*.proto
 .PHONY: protoc-generate
 
 lint: ## execute linter
@@ -33,3 +41,9 @@ lint: ## execute linter
 	  --enable=structcheck --enable=maligned --enable=errcheck --enable=dupl --enable=ineffassign \
 	  --enable=interfacer --enable=unconvert --enable=goconst --enable=gosec --enable=megacheck ./... ;
 .PHONY: lint
+
+help: ## run this help
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+.PHONY: help
+
+.DEFAULT_GOAL := help
