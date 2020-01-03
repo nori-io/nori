@@ -25,14 +25,14 @@ import (
 	"github.com/hashicorp/go-version"
 )
 
-const CoreVersion = "1.0.0"
+const CoreVersion = "0.2.0"
 
 var (
 	// The git commit that was compiled. These will be filled in by the compiler.
 	GitCommit string
 
 	// The main version number that is being run at the moment.
-	NoriVersion = "1.0.0"
+	NoriVersion = "0.2.0"
 
 	// A pre-release marker for the version. If this is "" (empty string)
 	// then it means that it is a final release. Otherwise, this is a pre-release

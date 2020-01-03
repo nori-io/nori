@@ -20,7 +20,6 @@ RUN go build -o bin/nori  ./cmd/nori.go
 FROM ubuntu:18.04 
 
 RUN apt-get install
-
 WORKDIR /app/
 
 # Copy the Pre-built binary file from the previous stage
@@ -29,13 +28,14 @@ RUN chmod +x nori
 
 # Copy defualt config file
 RUN mkdir /app/config
-COPY /configs/docker/nori.json /app/config/nori.json
+COPY /configs/docker/nori.yml /app/config/nori.yml
 
 # Expose port 80, 8080, 29876 to the outside world
 EXPOSE 80 8080 29876
 
 # Declare volumes to mount
 VOLUME /plugins
+VOLUME /configs
 
 # Command to run the executable
-CMD ["/app/nori","server", "--config", "/app/config/nori.json"]
+CMD ["/app/nori","server", "--config", "/app/config/nori.yml"]

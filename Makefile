@@ -6,6 +6,9 @@ ifeq ($(GO111MODULE),auto)
 override GO111MODULE = on
 endif
 
+DOCKER_IMAGE ?= noriio/nori
+DOCKER_TAG ?= 0.2.0
+
 clean: ## remove generated files, tidy vendor dependencies
 	export GO111MODULE=on ;\
 	go mod tidy ;\
@@ -31,8 +34,12 @@ build-web: protoc-generate ## build nori binary with packr
 	@packr clean
 .PHONY: build-web
 
+docker-image: protoc-generate ## build noriio/nori docker image
+	docker build -f build/docker/0.2.0/Dockerfile -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
+.PHONY: docker-build-image
+
 protoc-generate: ## generate protobuf
-	@protoc --proto_path=api/protobuf/nori --go_out=plugins=grpc:./internal/generated/protobuf api/protobuf/*.proto
+	@protoc --proto_path=api/protobuf/nori --go_out=plugins=grpc:./internal/generated/protobuf api/protobuf/nori/*.proto
 .PHONY: protoc-generate
 
 lint: ## execute linter

@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-package config_manager
+package config
 
 import (
 	"github.com/cheebo/go-config"

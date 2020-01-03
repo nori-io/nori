@@ -12,7 +12,7 @@ import (
 	"github.com/nori-io/nori-common/meta"
 	"github.com/nori-io/nori-common/plugin"
 	"github.com/nori-io/nori-common/version"
-	configManager "github.com/nori-io/nori/internal/config_manager"
+	configManager "github.com/nori-io/nori/internal/config"
 	"github.com/nori-io/nori/internal/dependency"
 	"github.com/nori-io/nori/pkg/errors"
 	"github.com/nori-io/nori/pkg/files"
@@ -163,14 +163,15 @@ func (m *manager) AddDir(paths []string) ([]meta.Meta, error) {
 
 func (m *manager) Install(ctx context.Context, id meta.ID) error {
 	// @todo check depManager for dependencies
-	p, err := m.data.installablePlugins.Find(id)
+	pm, err := m.data.installablePlugins.Find(id)
 	if err != nil {
 		return err
 	}
+	p, err := m.registry.Get(pm.Id())
 	installable, ok := p.(plugin.Installable)
 	if !ok {
 		return errors.NonInstallablePlugin{
-			ID: p.Id(),
+			ID: id,
 			// todo
 			//Path: m.data.files.Find(p.Id()),
 		}

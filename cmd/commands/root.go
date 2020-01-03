@@ -17,6 +17,7 @@ package commands
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/nori-io/logger"
@@ -46,7 +47,7 @@ var rootCmd = &cobra.Command{
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	config := go_config.New()
-	logger := logger.New()
+	logger := logger.New(logger.SetOutWriter(os.Stderr), logger.SetJsonFormatter())
 
 	cobra.OnInitialize(initConfig(config, logger))
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", fmt.Sprintf("config file (default is $HOME/%s/%s)", configDir, configName))
@@ -86,7 +87,7 @@ func initConfig(config go_config.Config, logger commonLogger.Logger) func() {
 		}
 		config.UseSource(fileSource)
 
-		logger.Info("Using config file: %s \n", cfgFile)
+		logger.Info("Using config file: %s", cfgFile)
 
 		config.UseSource(env.Source("NORI"))
 	}

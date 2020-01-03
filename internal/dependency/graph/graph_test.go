@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/nori-io/nori-common/meta"
-	"github.com/nori-io/nori-interfaces/interfaces"
 	"github.com/nori-io/nori/internal/dependency"
 	"github.com/stretchr/testify/assert"
 )
@@ -14,11 +13,14 @@ const (
 	pluginTwo   = "plugin2"
 	pluginThree = "plugin3"
 	pluginFour  = "plugin4"
+
+	HttpInterface = meta.Interface("nori/Http@1.0.0")
+	SQLInterface  = meta.Interface("nori/Sql@1.0.0")
 )
 
 // depend of plugin2
 func plugin1(deps ...meta.Dependency) meta.Meta {
-	var custom meta.Interface
+	custom := meta.Interface("nori/Custom@0.0.1")
 	data := meta.Data{
 		ID: meta.ID{
 			ID:      pluginOne,
@@ -40,7 +42,7 @@ func plugin1(deps ...meta.Dependency) meta.Meta {
 
 //depend of plugin3
 func plugin2(deps ...meta.Dependency) meta.Meta {
-	var custom meta.Interface
+	custom := meta.Interface("nori/Custom@0.0.1")
 	data := meta.Data{
 		ID: meta.ID{
 			ID:      pluginTwo,
@@ -62,7 +64,7 @@ func plugin2(deps ...meta.Dependency) meta.Meta {
 
 // without dependencies
 func plugin3(deps ...meta.Dependency) meta.Meta {
-	var custom meta.Interface
+	custom := meta.Interface("nori/Custom@0.0.1")
 	data := meta.Data{
 		ID: meta.ID{
 			ID:      pluginThree,
@@ -81,7 +83,7 @@ func plugin3(deps ...meta.Dependency) meta.Meta {
 
 //without dependencies
 func plugin4(deps ...meta.Dependency) meta.Meta {
-	var custom meta.Interface = ""
+	custom := meta.Interface("nori/Custom@0.0.1")
 	data := meta.Data{
 		ID: meta.ID{
 			ID:      pluginFour,
@@ -108,7 +110,7 @@ func pluginHTTP(deps ...meta.Dependency) meta.Meta {
 		Core: meta.Core{
 			VersionConstraint: ">=1.0.0, <2.0.0",
 		},
-		Interface: interfaces.HttpInterface,
+		Interface: HttpInterface,
 	}
 	if len(deps) > 0 {
 		data.Dependencies = deps
@@ -126,7 +128,7 @@ func pluginMysql(deps ...meta.Dependency) meta.Meta {
 		Core: meta.Core{
 			VersionConstraint: ">=1.0.0, <2.0.0",
 		},
-		Interface: interfaces.SQLInterface,
+		Interface: SQLInterface,
 	}
 	if len(deps) > 0 {
 		data.Dependencies = deps
@@ -136,15 +138,15 @@ func pluginMysql(deps ...meta.Dependency) meta.Meta {
 
 // depend of  pluginHTTP, pluginMysql
 func pluginCms(deps ...meta.Dependency) meta.Meta {
-	var custom meta.Interface = "Custom"
+	custom := meta.Interface("nori/Custom@1.0.0")
 	data := meta.Data{
 		ID: meta.ID{
 			ID:      "pluginCms",
 			Version: "1.0.0",
 		},
 		Dependencies: []meta.Dependency{
-			interfaces.HttpInterface.Dependency(),
-			interfaces.SQLInterface.Dependency(),
+			HttpInterface.Dependency(),
+			SQLInterface.Dependency(),
 		},
 		Core: meta.Core{
 			VersionConstraint: ">=1.0.0, <2.0.0",
@@ -270,7 +272,7 @@ func TestDependencyGraph_Sort3(t *testing.T) {
 func TestDependencyGraph_Sort4(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
-	a.Nil(managerPlugin.Add(plugin1(interfaces.HttpInterface.Dependency())))
+	a.Nil(managerPlugin.Add(plugin1(HttpInterface.Dependency())))
 	a.Nil(managerPlugin.Add(pluginHTTP()))
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
@@ -319,7 +321,7 @@ func TestDependencyGraph_Sort4(t *testing.T) {
 func TestDependencyGraph_Sort5(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
-	a.Nil(managerPlugin.Add(plugin1(interfaces.HttpInterface.Dependency())))
+	a.Nil(managerPlugin.Add(plugin1(HttpInterface.Dependency())))
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
 	i := 0
@@ -551,8 +553,8 @@ func TestDependencyGraph_Sort11(t *testing.T) {
 	var custom meta.Interface = ""
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(plugin1(meta.Dependency{pluginTwo, ">=1.0.0, <2.0.0", custom},
-		interfaces.HttpInterface.Dependency())))
-	a.Nil(managerPlugin.Add(pluginHTTP(meta.Dependency{pluginThree, ">=1.0.0, <2.0.0", custom}, interfaces.SQLInterface.Dependency())))
+		HttpInterface.Dependency())))
+	a.Nil(managerPlugin.Add(pluginHTTP(meta.Dependency{pluginThree, ">=1.0.0, <2.0.0", custom}, SQLInterface.Dependency())))
 	a.Nil(managerPlugin.Add(plugin3()))
 	a.Nil(managerPlugin.Add(plugin2(meta.Dependency{pluginThree, ">=1.0.0, <2.0.0", custom})))
 	a.Nil(managerPlugin.Add(pluginMysql(meta.Dependency{pluginThree, ">=1.0.0, <2.0.0", custom})))
@@ -630,7 +632,7 @@ func TestDependencyGraph_Sort12(t *testing.T) {
 	var custom meta.Interface = ""
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(plugin1(meta.Dependency{pluginTwo, ">=1.0.0, <2.0.0", custom},
-		interfaces.HttpInterface.Dependency())))
+		HttpInterface.Dependency())))
 	a.Nil(managerPlugin.Add(pluginHTTP(meta.Dependency{pluginThree, ">=1.0.0, <2.0.0", custom})))
 	a.Nil(managerPlugin.Add(plugin3()))
 	a.Nil(managerPlugin.Add(plugin2()))
@@ -667,7 +669,7 @@ func TestDependencyGraph_Sort13(t *testing.T) {
 	var custom meta.Interface = ""
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(plugin1(meta.Dependency{pluginTwo, ">=1.0.0, <2.0.0", custom},
-		interfaces.HttpInterface.Dependency())))
+		HttpInterface.Dependency())))
 	a.Nil(managerPlugin.Add(pluginHTTP(meta.Dependency{pluginThree, ">=1.0.0, <2.0.0", custom})))
 	a.Nil(managerPlugin.Add(plugin3(meta.Dependency{"pluginHTTP", ">=1.0.0, <2.0.0", custom})))
 	a.Nil(managerPlugin.Add(plugin2(meta.Dependency{pluginThree, ">=1.0.0, <2.0.0", custom})))
@@ -703,7 +705,7 @@ func TestDependencyGraph_Sort14(t *testing.T) {
 	var custom meta.Interface = ""
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(plugin1(meta.Dependency{pluginTwo, ">=1.0.0, <2.0.0", custom},
-		interfaces.HttpInterface.Dependency())))
+		HttpInterface.Dependency())))
 	a.Nil(managerPlugin.Add(pluginHTTP(meta.Dependency{pluginThree, ">=1.0.0, <2.0.0", custom})))
 	a.Nil(managerPlugin.Add(plugin3(meta.Dependency{"pluginCms", ">=1.0.0, <2.0.0", custom})))
 	a.Nil(managerPlugin.Add(plugin2(meta.Dependency{pluginThree, ">=1.0.0, <2.0.0", custom})))

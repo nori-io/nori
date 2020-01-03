@@ -2,7 +2,6 @@ package nori
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"sync"
 
@@ -18,7 +17,7 @@ type Nori interface {
 
 type nori struct {
 	config        Config
-	logger        logger.Logger
+	log           logger.Logger
 	pluginManager plugins.Manager
 	sig           chan os.Signal
 }
@@ -33,49 +32,86 @@ func NewNori(cfg go_config.Config, log logger.Logger, sig chan os.Signal) Nori {
 	}
 	return &nori{
 		config:        c,
-		logger:        log,
+		log:           log,
 		pluginManager: plugins.NewManager(cfg, log),
 		sig:           sig,
 	}
 }
 
 func (n *nori) Exec() error {
+	ctx := context.Background()
 	// todo: load config
-	// todo: logger config
+	// todo: log config
 
-	// todo: load files
-
-	dirs := make([]string, len(n.config.Plugins.Dir))
-	for i := 0; i < len(n.config.Plugins.Dir); i++ {
-		dirs[i] = n.config.Plugins.Dir[i].(string)
-	}
-
-	m, err := n.pluginManager.AddDir(dirs)
+	// load plugin files
+	m, err := n.pluginManager.AddDir(pluginDir(n.config.Plugins.Dir))
 	if err != nil {
-		fmt.Println(err)
+		n.log.Fatal("Cannot load plugins: %s", err.Error())
 	}
 	for _, d := range m {
-		fmt.Println(d.Id())
+		n.log.Info("Found plugin [%s] interface [%s]", d.Id(), d.GetInterface())
 	}
 
-	// todo: load plugins
-	// todo: start plugins
+	//filepath.Match()
+
+	ctx, cancelFunc := context.WithCancel(context.Background())
+
+	wg := &sync.WaitGroup{}
+	// two services to shutdown: PluginManager, gRPC, HTTP
+	wg.Add(3)
+
+	// start plugins
+	err = n.pluginManager.StartAll(ctx)
+	if err != nil {
+		n.log.Error("PluginManager cannot start all plugins: [%s]", err.Error())
+	}
 
 	// todo: start REST API server
 	// todo: start gRPC server
 
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
 	go func() {
-		<-n.sig
-
-		if err := n.pluginManager.StopAll(context.Background()); err != nil {
-			n.logger.Error("%v", err)
+		defer wg.Done()
+		select {
+		case <-ctx.Done():
+			if err := n.pluginManager.StopAll(ctx); err != nil {
+				n.log.Error("%v", err)
+			}
+			n.log.Info("Plugin Manager stopped all")
 		}
-		wg.Done()
 	}()
+	go n.rest(ctx, wg)
+	go n.gRPC(ctx, wg)
 
+	<-n.sig
+	cancelFunc()
 	wg.Wait()
-
 	return nil
+}
+
+func (n *nori) rest(ctx context.Context, wg *sync.WaitGroup) {
+	defer wg.Done()
+	// todo
+	select {
+	case <-ctx.Done():
+		// todo: shutdown
+		n.log.Info("Nori REST Server went down")
+	}
+}
+
+func (n *nori) gRPC(ctx context.Context, wg *sync.WaitGroup) {
+	defer wg.Done()
+	// todo
+	select {
+	case <-ctx.Done():
+		// todo: shutdown
+		n.log.Info("Nori gRPC Server went down")
+	}
+}
+
+func pluginDir(list []interface{}) []string {
+	dirs := make([]string, len(list))
+	for i := 0; i < len(list); i++ {
+		dirs[i] = list[i].(string)
+	}
+	return dirs
 }
