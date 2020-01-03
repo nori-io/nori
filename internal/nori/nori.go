@@ -57,7 +57,7 @@ func (n *nori) Exec() error {
 	ctx, cancelFunc := context.WithCancel(context.Background())
 
 	wg := &sync.WaitGroup{}
-	// two services to shutdown: PluginManager, gRPC, HTTP
+	// three services to shutdown: PluginManager, gRPC, HTTP
 	wg.Add(3)
 
 	// start plugins
@@ -66,19 +66,7 @@ func (n *nori) Exec() error {
 		n.log.Error("PluginManager cannot start all plugins: [%s]", err.Error())
 	}
 
-	// todo: start REST API server
-	// todo: start gRPC server
-
-	go func() {
-		defer wg.Done()
-		select {
-		case <-ctx.Done():
-			if err := n.pluginManager.StopAll(ctx); err != nil {
-				n.log.Error("%v", err)
-			}
-			n.log.Info("Plugin Manager stopped all")
-		}
-	}()
+	go n.pm(ctx, wg)
 	go n.rest(ctx, wg)
 	go n.gRPC(ctx, wg)
 
@@ -90,7 +78,7 @@ func (n *nori) Exec() error {
 
 func (n *nori) rest(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
-	// todo
+	// todo start REST server
 	select {
 	case <-ctx.Done():
 		// todo: shutdown
@@ -100,11 +88,24 @@ func (n *nori) rest(ctx context.Context, wg *sync.WaitGroup) {
 
 func (n *nori) gRPC(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
-	// todo
+	// todo start gRPC server
 	select {
 	case <-ctx.Done():
 		// todo: shutdown
 		n.log.Info("Nori gRPC Server went down")
+	}
+}
+
+func (n *nori) pm(ctx context.Context, wg *sync.WaitGroup) {
+	defer wg.Done()
+	// todo
+	select {
+	case <-ctx.Done():
+		if err := n.pluginManager.StopAll(ctx); err != nil {
+			n.log.Error("Plugin Manager stopped all with error [%s]", err.Error())
+		} else {
+			n.log.Info("Plugin Manager stopped all")
+		}
 	}
 }
 
