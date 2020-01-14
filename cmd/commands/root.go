@@ -30,7 +30,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var cfgFile string
+var (
+	cfgFile string
+	devMode bool
+)
 
 const (
 	configDir  = ".config/nori"
@@ -51,6 +54,7 @@ func Execute() {
 
 	cobra.OnInitialize(initConfig(config, logger))
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", fmt.Sprintf("config file (default is $HOME/%s/%s)", configDir, configName))
+	rootCmd.PersistentFlags().BoolVar(&devMode, "dev", false, "flag to run server in development mode")
 
 	rootCmd.AddCommand(serverCmd(config, logger), versionCmd)
 

@@ -54,7 +54,7 @@ type manager struct {
 }
 
 func NewManager(cfg go_config.Config, log logger.Logger) Manager {
-	v1, _ := version.NewVersion("0.2.0-alpha") // todo: fixme
+	v1, _ := version.NewVersion("0.2.0") // todo: fixme
 	return &manager{
 		helpers: struct {
 			fl files.FilesLoader
@@ -140,7 +140,7 @@ func (m *manager) AddDir(paths []string) ([]meta.Meta, error) {
 		return nil, err
 	}
 
-	mts := make([]meta.Meta, len(files))
+	mts := []meta.Meta{}
 
 	for _, file := range files {
 		// load plugin

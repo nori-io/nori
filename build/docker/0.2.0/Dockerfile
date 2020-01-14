@@ -28,7 +28,13 @@ RUN chmod +x nori
 
 # Copy defualt config file
 RUN mkdir /app/config
-COPY /configs/docker/nori.yml /app/config/nori.yml
+COPY /configs/docker/nori.json /app/config/nori.json
+COPY /build/docker/0.2.0/files/nori.sh /app/nori.sh
+RUN chmod +x nori.sh
+
+# Pass Nori Config flag
+ARG NORI_CONFIG
+ENV NORI_CONFIG=${NORI_CONFIG:-'/app/config/nori.json'}
 
 # Expose port 80, 8080, 29876 to the outside world
 EXPOSE 80 8080 29876
@@ -38,4 +44,4 @@ VOLUME /plugins
 VOLUME /configs
 
 # Command to run the executable
-CMD ["/app/nori","server", "--config", "/app/config/nori.yml"]
+ENTRYPOINT ["/app/nori.sh"]
