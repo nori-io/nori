@@ -281,7 +281,11 @@ func (g *dependencyGraph) Sort() ([]meta.ID, error) {
 
 	if len(tmpGraph.Edges()) > 0 {
 		// @todo return cycle info
-		return []meta.ID{}, fmt.Errorf("dependency cycle found")
+		cyclePlugins:=""
+		for _,v:=range tmpGraph.Edges(){
+			cyclePlugins=cyclePlugins+ fmt.Sprintf("%s",v.From())+"\n"
+		}
+		return []meta.ID{}, fmt.Errorf( "dependency cycle found among plugins:\n"+cyclePlugins)
 	}
 
 	return sorted, nil
