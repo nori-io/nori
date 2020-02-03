@@ -107,6 +107,15 @@ type DependencyNotFound struct {
 	Dependency meta.Dependency
 }
 
+func (e SelfRingFound) Error() string {
+	return fmt.Sprintf("Selfring [%s][%s][%s] found",
+		e.Dependency.ID, e.Dependency.Interface, e.Dependency.Constraint)
+}
+
+type SelfRingFound struct {
+	Dependency meta.Dependency
+}
+
 func (e DependencyNotFound) Error() string {
 	return fmt.Sprintf("Dependency [%s][%s][%s] not found",
 		e.Dependency.ID, e.Dependency.Interface, e.Dependency.Constraint)

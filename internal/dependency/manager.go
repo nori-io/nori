@@ -16,8 +16,6 @@
 package dependency
 
 import (
-	"fmt"
-
 	"github.com/nori-io/nori-common/meta"
 
 	"github.com/nori-io/nori/internal/dependency/graph"
@@ -71,7 +69,13 @@ func NewManager() Manager {
 
 func (m *manager) Add(mt meta.Meta) error {
 	m.plugins[mt.Id()] = mt
-	var selfrings []meta.Dependency
+
+	for _, dep := range mt.GetDependencies() {
+		if mt.Id().ID == dep.ID {
+			selfring := dep
+			return errors.SelfRingFound{Dependency: selfring}
+		}
+	}
 
 	// add to graph
 	err := m.graph.AddNode(mt.Id())
@@ -81,9 +85,6 @@ func (m *manager) Add(mt meta.Meta) error {
 
 	// build edges
 	for _, dep := range mt.GetDependencies() {
-		if mt.Id().ID==dep.ID{
-			selfrings=append(selfrings,dep)
-		}
 		depID, err := m.Resolve(dep)
 		if err != nil {
 			if _, ok := m.unresolved[mt.Id()]; !ok {
@@ -116,11 +117,7 @@ func (m *manager) Add(mt meta.Meta) error {
 			delete(m.unresolved, unID)
 		}
 	}
-	if len(selfrings)>0{
-		err=errors.DependencyCycleFound{DependencyCycle:selfrings}
-		fmt.Println(err)
-		return err
-	}
+
 	return nil
 }
 
