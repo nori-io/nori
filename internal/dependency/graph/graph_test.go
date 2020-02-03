@@ -664,7 +664,11 @@ func TestDependencyGraph_Sort12(t *testing.T) {
 	a.Nil(managerPlugin.Add(plugin3()))
 	a.Nil(managerPlugin.Add(plugin2()))
 	a.Nil(managerPlugin.Add(pluginMysql(meta.Dependency{pluginThree, ">=1.0.0, <2.0.0", custom})))
-	a.Nil(managerPlugin.Add(pluginCms(meta.Dependency{"pluginCms", ">=1.0.0, <2.0.0", custom})))
+	a.Equal(errors.SelfRingFound{Dependency: struct {
+		ID         meta.PluginID
+		Constraint string
+		Interface  meta.Interface
+	}{ID:"pluginCms", Constraint:">=1.0.0, <2.0.0" , Interface: ""}}, managerPlugin.Add(pluginCms(meta.Dependency{"pluginCms", ">=1.0.0, <2.0.0", custom})))
 
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
@@ -682,9 +686,8 @@ func TestDependencyGraph_Sort12(t *testing.T) {
 			t.Log("Plugin n.", i, " in list until sotring:", value.Id(), "Plugin doesn't have dependencies")
 		}
 	}
-	t.Log()
 	_, err := managerPlugin.Sort()
-	a.Error(err, "Error in sorting")
+	a.NoError(err)
 	t.Log(err)
 
 }
