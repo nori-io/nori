@@ -4,8 +4,9 @@ import (
 	"testing"
 
 	"github.com/nori-io/nori-common/meta"
-	"github.com/nori-io/nori/internal/dependency"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/nori-io/nori/internal/dependency"
 )
 
 const (
@@ -492,7 +493,8 @@ func TestDependencyGraph_Sort8(t *testing.T) {
 func TestDependencyGraph_Sort9(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
-	a.Nil(managerPlugin.Add(plugin1(meta.Dependency{pluginOne, ">=1.0.0, <2.0.0", meta.Interface("")})))
+	managerPlugin.Add(plugin1(meta.Dependency{pluginOne, ">=1.0.0, <2.0.0", meta.Interface("")}))
+	managerPlugin.Add(plugin2(meta.Dependency{pluginTwo, ">=1.0.0, <2.0.0", meta.Interface("")}))
 
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
@@ -522,6 +524,42 @@ func TestDependencyGraph_Sort10(t *testing.T) {
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(plugin2()))
 	a.Nil(managerPlugin.Add(plugin3(meta.Dependency{pluginTwo, ">=1.0.0, <2.0.0", meta.Interface("")})))
+
+	t.Log("Plugins' order until sorting:")
+	pluginsList := managerPlugin.GetPluginsList()
+	i := 0
+	for _, value := range pluginsList {
+		i++
+		if len(value.GetDependencies()) > 0 {
+			t.Log("Plugin n.", i, " in list until sotring:", value.Id(), " Dependencies:")
+			j := 0
+			for _, depvalue := range value.GetDependencies() {
+				j++
+				t.Log("Dependence n.", j, "for", value.Id().ID, "is", depvalue.String())
+			}
+		} else {
+			t.Log("Plugin n.", i, " in list until sotring:", value.Id(), "Plugin doesn't have dependencies")
+		}
+	}
+	t.Log()
+	_, err := managerPlugin.Sort()
+	a.Error(err, "Error in sorting")
+	t.Log(err)
+
+}
+
+//10)ring plugin2->plugin3, plugin3->plugin2
+func TestDependencyGraph_Sort100(t *testing.T) {
+	a := assert.New(t)
+	managerPlugin := dependency.NewManager()
+	a.Nil(managerPlugin.Add(plugin1()))
+	a.Nil(managerPlugin.Add(plugin2()))
+	a.Nil(managerPlugin.Add(plugin3(meta.Dependency{pluginTwo, ">=1.0.0, <2.0.0", meta.Interface("")},
+		meta.Dependency{
+			ID:         pluginOne,
+			Constraint: ">=1.0.0, <2.0.0",
+			Interface:  meta.Interface(""),
+		})))
 
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
