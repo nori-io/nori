@@ -162,7 +162,7 @@ func pluginCms(deps ...meta.Dependency) meta.Meta {
 }
 
 //1) plugin1 -> plugin2 -> plugin3 (all available) order for adding - 1 3 2
-func TestDependencyGraph_Sort1(t *testing.T) {
+func TestDependencyGraph_AllPluginsAvailable(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(plugin1()))
@@ -215,7 +215,7 @@ func TestDependencyGraph_Sort1(t *testing.T) {
 }
 
 //2) plugin1 -> plugin2 -> plugin3 (3rd is unavailable)
-func TestDependencyGraph_Sort2(t *testing.T) {
+func TestDependencyGraph_UnavailablePlugin3(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(plugin1()))
@@ -243,7 +243,7 @@ func TestDependencyGraph_Sort2(t *testing.T) {
 }
 
 //3) plugin1 -> plugin2 -> plugin3 (2nd is unavailable)
-func TestDependencyGraph_Sort3(t *testing.T) {
+func TestDependencyGraph_UnavailablePlugin2(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(plugin1()))
@@ -271,7 +271,7 @@ func TestDependencyGraph_Sort3(t *testing.T) {
 }
 
 //4) plugin1 -> interfaceHttp (all available)
-func TestDependencyGraph_Sort4(t *testing.T) {
+func TestDependencyGraph_AllPluginsAvailableWithInterfaceDependency(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(plugin1(HttpInterface.Dependency())))
@@ -320,7 +320,7 @@ func TestDependencyGraph_Sort4(t *testing.T) {
 }
 
 //5) plugin1-> interfaceHttp (interface is unavailable)
-func TestDependencyGraph_Sort5(t *testing.T) {
+func TestDependencyGraph_UnavailableInterface(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(plugin1(HttpInterface.Dependency())))
@@ -348,7 +348,7 @@ func TestDependencyGraph_Sort5(t *testing.T) {
 }
 
 //6) plugin1 -> plugin2, plugin 3 -> plugin2, plugin 2 -> plugin4 (all available)
-func TestDependencyGraph_Sort6(t *testing.T) {
+func TestDependencyGraph_AllPluginsAvailable2(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(plugin1()))
@@ -408,7 +408,7 @@ func TestDependencyGraph_Sort6(t *testing.T) {
 }
 
 //7) plugin1 -> plugin2, plugin 3 -> plugin2, (plugin 2 is unavailable)
-func TestDependencyGraph_Sort7(t *testing.T) {
+func TestDependencyGraph_UnavailablePlugin(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(plugin1()))
@@ -438,7 +438,7 @@ func TestDependencyGraph_Sort7(t *testing.T) {
 }
 
 //8) pluginCms->pluginMysql, pluginCms->pluginHTTP
-func TestDependencyGraph_Sort8(t *testing.T) {
+func TestDependencyGraph_PluginsCmsMySqlHttp(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(pluginCms()))
@@ -491,7 +491,7 @@ func TestDependencyGraph_Sort8(t *testing.T) {
 }
 
 //9) ring -plugin1->plugin1, plugin2->plugin2
-func TestDependencyGraph_Sort9(t *testing.T) {
+func TestDependencyGraph_SelfRing(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	a.Equal(errors.SelfRingFound{Dependency: struct {
@@ -509,7 +509,7 @@ func TestDependencyGraph_Sort9(t *testing.T) {
 }
 
 //10)ring plugin2->plugin3, plugin3->plugin2
-func TestDependencyGraph_Sort10(t *testing.T) {
+func TestDependencyGraph_Ring(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(plugin2()))
@@ -538,7 +538,7 @@ func TestDependencyGraph_Sort10(t *testing.T) {
 }
 
 //10)ring plugin1->plugin2, plugin2->plugin3, plugin3->plugin2, plugin3->plugin1
-func TestDependencyGraph_Sort100(t *testing.T) {
+func TestDependencyGraph_Ring2(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(plugin1()))
@@ -575,7 +575,7 @@ func TestDependencyGraph_Sort100(t *testing.T) {
 
 //11) plugin1 -> plugin2 -> plugin3 order for adding - 1 3 2, plugin1->Interface Http, pluginCms->interfaceHttp and interfaceMysql
 // (plugins with such interfaces added),pluginHTTP and pluginMysql -> plugin3, pluginHTTP->interface SQL
-func TestDependencyGraph_Sort11(t *testing.T) {
+func TestDependencyGraph_Sort1(t *testing.T) {
 	a := assert.New(t)
 	var custom meta.Interface = ""
 	managerPlugin := dependency.NewManager()
@@ -654,7 +654,7 @@ func TestDependencyGraph_Sort11(t *testing.T) {
 
 //as 11 test but have ring pluginCms->pluginCms
 //12) plugin1 -> plugin2 -> plugin3 order for adding - 1 3 2, plugin1->Interface Http, pluginCms->interfaceHttp and interfaceMysql (plugins with such interfaces added),pluginHTTP and pluginMysql -> plugin3,
-func TestDependencyGraph_Sort12(t *testing.T) {
+func TestDependencyGraph_SortWithRing(t *testing.T) {
 	a := assert.New(t)
 	var custom meta.Interface = ""
 	managerPlugin := dependency.NewManager()
@@ -694,7 +694,7 @@ func TestDependencyGraph_Sort12(t *testing.T) {
 
 //as 11 test but have ring pluginHTTP->plugin3, plugin3->pluginHTTP
 //13) plugin1 -> plugin2 -> plugin3 order for adding - 1 3 2, plugin1->Interface Http, pluginCms->interfaceHttp and interfaceMysql (plugins with such interfaces added),pluginHTTP and pluginMysql -> plugin3
-func TestDependencyGraph_Sort13(t *testing.T) {
+func TestDependencyGraph_SortWithRing2(t *testing.T) {
 	a := assert.New(t)
 	var custom meta.Interface = ""
 	managerPlugin := dependency.NewManager()
@@ -730,7 +730,7 @@ func TestDependencyGraph_Sort13(t *testing.T) {
 
 //// ring through interface as 11 test but have ring pluginCms>interfaceHttp, plugin3->pluginCms
 //14) plugin1 -> plugin2 -> plugin3 order for adding - 1 3 2, plugin1->Interface Http, pluginCms->interfaceHttp and interfaceMysql (plugins with such interfaces added),pluginHTTP and pluginMysql -> plugin3
-func TestDependencyGraph_Sort14(t *testing.T) {
+func TestDependencyGraph_SortWithRing3(t *testing.T) {
 	a := assert.New(t)
 	var custom meta.Interface = ""
 	managerPlugin := dependency.NewManager()
@@ -766,7 +766,7 @@ func TestDependencyGraph_Sort14(t *testing.T) {
 
 // ring through 1 plugin, between plugin1 and plugin3
 //15) plugin1 -> plugin2 -> plugin3, plugin3->1 (all available) order for adding - 1 2 3
-func TestDependencyGraph_Sort15(t *testing.T) {
+func TestDependencyGraph_SortWithRing4(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(plugin1()))
