@@ -72,8 +72,8 @@ func (m *manager) Add(mt meta.Meta) error {
 
 	for _, dep := range mt.GetDependencies() {
 		if mt.Id().ID == dep.ID {
-			selfring := dep
-			return errors.SelfRingFound{Dependency: selfring}
+			loopVertex := dep
+			return errors.LoopVertexFound{Dependency: loopVertex}
 		}
 	}
 

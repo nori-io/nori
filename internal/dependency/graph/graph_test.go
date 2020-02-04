@@ -491,16 +491,16 @@ func TestDependencyGraph_PluginsCmsMySqlHttp(t *testing.T) {
 }
 
 //9) ring -plugin1->plugin1, plugin2->plugin2
-func TestDependencyGraph_SelfRing(t *testing.T) {
+func TestDependencyGraph_LoopVertex(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
-	a.Equal(errors.SelfRingFound{Dependency: struct {
+	a.Equal(errors.LoopVertexFound{Dependency: struct {
 		ID         meta.PluginID
 		Constraint string
 		Interface  meta.Interface
-	}{ID:pluginOne , Constraint: ">=1.0.0, <2.0.0", Interface:"" }}, managerPlugin.Add(plugin1(meta.Dependency{pluginOne, ">=1.0.0, <2.0.0", meta.Interface("")})))
+	}{ID: pluginOne, Constraint: ">=1.0.0, <2.0.0", Interface: ""}}, managerPlugin.Add(plugin1(meta.Dependency{pluginOne, ">=1.0.0, <2.0.0", meta.Interface("")})))
 
-	a.Equal(errors.SelfRingFound{Dependency: struct {
+	a.Equal(errors.LoopVertexFound{Dependency: struct {
 		ID         meta.PluginID
 		Constraint string
 		Interface  meta.Interface
@@ -664,11 +664,11 @@ func TestDependencyGraph_SortWithRing(t *testing.T) {
 	a.Nil(managerPlugin.Add(plugin3()))
 	a.Nil(managerPlugin.Add(plugin2()))
 	a.Nil(managerPlugin.Add(pluginMysql(meta.Dependency{pluginThree, ">=1.0.0, <2.0.0", custom})))
-	a.Equal(errors.SelfRingFound{Dependency: struct {
+	a.Equal(errors.LoopVertexFound{Dependency: struct {
 		ID         meta.PluginID
 		Constraint string
 		Interface  meta.Interface
-	}{ID:"pluginCms", Constraint:">=1.0.0, <2.0.0" , Interface: ""}}, managerPlugin.Add(pluginCms(meta.Dependency{"pluginCms", ">=1.0.0, <2.0.0", custom})))
+	}{ID: "pluginCms", Constraint: ">=1.0.0, <2.0.0", Interface: ""}}, managerPlugin.Add(pluginCms(meta.Dependency{"pluginCms", ">=1.0.0, <2.0.0", custom})))
 
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()

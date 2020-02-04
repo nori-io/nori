@@ -107,12 +107,12 @@ type DependencyNotFound struct {
 	Dependency meta.Dependency
 }
 
-func (e SelfRingFound) Error() string {
-	return fmt.Sprintf("Selfring [%s][%s][%s] found",
+func (e LoopVertexFound) Error() string {
+	return fmt.Sprintf("LoopVertex [%s][%s][%s] found",
 		e.Dependency.ID, e.Dependency.Interface, e.Dependency.Constraint)
 }
 
-type SelfRingFound struct {
+type LoopVertexFound struct {
 	Dependency meta.Dependency
 }
 
