@@ -4,26 +4,31 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/golang/mock/gomock"
+	"github.com/nori-io/nori/internal/dependency"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/nori-io/nori-common/meta"
+	"github.com/nori-io/nori-common/v2/meta"
 
-	metaMock "github.com/nori-io/nori-common/mocks"
+	"github.com/nori-io/nori-common/v2/mocks/mock_meta"
 )
 
 func TestManager_Add(t *testing.T) {
 	a := assert.New(t)
 
-	manager := NewManager()
+	manager := dependency.NewManager()
 
 	id := meta.ID{
 		ID:      "nori/test",
 		Version: "1.0.0",
 	}
 
-	mt := &metaMock.Meta{}
-	mt.On("Id").Return(id)
-	mt.On("GetDependencies").Return([]meta.Dependency{})
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mt := mock_meta.NewMockMeta(ctrl)
+	mt.EXPECT().Id().Return(id).AnyTimes()
+	mt.EXPECT().GetDependencies().Return([]meta.Dependency{}).AnyTimes()
 
 	err := manager.Add(mt)
 	a.NoError(err)
@@ -34,16 +39,19 @@ func TestManager_Add(t *testing.T) {
 func TestManager_Remove(t *testing.T) {
 	a := assert.New(t)
 
-	manager := NewManager()
+	manager := dependency.NewManager()
 
 	id := meta.ID{
 		ID:      "nori/test",
 		Version: "1.0.0",
 	}
 
-	mt := &metaMock.Meta{}
-	mt.On("Id").Return(id)
-	mt.On("GetDependencies").Return([]meta.Dependency{})
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mt := mock_meta.NewMockMeta(ctrl)
+	mt.EXPECT().Id().Return(id).AnyTimes()
+	mt.EXPECT().GetDependencies().Return([]meta.Dependency{}).AnyTimes()
 
 	err := manager.Add(mt)
 	a.NoError(err)
@@ -56,7 +64,7 @@ func TestManager_Remove(t *testing.T) {
 func TestManager_Resolve(t *testing.T) {
 	a := assert.New(t)
 
-	manager := NewManager()
+	manager := dependency.NewManager()
 
 	id1 := meta.ID{
 		ID:      "nori/test",
@@ -69,23 +77,26 @@ func TestManager_Resolve(t *testing.T) {
 	}
 
 	dep := meta.Dependency{
-		ID:         "nori/mocks",
-		Constraint: ">=1.0.0",
+		Constraint: "^1.0.0",
+		Interface:  "nori/mocks",
 	}
 
 	unresolved := map[meta.ID][]meta.Dependency{
 		id1: []meta.Dependency{dep},
 	}
 
-	mt1 := &metaMock.Meta{}
-	mt1.On("Id").Return(id1)
-	mt1.On("GetDependencies").Return([]meta.Dependency{dep})
-	mt1.On("GetInterface").Return(meta.Interface(""))
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-	mt2 := &metaMock.Meta{}
-	mt2.On("Id").Return(id2)
-	mt2.On("GetDependencies").Return([]meta.Dependency{})
-	mt2.On("GetInterface").Return(meta.Interface(""))
+	mt1 := mock_meta.NewMockMeta(ctrl)
+	mt1.EXPECT().Id().Return(id1).AnyTimes()
+	mt1.EXPECT().GetDependencies().Return([]meta.Dependency{dep}).AnyTimes()
+	mt1.EXPECT().GetInterface().Return(meta.Interface("nori/test@1.0.0")).AnyTimes()
+
+	mt2 := mock_meta.NewMockMeta(ctrl)
+	mt2.EXPECT().Id().Return(id2).AnyTimes()
+	mt2.EXPECT().GetDependencies().Return([]meta.Dependency{}).AnyTimes()
+	mt2.EXPECT().GetInterface().Return(meta.Interface("nori/mocks@1.0.0")).AnyTimes()
 
 	a.NoError(manager.Add(mt1))
 
@@ -106,7 +117,7 @@ func TestManager_Resolve(t *testing.T) {
 func TestManager_Sort(t *testing.T) {
 	a := assert.New(t)
 
-	manager := NewManager()
+	manager := dependency.NewManager()
 
 	id1 := meta.ID{
 		ID:      "nori/main",
@@ -119,19 +130,22 @@ func TestManager_Sort(t *testing.T) {
 	}
 
 	dep := meta.Dependency{
-		ID:         "nori/dependency",
-		Constraint: ">=1.0.0",
+		Interface:  "nori/dependency",
+		Constraint: "^1.0.0",
 	}
 
-	mt1 := &metaMock.Meta{}
-	mt1.On("Id").Return(id1)
-	mt1.On("GetDependencies").Return([]meta.Dependency{dep})
-	mt1.On("GetInterface").Return(meta.Interface(""))
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-	mt2 := &metaMock.Meta{}
-	mt2.On("Id").Return(id2)
-	mt2.On("GetDependencies").Return([]meta.Dependency{})
-	mt1.On("GetInterface").Return(meta.Interface(""))
+	mt1 := mock_meta.NewMockMeta(ctrl)
+	mt1.EXPECT().Id().Return(id1).AnyTimes()
+	mt1.EXPECT().GetDependencies().Return([]meta.Dependency{dep}).AnyTimes()
+	mt1.EXPECT().GetInterface().Return(meta.Interface("test/mocks@1.0.0")).AnyTimes()
+
+	mt2 := mock_meta.NewMockMeta(ctrl)
+	mt2.EXPECT().Id().Return(id2).AnyTimes()
+	mt2.EXPECT().GetDependencies().Return([]meta.Dependency{}).AnyTimes()
+	mt2.EXPECT().GetInterface().Return(meta.Interface("nori/dependency@1.0.0")).AnyTimes()
 
 	a.NoError(manager.Add(mt1))
 	a.NoError(manager.Add(mt2))

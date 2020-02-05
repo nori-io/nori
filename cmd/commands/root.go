@@ -21,7 +21,7 @@ import (
 	"path/filepath"
 
 	"github.com/nori-io/logger"
-	commonLogger "github.com/nori-io/nori-common/logger"
+	commonLogger "github.com/nori-io/nori-common/v2/logger"
 
 	"github.com/cheebo/go-config"
 	"github.com/cheebo/go-config/sources/env"

@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/cheebo/go-config"
-	commonCfg "github.com/nori-io/nori-common/config"
-	"github.com/nori-io/nori-common/meta"
+	commonCfg "github.com/nori-io/nori-common/v2/config"
+	"github.com/nori-io/nori-common/v2/meta"
 	"github.com/nori-io/nori/internal/config"
 	"github.com/stretchr/testify/assert"
 )

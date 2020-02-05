@@ -20,7 +20,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/nori-io/nori-common/logger"
+	"github.com/nori-io/nori-common/v2/logger"
 
 	"github.com/hashicorp/go-version"
 )

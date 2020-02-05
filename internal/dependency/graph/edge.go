@@ -15,7 +15,7 @@
 
 package graph
 
-import "github.com/nori-io/nori-common/meta"
+import "github.com/nori-io/nori-common/v2/meta"
 
 type Edge interface {
 	From() meta.ID

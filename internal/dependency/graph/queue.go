@@ -18,7 +18,7 @@ package graph
 import (
 	"sync"
 
-	"github.com/nori-io/nori-common/meta"
+	"github.com/nori-io/nori-common/v2/meta"
 )
 
 // NodeQueue the queue of Items

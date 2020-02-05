@@ -3,7 +3,7 @@ package rest
 import (
 	"sync"
 
-	"github.com/nori-io/nori-common/logger"
+	"github.com/nori-io/nori-common/v2/logger"
 	"github.com/nori-io/nori/internal/plugins"
 	"github.com/nori-io/nori/internal/server"
 )

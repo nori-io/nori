@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 
-	"github.com/nori-io/nori-common/config"
-	"github.com/nori-io/nori-common/meta"
-	pl "github.com/nori-io/nori-common/plugin"
+	"github.com/nori-io/nori-common/v2/config"
+	"github.com/nori-io/nori-common/v2/meta"
+	pl "github.com/nori-io/nori-common/v2/plugin"
 )
 
 var Plugin plugin

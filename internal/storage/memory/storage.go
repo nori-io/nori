@@ -1,7 +1,7 @@
 package memory
 
 import (
-	"github.com/nori-io/nori-common/storage"
+	"github.com/nori-io/nori-common/v2/storage"
 )
 
 func NewStorage() (storage.Storage, error) {

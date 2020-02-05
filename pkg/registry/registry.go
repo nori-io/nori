@@ -1,9 +1,9 @@
 package registry
 
 import (
-	"github.com/nori-io/nori-common/logger"
-	"github.com/nori-io/nori-common/meta"
-	"github.com/nori-io/nori-common/plugin"
+	"github.com/nori-io/nori-common/v2/logger"
+	"github.com/nori-io/nori-common/v2/meta"
+	"github.com/nori-io/nori-common/v2/plugin"
 	"github.com/nori-io/nori/pkg/types"
 )
 

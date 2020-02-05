@@ -21,7 +21,7 @@ import (
 	"syscall"
 
 	"github.com/cheebo/go-config"
-	"github.com/nori-io/nori-common/logger"
+	"github.com/nori-io/nori-common/v2/logger"
 	"github.com/nori-io/nori/internal/nori"
 	"github.com/spf13/cobra"
 )

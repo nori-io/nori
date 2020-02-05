@@ -5,7 +5,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/nori-io/nori-common/logger"
+	"github.com/nori-io/nori-common/v2/logger"
 
 	go_config "github.com/cheebo/go-config"
 	"github.com/nori-io/nori/internal/plugins"

@@ -3,7 +3,7 @@ package graph_test
 import (
 	"testing"
 
-	"github.com/nori-io/nori-common/meta"
+	"github.com/nori-io/nori-common/v2/meta"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/nori-io/nori/internal/dependency"

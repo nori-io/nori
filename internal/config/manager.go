@@ -17,8 +17,8 @@ package config
 
 import (
 	"github.com/cheebo/go-config"
-	commonCfg "github.com/nori-io/nori-common/config"
-	"github.com/nori-io/nori-common/meta"
+	commonCfg "github.com/nori-io/nori-common/v2/config"
+	"github.com/nori-io/nori-common/v2/meta"
 )
 
 type manager struct {
