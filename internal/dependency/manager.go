@@ -17,6 +17,7 @@ package dependency
 
 import (
 	"github.com/nori-io/nori-common/v2/meta"
+	"github.com/nori-io/nori-common/v2/version"
 
 	"github.com/nori-io/nori/internal/dependency/graph"
 	"github.com/nori-io/nori/pkg/errors"
@@ -71,7 +72,7 @@ func (m *manager) Add(mt meta.Meta) error {
 	m.plugins[mt.Id()] = mt
 
 	for _, dep := range mt.GetDependencies() {
-		if mt.Id().ID == dep.ID {
+		if mt.GetInterface() == dep.Interface {
 			loopVertex := dep
 			return errors.LoopVertexFound{Dependency: loopVertex}
 		}
@@ -135,30 +136,26 @@ func (m *manager) Remove(id meta.ID) {
 
 func (m *manager) Resolve(dependency meta.Dependency) (meta.ID, error) {
 	for id, m := range m.plugins {
-		// dependency on interface
-		// dependency on plugin
-		if id.ID != dependency.ID {
-			if m.GetInterface() != dependency.Interface {
-				continue
-			}
+		// interface is undefined
+		if dependency.Interface.IsUndefined() {
+			continue
 		}
 
-		if !dependency.Interface.IsUndefined() && m.GetInterface().Equal(dependency.Interface) {
+		// names of interfaces are not equal
+		if m.GetInterface().Name() != dependency.Interface.Name() {
+			continue
+		}
+
+		constraint, err := dependency.GetConstraint()
+		if err != nil {
+			return meta.ID{}, err
+		}
+		ver, err := version.NewVersion(m.GetInterface().Version())
+		if err != nil {
+			return meta.ID{}, err
+		}
+		if constraint.Check(ver) {
 			return id, nil
-		}
-
-		if id.ID == dependency.ID {
-			constraints, err := dependency.GetConstraint()
-			if err != nil {
-				return meta.ID{}, err
-			}
-			version, err := id.GetVersion()
-			if err != nil {
-				return meta.ID{}, err
-			}
-			if constraints.Check(version) {
-				return id, nil
-			}
 		}
 	}
 	return meta.ID{}, errors.DependencyNotFound{

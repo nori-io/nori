@@ -68,7 +68,7 @@ func (pl *PluginList) Resolve(dep meta.Dependency) (plugin.Plugin, error) {
 	}
 
 	for _, p := range *pl {
-		if dep.ID != p.Meta().Id().ID {
+		if dep.Interface != p.Meta().GetInterface() {
 			continue
 		}
 
