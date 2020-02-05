@@ -11,18 +11,61 @@ import (
 )
 
 const (
-	pluginOne   = "plugin1"
-	pluginTwo   = "plugin2"
-	pluginThree = "plugin3"
-	pluginFour  = "plugin4"
+	pluginOne     = "plugin1"
+	pluginTwo     = "plugin2"
+	pluginThree   = "plugin3"
+	pluginFour    = "plugin4"
+	pluginRingOne = "pluginRingOne"
+	pluginRingTwo = "pluginRingTwo"
 
-	HttpInterface = meta.Interface("nori/Http@1.0.0")
-	SQLInterface  = meta.Interface("nori/Sql@1.0.0")
+	HttpInterface  = meta.Interface("nori/Http@1.0.0")
+	SQLInterface   = meta.Interface("nori/Sql@1.0.0")
+	Authentication = meta.Interface("nori/Authentication@1.0.0")
+
+	RingOne = meta.Interface("nori/RingOne")
+	RingTwo = meta.Interface("nori/RingTwo")
 )
 
-// depend of plugin2
+// plugin with SelfRing
+func plugin_RingOne(deps ...meta.Dependency) meta.Meta {
+	data := meta.Data{
+		ID: meta.ID{
+			ID:      pluginRingOne,
+			Version: "1.0.0",
+		},
+		Core: meta.Core{
+			VersionConstraint: ">=1.0.0, <2.0.0",
+		},
+		Dependencies: []meta.Dependency{},
+		Interface:    "",
+	}
+	if len(deps) > 0 {
+		data.Dependencies = deps
+	}
+	return data
+}
+
+// plugin with SelfRing
+func plugin_RingTwo(deps ...meta.Dependency) meta.Meta {
+	data := meta.Data{
+		ID: meta.ID{
+			ID:      pluginRingTwo,
+			Version: "1.0.0",
+		},
+		Core: meta.Core{
+			VersionConstraint: ">=1.0.0, <2.0.0",
+		},
+		Dependencies: []meta.Dependency{},
+		Interface:    "",
+	}
+	if len(deps) > 0 {
+		data.Dependencies = deps
+	}
+	return data
+}
+
+// plugin1 with AuthenticationInterface depends on HttpInterface
 func plugin1(deps ...meta.Dependency) meta.Meta {
-	custom := meta.Interface("nori/Custom@0.0.1")
 	data := meta.Data{
 		ID: meta.ID{
 			ID:      pluginOne,
@@ -31,10 +74,8 @@ func plugin1(deps ...meta.Dependency) meta.Meta {
 		Core: meta.Core{
 			VersionConstraint: ">=1.0.0, <2.0.0",
 		},
-		Dependencies: []meta.Dependency{
-			{pluginTwo, ">=1.0.0, <2.0.0", ""},
-		},
-		Interface: custom,
+		Dependencies: []meta.Dependency{{Constraint: ">=1.0.0, <2.0.0", Interface: HttpInterface}},
+		Interface:    "",
 	}
 	if len(deps) > 0 {
 		data.Dependencies = deps
@@ -495,16 +536,14 @@ func TestDependencyGraph_LoopVertex(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	a.Equal(errors.LoopVertexFound{Dependency: struct {
-		ID         meta.PluginID
 		Constraint string
 		Interface  meta.Interface
-	}{ID: pluginOne, Constraint: ">=1.0.0, <2.0.0", Interface: ""}}, managerPlugin.Add(plugin1(meta.Dependency{pluginOne, ">=1.0.0, <2.0.0", meta.Interface("")})))
+	}{Constraint: ">=1.0.0, <2.0.0", Interface: pluginRingOne}}, managerPlugin.Add(plugin_RingOne(meta.Dependency{">=1.0.0, <2.0.0", RingOne})))
 
 	a.Equal(errors.LoopVertexFound{Dependency: struct {
-		ID         meta.PluginID
 		Constraint string
 		Interface  meta.Interface
-	}{ID: pluginTwo, Constraint: ">=1.0.0, <2.0.0", Interface: ""}}, managerPlugin.Add(plugin2(meta.Dependency{pluginTwo, ">=1.0.0, <2.0.0", meta.Interface("")})))
+	}{Constraint: ">=1.0.0, <2.0.0", Interface: pluginRingTwo}}, managerPlugin.Add(plugin_RingTwo(meta.Dependency{">=1.0.0, <2.0.0", RingTwo})))
 
 }
 

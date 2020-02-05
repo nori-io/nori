@@ -118,7 +118,7 @@ type LoopVertexFound struct {
 
 func (e DependencyNotFound) Error() string {
 	return fmt.Sprintf("Dependency [%s][%s] not found",
-		 e.Dependency.Interface, e.Dependency.Constraint)
+		e.Dependency.Interface, e.Dependency.Constraint)
 }
 
 type DependenciesNotFound struct {

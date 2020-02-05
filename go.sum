@@ -13,6 +13,8 @@ github.com/cheebo/go-config v0.9.0 h1:+LToaMYMUcHGdBtJM46h/ZBM8Ara1kxGAZqMlOGb7B
 github.com/cheebo/go-config v0.9.0/go.mod h1:Qj0tzSp3vg2toHUyUzuSyNYyvu384JKEDzDaExEWJiw=
 github.com/cheebo/go-config v0.9.1-0.20200103002146-23dbf5a12463 h1:YfKRkj8nfYNxWqyo4+/vi6iT6AiCo7ZeALZKDPeRnUs=
 github.com/cheebo/go-config v0.9.1-0.20200103002146-23dbf5a12463/go.mod h1:Qj0tzSp3vg2toHUyUzuSyNYyvu384JKEDzDaExEWJiw=
+github.com/cheebo/go-config v0.9.1-0.20200118205128-36145d182a64 h1:RMaNyrl+RDL+1HUeAO6eIgoyav6m+BKd7HyOLwcrXfk=
+github.com/cheebo/go-config v0.9.1-0.20200118205128-36145d182a64/go.mod h1:MBBUH3GrHnW0/aKf5W9NdMF8WNYFKbecFZeUum+2Fkg=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/coreos/etcd v3.3.10+incompatible/go.mod h1:uF7uidLiAD3TWHmW31ZFd/JWoc32PjwdhPthX9715RE=
 github.com/coreos/go-etcd v2.0.0+incompatible/go.mod h1:Jez6KQU2B/sWsbdaef3ED8NzMklzPG4d5KIOhIy30Tk=
