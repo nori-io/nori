@@ -18,12 +18,17 @@ const (
 	pluginRingOne = "pluginRingOne"
 	pluginRingTwo = "pluginRingTwo"
 
-	HttpInterface  = meta.Interface("nori/Http@1.0.0")
+	InterfaceHttp  = meta.Interface("nori/Http@1.0.0")
 	SQLInterface   = meta.Interface("nori/Sql@1.0.0")
 	Authentication = meta.Interface("nori/Authentication@1.0.0")
+	InterfaceOne=meta.Interface("nori/InterfaceOne@1.0.0")
+	InterfaceTwo=meta.Interface("nori/InterfaceTwo@1.0.0")
+	InterfaceThree=meta.Interface("nori/InterfaceThree@1.0.0")
+	InterfaceFour=meta.Interface("nori/InterfaceFour@1.0.0")
 
-	RingOne = meta.Interface("nori/RingOne")
-	RingTwo = meta.Interface("nori/RingTwo")
+
+	RingOne = meta.Interface("nori/RingOne@1.0.0")
+	RingTwo = meta.Interface("nori/RingTwo@1.0.0")
 )
 
 // plugin with SelfRing
@@ -65,7 +70,7 @@ func plugin_RingTwo(deps ...meta.Dependency) meta.Meta {
 }
 
 // plugin1 with AuthenticationInterface depends on HttpInterface
-/*func plugin1(deps ...meta.Dependency) meta.Meta {
+func plugin1(deps ...meta.Dependency) meta.Meta {
 	data := meta.Data{
 		ID: meta.ID{
 			ID:      pluginOne,
@@ -74,18 +79,17 @@ func plugin_RingTwo(deps ...meta.Dependency) meta.Meta {
 		Core: meta.Core{
 			VersionConstraint: ">=1.0.0, <2.0.0",
 		},
-		Dependencies: []meta.Dependency{{Constraint: ">=1.0.0, <2.0.0", Interface: HttpInterface}},
-		Interface:    "",
+		Dependencies: []meta.Dependency{{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceHttp}},
+		Interface:    InterfaceOne,
 	}
 	if len(deps) > 0 {
 		data.Dependencies = deps
 	}
 	return data
 }
-*/
+
 //depend of plugin3
-/*func plugin2(deps ...meta.Dependency) meta.Meta {
-	custom := meta.Interface("nori/Custom@0.0.1")
+func plugin2(deps ...meta.Dependency) meta.Meta {
 	data := meta.Data{
 		ID: meta.ID{
 			ID:      pluginTwo,
@@ -95,19 +99,18 @@ func plugin_RingTwo(deps ...meta.Dependency) meta.Meta {
 			VersionConstraint: ">=1.0.0, <2.0.0",
 		},
 		Dependencies: []meta.Dependency{
-			{pluginThree, ">=1.0.0, <2.0.0", ""},
+			{Constraint:">=1.0.0, <2.0.0", Interface:InterfaceThree},
 		},
-		Interface: custom,
+		Interface: InterfaceTwo,
 	}
 	if len(deps) > 0 {
 		data.Dependencies = deps
 	}
 	return data
 }
-*/
+
 // without dependencies
-/*func plugin3(deps ...meta.Dependency) meta.Meta {
-	custom := meta.Interface("nori/Custom@0.0.1")
+func plugin3(deps ...meta.Dependency) meta.Meta {
 	data := meta.Data{
 		ID: meta.ID{
 			ID:      pluginThree,
@@ -116,14 +119,32 @@ func plugin_RingTwo(deps ...meta.Dependency) meta.Meta {
 		Core: meta.Core{
 			VersionConstraint: ">=1.0.0, <2.0.0",
 		},
-		Interface: custom,
+		Interface: InterfaceThree,
 	}
 	if len(deps) > 0 {
 		data.Dependencies = deps
 	}
 	return data
 }
-*/
+
+func pluginHTTP(deps ...meta.Dependency) meta.Meta {
+	data := meta.Data{
+		ID: meta.ID{
+			ID:      "pluginHTTP",
+			Version: "1.0.0",
+		},
+		Core: meta.Core{
+			VersionConstraint: ">=1.0.0, <2.0.0",
+		},
+		Interface: InterfaceHttp,
+	}
+	if len(deps) > 0 {
+		data.Dependencies = deps
+	}
+	return data
+}
+
+
 //without dependencies
 /*func plugin4(deps ...meta.Dependency) meta.Meta {
 	custom := meta.Interface("nori/Custom@0.0.1")
@@ -144,23 +165,7 @@ func plugin_RingTwo(deps ...meta.Dependency) meta.Meta {
 }
 */
 // without dependencies
-/*func pluginHTTP(deps ...meta.Dependency) meta.Meta {
-	data := meta.Data{
-		ID: meta.ID{
-			ID:      "pluginHTTP",
-			Version: "1.0.0",
-		},
-		Core: meta.Core{
-			VersionConstraint: ">=1.0.0, <2.0.0",
-		},
-		Interface: HttpInterface,
-	}
-	if len(deps) > 0 {
-		data.Dependencies = deps
-	}
-	return data
-}
-*/
+
 // without dependencies
 /*func pluginMysql(deps ...meta.Dependency) meta.Meta {
 	data := meta.Data{
@@ -203,12 +208,13 @@ func plugin_RingTwo(deps ...meta.Dependency) meta.Meta {
 }
 */
 //1) plugin1 -> plugin2 -> plugin3 (all available) order for adding - 1 3 2
-/*func TestDependencyGraph_AllPluginsAvailable(t *testing.T) {
+func TestDependencyGraph_AllPluginsAvailable(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(plugin1()))
 	a.Nil(managerPlugin.Add(plugin3()))
 	a.Nil(managerPlugin.Add(plugin2()))
+	a.Nil(managerPlugin.Add(pluginHTTP()))
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
 	i := 0
@@ -238,6 +244,7 @@ func plugin_RingTwo(deps ...meta.Dependency) meta.Meta {
 		index1 int
 		index2 int
 		index3 int
+		index4 int
 	)
 	for index, value := range pluginsSorted {
 		if value.ID == pluginOne {
@@ -252,9 +259,9 @@ func plugin_RingTwo(deps ...meta.Dependency) meta.Meta {
 	}
 	a.Equal(true, index3 < index2)
 	a.Equal(true, index2 < index1)
-	a.Equal(3, len(pluginsSorted))
+	a.Equal(4, len(pluginsSorted))
 }
-*/
+
 //2) plugin1 -> plugin2 -> plugin3 (3rd is unavailable)
 /*func TestDependencyGraph_UnavailablePlugin3(t *testing.T) {
 	a := assert.New(t)
@@ -532,18 +539,18 @@ func plugin_RingTwo(deps ...meta.Dependency) meta.Meta {
 }
 */
 //9) ring -plugin1->plugin1, plugin2->plugin2
-func TestDependencyGraph_LoopVertex(t *testing.T) {
+func TestDependencyGraph_Loops(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	a.Equal(errors.LoopVertexFound{Dependency: struct {
 		Constraint string
 		Interface  meta.Interface
-	}{Constraint: ">=1.0.0, <2.0.0", Interface: RingOne}}, managerPlugin.Add(plugin_RingOne(meta.Dependency{">=1.0.0, <2.0.0", RingOne})))
+	}{Constraint: ">=1.0.0, <2.0.0", Interface: RingOne}}, managerPlugin.Add(plugin_RingOne(meta.Dependency{Constraint:">=1.0.0, <2.0.0", Interface:RingOne})))
 
 		a.Equal(errors.LoopVertexFound{Dependency: struct {
 		Constraint string
 		Interface  meta.Interface
-	}{Constraint: ">=1.0.0, <2.0.0", Interface: RingTwo}}, managerPlugin.Add(plugin_RingTwo(meta.Dependency{">=1.0.0, <2.0.0", RingTwo})))
+	}{Constraint: ">=1.0.0, <2.0.0", Interface: RingTwo}}, managerPlugin.Add(plugin_RingTwo(meta.Dependency{Constraint:">=1.0.0, <2.0.0", Interface:RingTwo})))
 
 }
 
