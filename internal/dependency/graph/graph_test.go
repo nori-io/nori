@@ -148,8 +148,7 @@ func pluginHTTP(deps ...meta.Dependency) meta.Meta {
 
 
 //without dependencies
-/*func plugin4(deps ...meta.Dependency) meta.Meta {
-	custom := meta.Interface("nori/Custom@0.0.1")
+func plugin4(deps ...meta.Dependency) meta.Meta {
 	data := meta.Data{
 		ID: meta.ID{
 			ID:      pluginFour,
@@ -158,14 +157,14 @@ func pluginHTTP(deps ...meta.Dependency) meta.Meta {
 		Core: meta.Core{
 			VersionConstraint: ">=1.0.0, <2.0.0",
 		},
-		Interface: custom,
+		Interface: InterfaceFour,
 	}
 	if len(deps) > 0 {
 		data.Dependencies = deps
 	}
 	return data
 }
-*/
+
 // without dependencies
 
 // without dependencies
@@ -267,6 +266,8 @@ func TestDependencyGraph_AllPluginsAvailable(t *testing.T) {
 	a.Equal(true, (index3==0)||(index3==1)||(index3==2))
 	a.Equal(true, (index2==1)||(index2==2)||(index2==3))
 	a.Equal(true, (index1==1)||(index1==2)||(index1==3))
+	a.Equal(true, indexHttp<index1)
+	a.Equal(true, index3<index2)
 	a.Equal(4, len(pluginsSorted))
 }
 
@@ -404,12 +405,12 @@ func TestDependencyGraph_UnavailableInterface(t *testing.T) {
 }
 
 //6) plugin1 -> plugin2, plugin 3 -> plugin2, plugin 2 -> plugin4 (all available)
-/*func TestDependencyGraph_AllPluginsAvailable2(t *testing.T) {
+func TestDependencyGraph_AllPluginsAvailable2(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(plugin1()))
-	a.Nil(managerPlugin.Add(plugin2(meta.Dependency{pluginFour, ">=1.0.0, <2.0.0", meta.Interface("")})))
-	a.Nil(managerPlugin.Add(plugin3(meta.Dependency{pluginTwo, ">=1.0.0, <2.0.0", meta.Interface("")})))
+	a.Nil(managerPlugin.Add(plugin2(meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface:InterfaceFour})))
+	a.Nil(managerPlugin.Add(plugin3(meta.Dependency{Constraint:">=1.0.0, <2.0.0", Interface:InterfaceTwo})))
 	a.Nil(managerPlugin.Add(plugin4()))
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
@@ -457,12 +458,13 @@ func TestDependencyGraph_UnavailableInterface(t *testing.T) {
 		}
 	}
 	a.Equal(err, nil)
+	a.Equal(true, (index4==0)||(index4==1)||(index4==2)||(index4==3))
 	a.Equal(true, index4 < index2)
 	a.Equal(true, index2 < index3)
 	a.Equal(true, index2 < index1)
 	a.Equal(4, len(pluginsSorted))
 }
-*/
+
 //7) plugin1 -> plugin2, plugin 3 -> plugin2, (plugin 2 is unavailable)
 /*func TestDependencyGraph_UnavailablePlugin(t *testing.T) {
 	a := assert.New(t)
