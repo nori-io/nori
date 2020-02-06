@@ -271,7 +271,7 @@ func TestDependencyGraph_AllPluginsAvailable(t *testing.T) {
 }
 
 //2) plugin1 -> plugin2 -> plugin3 (3rd is unavailable)
-/*func TestDependencyGraph_UnavailablePlugin3(t *testing.T) {
+func TestDependencyGraph_UnavailablePlugin3(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(plugin1()))
@@ -297,7 +297,7 @@ func TestDependencyGraph_AllPluginsAvailable(t *testing.T) {
 	a.Error(err, "Error in sorting")
 	t.Log(err)
 }
-*/
+
 //3) plugin1 -> plugin2 -> plugin3 (2nd is unavailable)
 /*func TestDependencyGraph_UnavailablePlugin2(t *testing.T) {
 	a := assert.New(t)
