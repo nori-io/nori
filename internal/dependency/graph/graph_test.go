@@ -471,11 +471,11 @@ func TestDependencyGraph_AllPluginsAvailable2(t *testing.T) {
 }
 
 //7) plugin1 -> plugin2, plugin 3 -> plugin2, (plugin 2 is unavailable)
-/*func TestDependencyGraph_UnavailablePlugin(t *testing.T) {
+func TestDependencyGraph_UnavailablePlugin(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(plugin1()))
-	a.Nil(managerPlugin.Add(plugin3(meta.Dependency{pluginTwo, ">=1.0.0, <2.0.0", meta.Interface("")})))
+	a.Nil(managerPlugin.Add(plugin3(meta.Dependency{ Constraint:">=1.0.0, <2.0.0", Interface:InterfaceTwo})))
 
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
@@ -499,7 +499,7 @@ func TestDependencyGraph_AllPluginsAvailable2(t *testing.T) {
 	t.Log(err)
 
 }
-*/
+
 //8) pluginCms->pluginMysql, pluginCms->pluginHTTP
 /*func TestDependencyGraph_PluginsCmsMySqlHttp(t *testing.T) {
 	a := assert.New(t)
