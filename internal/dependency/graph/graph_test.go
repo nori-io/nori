@@ -1,6 +1,7 @@
 package graph_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/nori-io/nori-common/v2/meta"
@@ -17,6 +18,7 @@ const (
 	pluginFour    = "plugin4"
 	pluginRingOne = "pluginRingOne"
 	pluginRingTwo = "pluginRingTwo"
+	pluginHttp="pluginHttp"
 
 	InterfaceHttp  = meta.Interface("nori/Http@1.0.0")
 	SQLInterface   = meta.Interface("nori/Sql@1.0.0")
@@ -244,7 +246,7 @@ func TestDependencyGraph_AllPluginsAvailable(t *testing.T) {
 		index1 int
 		index2 int
 		index3 int
-		index4 int
+		indexHttp int
 	)
 	for index, value := range pluginsSorted {
 		if value.ID == pluginOne {
@@ -256,9 +258,15 @@ func TestDependencyGraph_AllPluginsAvailable(t *testing.T) {
 		if value.ID == pluginThree {
 			index3 = index
 		}
+		if value.ID==pluginHttp{
+			indexHttp=index
+		}
 	}
-	a.Equal(true, index3 < index2)
-	a.Equal(true, index2 < index1)
+	fmt.Println(indexHttp)
+	a.Equal(true, (indexHttp==0)||(indexHttp==1)||(indexHttp==2))
+	a.Equal(true, (index3==0)||(index3==1)||(index3==2))
+	a.Equal(true, (index2==1)||(index2==2)||(index2==3))
+	a.Equal(true, (index1==1)||(index1==2)||(index1==3))
 	a.Equal(4, len(pluginsSorted))
 }
 
