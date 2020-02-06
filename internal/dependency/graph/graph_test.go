@@ -412,6 +412,7 @@ func TestDependencyGraph_AllPluginsAvailable2(t *testing.T) {
 	a.Nil(managerPlugin.Add(plugin2(meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface:InterfaceFour})))
 	a.Nil(managerPlugin.Add(plugin3(meta.Dependency{Constraint:">=1.0.0, <2.0.0", Interface:InterfaceTwo})))
 	a.Nil(managerPlugin.Add(plugin4()))
+	a.Nil(managerPlugin.Add(pluginHTTP()))
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
 	i := 0
@@ -442,6 +443,7 @@ func TestDependencyGraph_AllPluginsAvailable2(t *testing.T) {
 		index2 int
 		index3 int
 		index4 int
+		indexHttp int
 	)
 	for index, value := range pluginsSorted {
 		if value.ID == pluginOne {
@@ -456,13 +458,16 @@ func TestDependencyGraph_AllPluginsAvailable2(t *testing.T) {
 		if value.ID == pluginFour {
 			index4 = index
 		}
+		if value.ID== pluginHttp{
+			indexHttp=index
+		}
 	}
 	a.Equal(err, nil)
 	a.Equal(true, (index4==0)||(index4==1)||(index4==2)||(index4==3))
-	a.Equal(true, index4 < index2)
 	a.Equal(true, index2 < index3)
-	a.Equal(true, index2 < index1)
-	a.Equal(4, len(pluginsSorted))
+	a.Equal(true, indexHttp < index1)
+	a.Equal(true, index4 < index2)
+	a.Equal(5, len(pluginsSorted))
 }
 
 //7) plugin1 -> plugin2, plugin 3 -> plugin2, (plugin 2 is unavailable)
