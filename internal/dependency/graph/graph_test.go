@@ -376,10 +376,10 @@ func TestDependencyGraph_AllPluginsAvailableWithInterfaceDependency(t *testing.T
 }
 
 //5) plugin1-> interfaceHttp (interface is unavailable)
-/*func TestDependencyGraph_UnavailableInterface(t *testing.T) {
+func TestDependencyGraph_UnavailableInterface(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
-	a.Nil(managerPlugin.Add(plugin1(HttpInterface.Dependency())))
+	a.Nil(managerPlugin.Add(plugin1(InterfaceHttp.Dependency())))
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
 	i := 0
@@ -402,7 +402,7 @@ func TestDependencyGraph_AllPluginsAvailableWithInterfaceDependency(t *testing.T
 	t.Log(err)
 
 }
-*/
+
 //6) plugin1 -> plugin2, plugin 3 -> plugin2, plugin 2 -> plugin4 (all available)
 /*func TestDependencyGraph_AllPluginsAvailable2(t *testing.T) {
 	a := assert.New(t)
