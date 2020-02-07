@@ -72,7 +72,7 @@ func plugin_RingTwo(deps ...meta.Dependency) meta.Meta {
 	return data
 }
 
-// plugin1 with AuthenticationInterface depends on HttpInterface
+// plugin1 depends on HttpInterface
 func plugin1(deps ...meta.Dependency) meta.Meta {
 	data := meta.Data{
 		ID: meta.ID{
@@ -131,24 +131,6 @@ func plugin3(deps ...meta.Dependency) meta.Meta {
 }
 
 //without dependencies
-func plugin_HTTP(deps ...meta.Dependency) meta.Meta {
-	data := meta.Data{
-		ID: meta.ID{
-			ID:      "pluginHTTP",
-			Version: "1.0.0",
-		},
-		Core: meta.Core{
-			VersionConstraint: ">=1.0.0, <2.0.0",
-		},
-		Interface: InterfaceHttp,
-	}
-	if len(deps) > 0 {
-		data.Dependencies = deps
-	}
-	return data
-}
-
-//without dependencies
 func plugin4(deps ...meta.Dependency) meta.Meta {
 	data := meta.Data{
 		ID: meta.ID{
@@ -159,6 +141,24 @@ func plugin4(deps ...meta.Dependency) meta.Meta {
 			VersionConstraint: ">=1.0.0, <2.0.0",
 		},
 		Interface: InterfaceFour,
+	}
+	if len(deps) > 0 {
+		data.Dependencies = deps
+	}
+	return data
+}
+
+//without dependencies
+func plugin_HTTP(deps ...meta.Dependency) meta.Meta {
+	data := meta.Data{
+		ID: meta.ID{
+			ID:      pluginHttp,
+			Version: "1.0.0",
+		},
+		Core: meta.Core{
+			VersionConstraint: ">=1.0.0, <2.0.0",
+		},
+		Interface: InterfaceHttp,
 	}
 	if len(deps) > 0 {
 		data.Dependencies = deps
@@ -184,11 +184,11 @@ func plugin_Sql(deps ...meta.Dependency) meta.Meta {
 	return data
 }
 
-// depend of  pluginHTTP, pluginMysql
+// depend of  pluginHTTP, pluginSql
 func plugin_Cms(deps ...meta.Dependency) meta.Meta {
 	data := meta.Data{
 		ID: meta.ID{
-			ID:      "pluginCms",
+			ID:      pluginCms,
 			Version: "1.0.0",
 		},
 		Dependencies: []meta.Dependency{
@@ -335,7 +335,10 @@ func TestDependencyGraph_UnavailablePlugin2(t *testing.T) {
 func TestDependencyGraph_AllPluginsAvailableWithInterfaceDependency(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
-	a.Nil(managerPlugin.Add(plugin1(InterfaceHttp.Dependency())))
+	a.Nil(managerPlugin.Add(plugin1(meta.Dependency{
+		Constraint: ">=1.0.0, <2.0.0",
+		Interface:  InterfaceHttp,
+	})))
 	a.Nil(managerPlugin.Add(plugin_HTTP()))
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
@@ -384,7 +387,10 @@ func TestDependencyGraph_AllPluginsAvailableWithInterfaceDependency(t *testing.T
 func TestDependencyGraph_UnavailableInterface(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
-	a.Nil(managerPlugin.Add(plugin1(InterfaceHttp.Dependency())))
+	a.Nil(managerPlugin.Add(plugin1(meta.Dependency{
+		Constraint: ">=1.0.0, <2.0.0",
+		Interface:  InterfaceHttp,
+	})))
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
 	i := 0
