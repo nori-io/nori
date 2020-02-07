@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/nori-io/nori/pkg/errors"
+	"github.com/nori-io/nori/pkg/files"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -14,7 +15,7 @@ func TestPluginExtractor_Get(t *testing.T) {
 	a := assert.New(t)
 	dir := getTestDataDirPath()
 
-	pe := NewFilesLoader()
+	pe := files.NewFilesLoader()
 	file, err := pe.Get(path.Join(dir, "testdata/plugin.so"))
 
 	a.Nil(err)
@@ -25,7 +26,7 @@ func TestPluginExtractor_Get_FileDoesNotExist(t *testing.T) {
 	a := assert.New(t)
 	dir := getTestDataDirPath()
 
-	pe := NewFilesLoader()
+	pe := files.NewFilesLoader()
 	filePath := path.Join(dir, "testdata/no_file.so")
 	file, err := pe.Get(filePath)
 
@@ -40,7 +41,7 @@ func TestPluginExtractor_Get_FileOpenError(t *testing.T) {
 	a := assert.New(t)
 	dir := getTestDataDirPath()
 
-	pe := NewFilesLoader()
+	pe := files.NewFilesLoader()
 	// todo: create empty plugin file before test
 	file, err := pe.Get(path.Join(dir, "testdata/empty.so"))
 
@@ -53,7 +54,7 @@ func TestPluginExtractor_Get_LookupError(t *testing.T) {
 	a := assert.New(t)
 	dir := getTestDataDirPath()
 
-	pe := NewFilesLoader()
+	pe := files.NewFilesLoader()
 	// todo: build plugin before test
 	file, err := pe.Get(path.Join(dir, "testdata/no_variable.so"))
 
@@ -66,7 +67,7 @@ func TestPluginExtractor_Get_NoPluginInterfaceError(t *testing.T) {
 	a := assert.New(t)
 
 	dir := getTestDataDirPath()
-	pe := NewFilesLoader()
+	pe := files.NewFilesLoader()
 	// todo: build plugin before test
 	file, err := pe.Get(path.Join(dir, "/testdata/no_interface.so"))
 

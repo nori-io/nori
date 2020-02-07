@@ -21,7 +21,7 @@ import (
 	"path/filepath"
 
 	"github.com/nori-io/logger"
-	commonLogger "github.com/nori-io/nori-common/logger"
+	commonLogger "github.com/nori-io/nori-common/v2/logger"
 
 	"github.com/cheebo/go-config"
 	"github.com/cheebo/go-config/sources/env"
@@ -31,13 +31,11 @@ import (
 )
 
 var (
-	cfgFile string
-	devMode bool
+	configFile string
 )
 
 const (
-	configDir  = ".config/nori"
-	configName = "nori.json"
+	defaultConfigFile = ".config/nori/nori.yml"
 )
 
 // root command
@@ -50,11 +48,10 @@ var rootCmd = &cobra.Command{
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	config := go_config.New()
-	logger := logger.New(logger.SetOutWriter(os.Stderr), logger.SetJsonFormatter())
+	logger := logger.New(logger.SetOutWriter(os.Stderr), logger.SetJsonFormatter(""))
 
 	cobra.OnInitialize(initConfig(config, logger))
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", fmt.Sprintf("config file (default is $HOME/%s/%s)", configDir, configName))
-	rootCmd.PersistentFlags().BoolVar(&devMode, "dev", false, "flag to run server in development mode")
+	rootCmd.PersistentFlags().StringVar(&configFile, "cfg.file", "", fmt.Sprintf("defualt: `$HOME/%s`", defaultConfigFile))
 
 	rootCmd.AddCommand(serverCmd(config, logger), versionCmd)
 
@@ -63,15 +60,28 @@ func Execute() {
 	}
 }
 
+func initConf(config go_config.Config, logger commonLogger.Logger) func() {
+	return func() {
+		// 1. check -config flag, if empty then
+		// 2. check NORI_CONFIG env variable, if empty then
+		// 3. load default config
+
+		cfg := "file,/home/sergey/nori"
+
+		// use env variables as config source
+		config.UseSource(env.Source("NORI", ","))
+	}
+}
+
 // initConfig reads in config file and ENV variables if set.
 func initConfig(config go_config.Config, logger commonLogger.Logger) func() {
 	return func() {
-		config.SetDefault("nori.grpc.enable", true)
-		config.SetDefault("nori.grpc.address", "0.0.0.0:29876")
+		//config.SetDefault("nori.grpc.enable", true)
+		//config.SetDefault("nori.grpc.address", "0.0.0.0:29876")
 
-		config.SetDefault("nori.rest.enable", true)
-		config.SetDefault("nori.rest.base", "/")
-		config.SetDefault("nori.rest.address", "0.0.0.0:28541")
+		//config.SetDefault("nori.rest.enable", true)
+		//config.SetDefault("nori.rest.base", "/")
+		//config.SetDefault("nori.rest.address", "0.0.0.0:28541")
 
 		if cfgFile == "" {
 			// Find home directory.
@@ -84,7 +94,7 @@ func initConfig(config go_config.Config, logger commonLogger.Logger) func() {
 		}
 
 		fileSource, err := file.Source(
-			file.File{Path: cfgFile, Type: go_config.JSON, Namespace: ""},
+			file.File{Path: cfgFile, Namespace: ""},
 		)
 		if err != nil {
 			logger.Fatal(err.Error())
@@ -93,6 +103,6 @@ func initConfig(config go_config.Config, logger commonLogger.Logger) func() {
 
 		logger.Info("Using config file: %s", cfgFile)
 
-		config.UseSource(env.Source("NORI"))
+		config.UseSource(env.Source("NORI", ","))
 	}
 }

@@ -1,3 +1,5 @@
 plugins:
   dir:
     - "/plugins"
+nori:
+  storage: "bolt;/configs/storage_bbolt.db;0644"

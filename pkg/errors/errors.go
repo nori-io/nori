@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/nori-io/nori-common/meta"
+	"github.com/nori-io/nori-common/v2/meta"
 )
 
 type NotFound struct {
@@ -37,7 +37,7 @@ type AlreadyExists struct {
 }
 
 func (e AlreadyExists) Error() string {
-	return fmt.Sprintf("plugin [%s] already exists {%s}", e.ID.String())
+	return fmt.Sprintf("plugin [%s] already exists {%s}", e.ID.String(), e.Path)
 }
 
 type FileDoesNotExist struct {
@@ -108,8 +108,8 @@ type DependencyNotFound struct {
 }
 
 func (e DependencyNotFound) Error() string {
-	return fmt.Sprintf("Dependency [%s][%s][%s] not found",
-		e.Dependency.ID, e.Dependency.Interface, e.Dependency.Constraint)
+	return fmt.Sprintf("Dependency [%s][%s] not found",
+		e.Dependency.Interface, e.Dependency.Constraint)
 }
 
 type DependenciesNotFound struct {

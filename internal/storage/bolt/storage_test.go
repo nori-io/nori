@@ -1,16 +1,21 @@
-package memory_test
+package bolt_test
 
 import (
+	"io/ioutil"
+	"os"
 	"testing"
 
-	"github.com/nori-io/nori/internal/storage/memory"
+	"github.com/nori-io/nori/internal/storage/bolt"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewStorage(t *testing.T) {
+func TestNewBoltStorage(t *testing.T) {
 	a := assert.New(t)
 
-	s, err := memory.NewStorage()
+	tmpFile, err := ioutil.TempFile("", "bbolt_db")
+	defer os.Remove(tmpFile.Name()) // clean up
+
+	s, err := bolt.NewBoltStorage(tmpFile.Name(), 0666)
 	a.NoError(err)
 
 	bucket, err := s.CreateBucket("storage")
@@ -37,10 +42,21 @@ func TestNewStorage(t *testing.T) {
 	a.Error(err)
 }
 
+func TestNewBoltStorage_Error(t *testing.T) {
+	a := assert.New(t)
+
+	s, err := bolt.NewBoltStorage("", 0666)
+	a.Error(err)
+	a.Nil(s)
+}
+
 func TestStorage_Bucket(t *testing.T) {
 	a := assert.New(t)
 
-	s, err := memory.NewStorage()
+	tmpFile, err := ioutil.TempFile("", "bbolt_db")
+	defer os.Remove(tmpFile.Name()) // clean up
+
+	s, err := bolt.NewBoltStorage(tmpFile.Name(), 0666)
 	defer s.Close()
 	a.NoError(err)
 
@@ -66,15 +82,29 @@ func TestStorage_Bucket(t *testing.T) {
 	b, err = s.CreateBucketIfNotExists("bar")
 	a.NoError(err)
 	a.NotNil(b)
+}
 
-	err = s.Close()
+func TestStorage_BucketError(t *testing.T) {
+	a := assert.New(t)
+
+	tmpFile, err := ioutil.TempFile("", "bbolt_db")
+	defer os.Remove(tmpFile.Name()) // clean up
+
+	s, err := bolt.NewBoltStorage(tmpFile.Name(), 0666)
+	defer s.Close()
 	a.NoError(err)
+
+	_, err = s.CreateBucketIfNotExists("")
+	a.Error(err)
 }
 
 func TestStorage_BucketDelete(t *testing.T) {
 	a := assert.New(t)
 
-	s, err := memory.NewStorage()
+	tmpFile, err := ioutil.TempFile("", "bbolt_db")
+	defer os.Remove(tmpFile.Name()) // clean up
+
+	s, err := bolt.NewBoltStorage(tmpFile.Name(), 0666)
 	defer s.Close()
 	a.NoError(err)
 
@@ -97,7 +127,10 @@ func TestStorage_BucketDelete(t *testing.T) {
 func TestStorage_DeletedBucketGet(t *testing.T) {
 	a := assert.New(t)
 
-	s, err := memory.NewStorage()
+	tmpFile, err := ioutil.TempFile("", "bbolt_db")
+	defer os.Remove(tmpFile.Name()) // clean up
+
+	s, err := bolt.NewBoltStorage(tmpFile.Name(), 0666)
 	defer s.Close()
 	a.NoError(err)
 
@@ -118,7 +151,10 @@ func TestStorage_DeletedBucketGet(t *testing.T) {
 func TestStorage_DeletedBucketSet(t *testing.T) {
 	a := assert.New(t)
 
-	s, err := memory.NewStorage()
+	tmpFile, err := ioutil.TempFile("", "bbolt_db")
+	defer os.Remove(tmpFile.Name()) // clean up
+
+	s, err := bolt.NewBoltStorage(tmpFile.Name(), 0666)
 	defer s.Close()
 	a.NoError(err)
 
@@ -139,7 +175,10 @@ func TestStorage_DeletedBucketSet(t *testing.T) {
 func TestStorage_DeletedBucketDelete(t *testing.T) {
 	a := assert.New(t)
 
-	s, err := memory.NewStorage()
+	tmpFile, err := ioutil.TempFile("", "bbolt_db")
+	defer os.Remove(tmpFile.Name()) // clean up
+
+	s, err := bolt.NewBoltStorage(tmpFile.Name(), 0666)
 	defer s.Close()
 	a.NoError(err)
 
@@ -160,7 +199,10 @@ func TestStorage_DeletedBucketDelete(t *testing.T) {
 func TestStorage_DeletedBucketCursor(t *testing.T) {
 	a := assert.New(t)
 
-	s, err := memory.NewStorage()
+	tmpFile, err := ioutil.TempFile("", "bbolt_db")
+	defer os.Remove(tmpFile.Name()) // clean up
+
+	s, err := bolt.NewBoltStorage(tmpFile.Name(), 0666)
 	defer s.Close()
 	a.NoError(err)
 
@@ -181,7 +223,10 @@ func TestStorage_DeletedBucketCursor(t *testing.T) {
 func TestStorage_ForEach(t *testing.T) {
 	a := assert.New(t)
 
-	s, err := memory.NewStorage()
+	tmpFile, err := ioutil.TempFile("", "bbolt_db")
+	defer os.Remove(tmpFile.Name()) // clean up
+
+	s, err := bolt.NewBoltStorage(tmpFile.Name(), 0666)
 	defer s.Close()
 	a.NoError(err)
 
@@ -201,11 +246,12 @@ func TestStorage_ForEach(t *testing.T) {
 	keys := ""
 	vals := []byte{}
 
-	b.ForEach(func(k string, v []byte) error {
+	err = b.ForEach(func(k string, v []byte) error {
 		keys = keys + k
 		vals = append(vals, v...)
 		return nil
 	})
+	a.NoError(err)
 
 	a.Equal("abc", keys)
 	a.Equal([]byte("onetwothree"), vals)
@@ -214,7 +260,10 @@ func TestStorage_ForEach(t *testing.T) {
 func TestStorage_ForEachError(t *testing.T) {
 	a := assert.New(t)
 
-	s, err := memory.NewStorage()
+	tmpFile, err := ioutil.TempFile("", "bbolt_db")
+	defer os.Remove(tmpFile.Name()) // clean up
+
+	s, err := bolt.NewBoltStorage(tmpFile.Name(), 0666)
 	defer s.Close()
 	a.NoError(err)
 
@@ -231,7 +280,10 @@ func TestStorage_ForEachError(t *testing.T) {
 func TestStorage_Cursor(t *testing.T) {
 	a := assert.New(t)
 
-	s, err := memory.NewStorage()
+	tmpFile, err := ioutil.TempFile("", "bbolt_db")
+	defer os.Remove(tmpFile.Name()) // clean up
+
+	s, err := bolt.NewBoltStorage(tmpFile.Name(), 0666)
 	defer s.Close()
 	a.NoError(err)
 
@@ -260,7 +312,10 @@ func TestStorage_Cursor(t *testing.T) {
 func TestStorage_CursorEmpty(t *testing.T) {
 	a := assert.New(t)
 
-	s, err := memory.NewStorage()
+	tmpFile, err := ioutil.TempFile("", "bbolt_db")
+	defer os.Remove(tmpFile.Name()) // clean up
+
+	s, err := bolt.NewBoltStorage(tmpFile.Name(), 0666)
 	defer s.Close()
 	a.NoError(err)
 
@@ -274,7 +329,10 @@ func TestStorage_CursorEmpty(t *testing.T) {
 func TestStorage_CursorFirst(t *testing.T) {
 	a := assert.New(t)
 
-	s, err := memory.NewStorage()
+	tmpFile, err := ioutil.TempFile("", "bbolt_db")
+	defer os.Remove(tmpFile.Name()) // clean up
+
+	s, err := bolt.NewBoltStorage(tmpFile.Name(), 0666)
 	defer s.Close()
 	a.NoError(err)
 
@@ -302,7 +360,10 @@ func TestStorage_CursorFirst(t *testing.T) {
 func TestStorage_CursorLast(t *testing.T) {
 	a := assert.New(t)
 
-	s, err := memory.NewStorage()
+	tmpFile, err := ioutil.TempFile("", "bbolt_db")
+	defer os.Remove(tmpFile.Name()) // clean up
+
+	s, err := bolt.NewBoltStorage(tmpFile.Name(), 0666)
 	defer s.Close()
 	a.NoError(err)
 
@@ -330,7 +391,10 @@ func TestStorage_CursorLast(t *testing.T) {
 func TestStorage_CursorHasNext(t *testing.T) {
 	a := assert.New(t)
 
-	s, err := memory.NewStorage()
+	tmpFile, err := ioutil.TempFile("", "bbolt_db")
+	defer os.Remove(tmpFile.Name()) // clean up
+
+	s, err := bolt.NewBoltStorage(tmpFile.Name(), 0666)
 	defer s.Close()
 	a.NoError(err)
 
@@ -359,7 +423,10 @@ func TestStorage_CursorHasNext(t *testing.T) {
 func TestStorage_CursorDelete(t *testing.T) {
 	a := assert.New(t)
 
-	s, err := memory.NewStorage()
+	tmpFile, err := ioutil.TempFile("", "bbolt_db")
+	defer os.Remove(tmpFile.Name()) // clean up
+
+	s, err := bolt.NewBoltStorage(tmpFile.Name(), 0666)
 	defer s.Close()
 	a.NoError(err)
 
@@ -389,7 +456,10 @@ func TestStorage_CursorDelete(t *testing.T) {
 func TestStorage_CursorNextPrev(t *testing.T) {
 	a := assert.New(t)
 
-	s, err := memory.NewStorage()
+	tmpFile, err := ioutil.TempFile("", "bbolt_db")
+	defer os.Remove(tmpFile.Name()) // clean up
+
+	s, err := bolt.NewBoltStorage(tmpFile.Name(), 0666)
 	defer s.Close()
 	a.NoError(err)
 
@@ -424,7 +494,10 @@ func TestStorage_CursorNextPrev(t *testing.T) {
 func TestStorage_CursorSeek(t *testing.T) {
 	a := assert.New(t)
 
-	s, err := memory.NewStorage()
+	tmpFile, err := ioutil.TempFile("", "bbolt_db")
+	defer os.Remove(tmpFile.Name()) // clean up
+
+	s, err := bolt.NewBoltStorage(tmpFile.Name(), 0666)
 	defer s.Close()
 	a.NoError(err)
 

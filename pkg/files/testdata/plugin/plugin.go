@@ -3,9 +3,10 @@ package main
 import (
 	"context"
 
-	"github.com/nori-io/nori-common/config"
-	"github.com/nori-io/nori-common/meta"
-	pl "github.com/nori-io/nori-common/plugin"
+	"github.com/nori-io/nori-common/v2/config"
+	"github.com/nori-io/nori-common/v2/logger"
+	"github.com/nori-io/nori-common/v2/meta"
+	pl "github.com/nori-io/nori-common/v2/plugin"
 )
 
 var Plugin plugin
@@ -20,7 +21,7 @@ func (p plugin) Instance() interface{} {
 	return nil
 }
 
-func (p plugin) Init(ctx context.Context, config config.Manager) error {
+func (p plugin) Init(ctx context.Context, config config.Config, log logger.FieldLogger) error {
 	return nil
 }
 

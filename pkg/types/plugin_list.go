@@ -16,8 +16,8 @@
 package types
 
 import (
-	"github.com/nori-io/nori-common/meta"
-	"github.com/nori-io/nori-common/plugin"
+	"github.com/nori-io/nori-common/v2/meta"
+	"github.com/nori-io/nori-common/v2/plugin"
 	"github.com/nori-io/nori/pkg/errors"
 )
 
@@ -68,10 +68,6 @@ func (pl *PluginList) Resolve(dep meta.Dependency) (plugin.Plugin, error) {
 	}
 
 	for _, p := range *pl {
-		if dep.ID != p.Meta().Id().ID {
-			continue
-		}
-
 		v, _ := p.Meta().Id().GetVersion()
 
 		if cons.Check(v) {

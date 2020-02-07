@@ -5,7 +5,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/nori-io/nori-common/logger"
+	"github.com/nori-io/nori-common/v2/logger"
 
 	go_config "github.com/cheebo/go-config"
 	"github.com/nori-io/nori/internal/plugins"
@@ -26,10 +26,17 @@ func NewNori(cfg go_config.Config, log logger.Logger, sig chan os.Signal) Nori {
 	c := Config{
 		Plugins: struct{ Dir []interface{} }{Dir: nil},
 	}
+	// plugins
 	err := cfg.Unmarshal(&c.Plugins, "plugins")
 	if err != nil {
 		log.Fatal("%v", err)
 	}
+	// nori
+	err = cfg.Unmarshal(&c.Nori, "nori")
+	if err != nil {
+		log.Fatal("%v", err)
+	}
+
 	return &nori{
 		config:        c,
 		log:           log,
@@ -42,6 +49,9 @@ func (n *nori) Exec() error {
 	ctx := context.Background()
 	// todo: load config
 	// todo: log config
+
+	// hooks
+	// storage
 
 	// load plugin files
 	m, err := n.pluginManager.AddDir(pluginDir(n.config.Plugins.Dir))
