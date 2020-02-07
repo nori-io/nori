@@ -275,7 +275,7 @@ func TestDependencyGraph_AllPluginsAvailable(t *testing.T) {
 	a.Equal(4, len(pluginsSorted))
 }
 
-//2) plugin1, plugin2, plugin3, pluginHttp (plugin3, pluginHttp are unavailable)
+//2) plugin1, plugin2, plugin3, pluginHttp (plugin3, pluginHttp with their interfaces are unavailable)
 func TestDependencyGraph_UnavailablePlugin3PluginHttp(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
@@ -303,8 +303,8 @@ func TestDependencyGraph_UnavailablePlugin3PluginHttp(t *testing.T) {
 	t.Log(err)
 }
 
-//3) plugin1 -> plugin2 -> plugin3 (2nd is unavailable)
-func TestDependencyGraph_UnavailablePlugin2(t *testing.T) {
+//3) plugin1, plugin2, plugin3 (plugin2 is unavailable, plugin that implements interfacesHttp is unavailable)
+func TestDependencyGraph_UnavailablePlugin2InterfacesHttp(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(plugin1()))
