@@ -212,7 +212,7 @@ func plugin_Cms(deps ...meta.Dependency) meta.Meta {
 	return data
 }
 
-//1) plugin1 -> plugin2 -> plugin3 (all available) order for adding - 1 3 2
+//1) plugin1, plugin2, plugin3, pluginHttp (all available) order for adding - 1 3 2
 func TestDependencyGraph_AllPluginsAvailable(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
@@ -275,8 +275,8 @@ func TestDependencyGraph_AllPluginsAvailable(t *testing.T) {
 	a.Equal(4, len(pluginsSorted))
 }
 
-//2) plugin1 -> plugin2 -> plugin3 (3rd is unavailable)
-func TestDependencyGraph_UnavailablePlugin3(t *testing.T) {
+//2) plugin1, plugin2, plugin3, pluginHttp (plugin3, pluginHttp are unavailable)
+func TestDependencyGraph_UnavailablePlugin3PluginHttp(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(plugin1()))
