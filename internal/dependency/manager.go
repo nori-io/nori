@@ -18,6 +18,7 @@ package dependency
 import (
 	"github.com/nori-io/nori-common/v2/meta"
 	"github.com/nori-io/nori-common/v2/version"
+
 	"github.com/nori-io/nori/internal/dependency/graph"
 	"github.com/nori-io/nori/pkg/errors"
 	"github.com/nori-io/nori/pkg/types"
@@ -69,6 +70,13 @@ func NewManager() Manager {
 
 func (m *manager) Add(mt meta.Meta) error {
 	m.plugins[mt.Id()] = mt
+
+	for _, dep := range mt.GetDependencies() {
+		if mt.GetInterface() == dep.Interface {
+			loopVertex := dep
+			return errors.LoopVertexFound{Dependency: loopVertex}
+		}
+	}
 
 	// add to graph
 	err := m.graph.AddNode(mt.Id())

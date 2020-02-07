@@ -241,12 +241,14 @@ func (g *dependencyGraph) RemoveEdge(e Edge) {
 
 func (g *dependencyGraph) Sort() ([]meta.ID, error) {
 	var sorted []meta.ID
+
 	queue := NewNodeQueue()
 
 	tmpGraph := NewDependencyGraph()
 	for _, n := range g.Nodes() {
 		tmpGraph.AddNode(n)
 	}
+
 	for _, e := range g.Edges() {
 		tmpGraph.SetEdge(tmpGraph.NewEdge(e.From(), e.To()))
 	}
@@ -281,11 +283,13 @@ func (g *dependencyGraph) Sort() ([]meta.ID, error) {
 
 	if len(tmpGraph.Edges()) > 0 {
 		// @todo return cycle info
-		cyclePlugins:=""
-		for _,v:=range tmpGraph.Edges(){
-			cyclePlugins=cyclePlugins+ fmt.Sprintf("%s",v.From())+"\n"
+
+		cyclePlugins := ""
+		for _, v := range tmpGraph.Edges() {
+			cyclePlugins = cyclePlugins + fmt.Sprintf("%s", v) + "\n"
 		}
-		return []meta.ID{}, fmt.Errorf( "dependency cycle found among plugins:\n"+cyclePlugins)
+
+		return []meta.ID{}, fmt.Errorf("dependency cycle found among plugins:\n" + cyclePlugins)
 	}
 
 	return sorted, nil

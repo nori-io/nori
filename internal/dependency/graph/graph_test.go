@@ -1,26 +1,79 @@
 package graph_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/nori-io/nori-common/v2/meta"
-	"github.com/nori-io/nori/internal/dependency"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/nori-io/nori/internal/dependency"
+	"github.com/nori-io/nori/pkg/errors"
 )
 
 const (
-	pluginOne   = "plugin1"
-	pluginTwo   = "plugin2"
-	pluginThree = "plugin3"
-	pluginFour  = "plugin4"
+	pluginOne     = "plugin1"
+	pluginTwo     = "plugin2"
+	pluginThree   = "plugin3"
+	pluginFour    = "plugin4"
+	pluginRingOne = "pluginRingOne"
+	pluginRingTwo = "pluginRingTwo"
+	pluginHttp    = "pluginHttp"
+	pluginSql="pluginSql"
+	pluginCms="pluginCms"
 
-	HttpInterface = meta.Interface("nori/Http@1.0.0")
-	SQLInterface  = meta.Interface("nori/Sql@1.0.0")
+	InterfaceOne   = meta.Interface("nori/InterfaceOne@1.0.0")
+	InterfaceTwo   = meta.Interface("nori/InterfaceTwo@1.0.0")
+	InterfaceThree = meta.Interface("nori/InterfaceThree@1.0.0")
+	InterfaceFour  = meta.Interface("nori/InterfaceFour@1.0.0")
+	InterfaceRingOne = meta.Interface("nori/RingOne@1.0.0")
+	InterfaceRingTwo = meta.Interface("nori/RingTwo@1.0.0")
+	InterfaceCms   = meta.Interface("nori/InterfaceCms@1.0.0")
+	InterfaceHttp  = meta.Interface("nori/InterfaceHttp@1.0.0")
+	InterfaceSql   = meta.Interface("nori/InterfaceSql@1.0.0")
+
 )
 
-// depend of plugin2
+// plugin with SelfRing
+func plugin_RingOne(deps ...meta.Dependency) meta.Meta {
+	data := meta.Data{
+		ID: meta.ID{
+			ID:      pluginRingOne,
+			Version: "1.0.0",
+		},
+		Core: meta.Core{
+			VersionConstraint: ">=1.0.0, <2.0.0",
+		},
+		Dependencies: []meta.Dependency{{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceRingOne}},
+		Interface:    InterfaceRingOne,
+	}
+	if len(deps) > 0 {
+		data.Dependencies = deps
+	}
+	return data
+}
+
+// plugin with SelfRing
+func plugin_RingTwo(deps ...meta.Dependency) meta.Meta {
+	data := meta.Data{
+		ID: meta.ID{
+			ID:      pluginRingTwo,
+			Version: "1.0.0",
+		},
+		Core: meta.Core{
+			VersionConstraint: ">=1.0.0, <2.0.0",
+		},
+		Dependencies: []meta.Dependency{{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceRingTwo}},
+		Interface:    InterfaceRingTwo,
+	}
+	if len(deps) > 0 {
+		data.Dependencies = deps
+	}
+	return data
+}
+
+// plugin1 depends on HttpInterface
 func plugin1(deps ...meta.Dependency) meta.Meta {
-	custom := meta.Interface("nori/Custom@0.0.1")
 	data := meta.Data{
 		ID: meta.ID{
 			ID:      pluginOne,
@@ -29,13 +82,8 @@ func plugin1(deps ...meta.Dependency) meta.Meta {
 		Core: meta.Core{
 			VersionConstraint: ">=1.0.0, <2.0.0",
 		},
-		Dependencies: []meta.Dependency{
-			{
-				Interface:  pluginTwo,
-				Constraint: ">=1.0.0, <2.0.0",
-			},
-		},
-		Interface: custom,
+		Dependencies: []meta.Dependency{{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceHttp}},
+		Interface:    InterfaceOne,
 	}
 	if len(deps) > 0 {
 		data.Dependencies = deps
@@ -45,7 +93,6 @@ func plugin1(deps ...meta.Dependency) meta.Meta {
 
 //depend of plugin3
 func plugin2(deps ...meta.Dependency) meta.Meta {
-	custom := meta.Interface("nori/Custom@0.0.1")
 	data := meta.Data{
 		ID: meta.ID{
 			ID:      pluginTwo,
@@ -55,12 +102,9 @@ func plugin2(deps ...meta.Dependency) meta.Meta {
 			VersionConstraint: ">=1.0.0, <2.0.0",
 		},
 		Dependencies: []meta.Dependency{
-			{
-				Interface:  pluginThree,
-				Constraint: ">=1.0.0, <2.0.0",
-			},
+			{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceThree},
 		},
-		Interface: custom,
+		Interface: InterfaceTwo,
 	}
 	if len(deps) > 0 {
 		data.Dependencies = deps
@@ -70,7 +114,6 @@ func plugin2(deps ...meta.Dependency) meta.Meta {
 
 // without dependencies
 func plugin3(deps ...meta.Dependency) meta.Meta {
-	custom := meta.Interface("nori/Custom@0.0.1")
 	data := meta.Data{
 		ID: meta.ID{
 			ID:      pluginThree,
@@ -79,7 +122,7 @@ func plugin3(deps ...meta.Dependency) meta.Meta {
 		Core: meta.Core{
 			VersionConstraint: ">=1.0.0, <2.0.0",
 		},
-		Interface: custom,
+		Interface: InterfaceThree,
 	}
 	if len(deps) > 0 {
 		data.Dependencies = deps
@@ -89,7 +132,6 @@ func plugin3(deps ...meta.Dependency) meta.Meta {
 
 //without dependencies
 func plugin4(deps ...meta.Dependency) meta.Meta {
-	custom := meta.Interface("nori/Custom@0.0.1")
 	data := meta.Data{
 		ID: meta.ID{
 			ID:      pluginFour,
@@ -98,7 +140,25 @@ func plugin4(deps ...meta.Dependency) meta.Meta {
 		Core: meta.Core{
 			VersionConstraint: ">=1.0.0, <2.0.0",
 		},
-		Interface: custom,
+		Interface: InterfaceFour,
+	}
+	if len(deps) > 0 {
+		data.Dependencies = deps
+	}
+	return data
+}
+
+//without dependencies
+func plugin_HTTP(deps ...meta.Dependency) meta.Meta {
+	data := meta.Data{
+		ID: meta.ID{
+			ID:      pluginHttp,
+			Version: "1.0.0",
+		},
+		Core: meta.Core{
+			VersionConstraint: ">=1.0.0, <2.0.0",
+		},
+		Interface: InterfaceHttp,
 	}
 	if len(deps) > 0 {
 		data.Dependencies = deps
@@ -107,16 +167,16 @@ func plugin4(deps ...meta.Dependency) meta.Meta {
 }
 
 // without dependencies
-func pluginHTTP(deps ...meta.Dependency) meta.Meta {
+func plugin_Sql(deps ...meta.Dependency) meta.Meta {
 	data := meta.Data{
 		ID: meta.ID{
-			ID:      "pluginHTTP",
+			ID:      pluginSql,
 			Version: "1.0.0",
 		},
 		Core: meta.Core{
 			VersionConstraint: ">=1.0.0, <2.0.0",
 		},
-		Interface: HttpInterface,
+		Interface: InterfaceSql,
 	}
 	if len(deps) > 0 {
 		data.Dependencies = deps
@@ -124,40 +184,27 @@ func pluginHTTP(deps ...meta.Dependency) meta.Meta {
 	return data
 }
 
-// without dependencies
-func pluginMysql(deps ...meta.Dependency) meta.Meta {
+// depend of  pluginHTTP, pluginSql
+func plugin_Cms(deps ...meta.Dependency) meta.Meta {
 	data := meta.Data{
 		ID: meta.ID{
-			ID:      "pluginMysql",
-			Version: "1.0.0",
-		},
-		Core: meta.Core{
-			VersionConstraint: ">=1.0.0, <2.0.0",
-		},
-		Interface: SQLInterface,
-	}
-	if len(deps) > 0 {
-		data.Dependencies = deps
-	}
-	return data
-}
-
-// depend of  pluginHTTP, pluginMysql
-func pluginCms(deps ...meta.Dependency) meta.Meta {
-	custom := meta.Interface("nori/Custom@1.0.0")
-	data := meta.Data{
-		ID: meta.ID{
-			ID:      "pluginCms",
+			ID:      pluginCms,
 			Version: "1.0.0",
 		},
 		Dependencies: []meta.Dependency{
-			HttpInterface.Dependency(),
-			SQLInterface.Dependency(),
+			{
+				Constraint: ">=1.0.0, <2.0.0",
+				Interface:  InterfaceHttp,
+			},
+			{
+				Constraint: ">=1.0.0, <2.0.0",
+				Interface:  InterfaceSql,
+			},
 		},
 		Core: meta.Core{
 			VersionConstraint: ">=1.0.0, <2.0.0",
 		},
-		Interface: custom,
+		Interface: InterfaceCms,
 	}
 	if len(deps) > 0 {
 		data.Dependencies = deps
@@ -165,13 +212,14 @@ func pluginCms(deps ...meta.Dependency) meta.Meta {
 	return data
 }
 
-//1) plugin1 -> plugin2 -> plugin3 (all available) order for adding - 1 3 2
-func TestDependencyGraph_Sort1(t *testing.T) {
+//1) plugin1, plugin2, plugin3, pluginHttp (all available) order for adding - 1 3 2
+func TestDependencyGraph_AllPluginsAvailable(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(plugin1()))
 	a.Nil(managerPlugin.Add(plugin3()))
 	a.Nil(managerPlugin.Add(plugin2()))
+	a.Nil(managerPlugin.Add(plugin_HTTP()))
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
 	i := 0
@@ -198,9 +246,10 @@ func TestDependencyGraph_Sort1(t *testing.T) {
 		t.Log("Plugin n.", index+1, " in list for start:", pluginsSorted[index].String())
 	}
 	var (
-		index1 int
-		index2 int
-		index3 int
+		index1    int
+		index2    int
+		index3    int
+		indexHttp int
 	)
 	for index, value := range pluginsSorted {
 		if value.ID == pluginOne {
@@ -212,14 +261,22 @@ func TestDependencyGraph_Sort1(t *testing.T) {
 		if value.ID == pluginThree {
 			index3 = index
 		}
+		if value.ID == pluginHttp {
+			indexHttp = index
+		}
 	}
+	fmt.Println(indexHttp)
+	a.Equal(true, (indexHttp == 0) || (indexHttp == 1) || (indexHttp == 2))
+	a.Equal(true, (index3 == 0) || (index3 == 1) || (index3 == 2))
+	a.Equal(true, (index2 == 1) || (index2 == 2) || (index2 == 3))
+	a.Equal(true, (index1 == 1) || (index1 == 2) || (index1 == 3))
+	a.Equal(true, indexHttp < index1)
 	a.Equal(true, index3 < index2)
-	a.Equal(true, index2 < index1)
-	a.Equal(3, len(pluginsSorted))
+	a.Equal(4, len(pluginsSorted))
 }
 
-//2) plugin1 -> plugin2 -> plugin3 (3rd is unavailable)
-func TestDependencyGraph_Sort2(t *testing.T) {
+//2) plugin1, plugin2, plugin3, pluginHttp (plugin3, pluginHttp with their interfaces are unavailable)
+func TestDependencyGraph_UnavailablePlugin3PluginHttp(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(plugin1()))
@@ -246,8 +303,8 @@ func TestDependencyGraph_Sort2(t *testing.T) {
 	t.Log(err)
 }
 
-//3) plugin1 -> plugin2 -> plugin3 (2nd is unavailable)
-func TestDependencyGraph_Sort3(t *testing.T) {
+//3) plugin1, plugin2, plugin3 (plugin2 is unavailable, plugin that implements interfacesHttp is unavailable)
+func TestDependencyGraph_UnavailablePlugin2InterfacesHttp(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(plugin1()))
@@ -275,11 +332,14 @@ func TestDependencyGraph_Sort3(t *testing.T) {
 }
 
 //4) plugin1 -> interfaceHttp (all available)
-func TestDependencyGraph_Sort4(t *testing.T) {
+func TestDependencyGraph_AllPluginsAvailableWithInterfaceDependency(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
-	a.Nil(managerPlugin.Add(plugin1(HttpInterface.Dependency())))
-	a.Nil(managerPlugin.Add(pluginHTTP()))
+	a.Nil(managerPlugin.Add(plugin1(meta.Dependency{
+		Constraint: ">=1.0.0, <2.0.0",
+		Interface:  InterfaceHttp,
+	})))
+	a.Nil(managerPlugin.Add(plugin_HTTP()))
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
 	i := 0
@@ -324,10 +384,13 @@ func TestDependencyGraph_Sort4(t *testing.T) {
 }
 
 //5) plugin1-> interfaceHttp (interface is unavailable)
-func TestDependencyGraph_Sort5(t *testing.T) {
+func TestDependencyGraph_UnavailableInterface(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
-	a.Nil(managerPlugin.Add(plugin1(HttpInterface.Dependency())))
+	a.Nil(managerPlugin.Add(plugin1(meta.Dependency{
+		Constraint: ">=1.0.0, <2.0.0",
+		Interface:  InterfaceHttp,
+	})))
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
 	i := 0
@@ -351,14 +414,15 @@ func TestDependencyGraph_Sort5(t *testing.T) {
 
 }
 
-//6) plugin1 -> plugin2, plugin 3 -> plugin2, plugin 2 -> plugin4 (all available)
-func TestDependencyGraph_Sort6(t *testing.T) {
+//6) plugin 3 -> interfaceTwo, plugin 2 -> InterfaceFour (all available)
+func TestDependencyGraph_AllPluginsAvailable2(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(plugin1()))
-	a.Nil(managerPlugin.Add(plugin2(meta.Dependency{Interface: pluginFour, Constraint: ">=1.0.0, <2.0.0"})))
-	a.Nil(managerPlugin.Add(plugin3(meta.Dependency{Interface: pluginTwo, Constraint: ">=1.0.0, <2.0.0"})))
+	a.Nil(managerPlugin.Add(plugin2(meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceFour})))
+	a.Nil(managerPlugin.Add(plugin3(meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceTwo})))
 	a.Nil(managerPlugin.Add(plugin4()))
+	a.Nil(managerPlugin.Add(plugin_HTTP()))
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
 	i := 0
@@ -385,10 +449,11 @@ func TestDependencyGraph_Sort6(t *testing.T) {
 		t.Log("Plugin n.", index+1, " in list for start:", pluginsSorted[index].String())
 	}
 	var (
-		index1 int
-		index2 int
-		index3 int
-		index4 int
+		index1    int
+		index2    int
+		index3    int
+		index4    int
+		indexHttp int
 	)
 	for index, value := range pluginsSorted {
 		if value.ID == pluginOne {
@@ -403,20 +468,24 @@ func TestDependencyGraph_Sort6(t *testing.T) {
 		if value.ID == pluginFour {
 			index4 = index
 		}
+		if value.ID == pluginHttp {
+			indexHttp = index
+		}
 	}
 	a.Equal(err, nil)
-	a.Equal(true, index4 < index2)
+	a.Equal(true, (index4 == 0) || (index4 == 1) || (index4 == 2) || (index4 == 3))
 	a.Equal(true, index2 < index3)
-	a.Equal(true, index2 < index1)
-	a.Equal(4, len(pluginsSorted))
+	a.Equal(true, indexHttp < index1)
+	a.Equal(true, index4 < index2)
+	a.Equal(5, len(pluginsSorted))
 }
 
 //7) plugin1 -> plugin2, plugin 3 -> plugin2, (plugin 2 is unavailable)
-func TestDependencyGraph_Sort7(t *testing.T) {
+func TestDependencyGraph_UnavailablePlugin(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(plugin1()))
-	a.Nil(managerPlugin.Add(plugin3(meta.Dependency{Interface: pluginTwo, Constraint: ">=1.0.0, <2.0.0"})))
+	a.Nil(managerPlugin.Add(plugin3(meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceTwo})))
 
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
@@ -442,12 +511,12 @@ func TestDependencyGraph_Sort7(t *testing.T) {
 }
 
 //8) pluginCms->pluginMysql, pluginCms->pluginHTTP
-func TestDependencyGraph_Sort8(t *testing.T) {
+func TestDependencyGraph_PluginsCmsMySqlHttp(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
-	a.Nil(managerPlugin.Add(pluginCms()))
-	a.Nil(managerPlugin.Add(pluginHTTP()))
-	a.Nil(managerPlugin.Add(pluginMysql()))
+	a.Nil(managerPlugin.Add(plugin_Cms()))
+	a.Nil(managerPlugin.Add(plugin_HTTP()))
+	a.Nil(managerPlugin.Add(plugin_Sql()))
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
 	i := 0
@@ -494,12 +563,28 @@ func TestDependencyGraph_Sort8(t *testing.T) {
 	a.Equal(3, len(pluginsSorted))
 }
 
-//9) ring -plugin1->plugin1
-func TestDependencyGraph_Sort9(t *testing.T) {
+//9) ring -plugin1->plugin1, plugin2->plugin2
+func TestDependencyGraph_Loops(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
-	a.Nil(managerPlugin.Add(plugin1(meta.Dependency{">=1.0.0, <2.0.0", meta.Interface("")})))
+	a.Equal(errors.LoopVertexFound{Dependency: struct {
+		Constraint string
+		Interface  meta.Interface
+	}{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceRingOne}}, managerPlugin.Add(plugin_RingOne(meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceRingOne})))
 
+	a.Equal(errors.LoopVertexFound{Dependency: struct {
+		Constraint string
+		Interface  meta.Interface
+	}{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceRingTwo}}, managerPlugin.Add(plugin_RingTwo(meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceRingTwo})))
+
+}
+
+//10)ring plugin2->plugin3, plugin3->plugin2
+func TestDependencyGraph_Ring(t *testing.T) {
+	a := assert.New(t)
+	managerPlugin := dependency.NewManager()
+	a.Nil(managerPlugin.Add(plugin2()))
+	a.Nil(managerPlugin.Add(plugin3(meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceTwo})))
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
 	i := 0
@@ -520,14 +605,20 @@ func TestDependencyGraph_Sort9(t *testing.T) {
 	_, err := managerPlugin.Sort()
 	a.Error(err, "Error in sorting")
 	t.Log(err)
+
 }
 
-//10)ring plugin2->plugin3, plugin3->plugin2
-func TestDependencyGraph_Sort10(t *testing.T) {
+//10)ring plugin1->plugin2, plugin2->plugin3, plugin3->plugin2, plugin3->plugin1
+func TestDependencyGraph_Ring2(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
+	a.Nil(managerPlugin.Add(plugin1()))
 	a.Nil(managerPlugin.Add(plugin2()))
-	a.Nil(managerPlugin.Add(plugin3(meta.Dependency{">=1.0.0, <2.0.0", meta.Interface("")})))
+	a.Nil(managerPlugin.Add(plugin3(meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceTwo},
+		meta.Dependency{
+			Constraint: ">=1.0.0, <2.0.0",
+			Interface:  InterfaceOne,
+		})))
 
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
@@ -554,17 +645,23 @@ func TestDependencyGraph_Sort10(t *testing.T) {
 
 //11) plugin1 -> plugin2 -> plugin3 order for adding - 1 3 2, plugin1->Interface Http, pluginCms->interfaceHttp and interfaceMysql
 // (plugins with such interfaces added),pluginHTTP and pluginMysql -> plugin3, pluginHTTP->interface SQL
-func TestDependencyGraph_Sort11(t *testing.T) {
+func TestDependencyGraph_Sort1(t *testing.T) {
 	a := assert.New(t)
-	var custom meta.Interface = ""
 	managerPlugin := dependency.NewManager()
-	a.Nil(managerPlugin.Add(plugin1(meta.Dependency{">=1.0.0, <2.0.0", custom},
-		HttpInterface.Dependency())))
-	a.Nil(managerPlugin.Add(pluginHTTP(meta.Dependency{">=1.0.0, <2.0.0", custom}, SQLInterface.Dependency())))
+	a.Nil(managerPlugin.Add(plugin1(meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceTwo},
+		meta.Dependency{
+			Constraint: ">=1.0.0, <2.0.0",
+			Interface:  InterfaceHttp,
+		})))
+	a.Nil(managerPlugin.Add(plugin_HTTP(meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceThree},
+		meta.Dependency{
+			Constraint: ">=1.0.0, <2.0.0",
+			Interface:  InterfaceSql,
+		})))
 	a.Nil(managerPlugin.Add(plugin3()))
-	a.Nil(managerPlugin.Add(plugin2(meta.Dependency{">=1.0.0, <2.0.0", custom})))
-	a.Nil(managerPlugin.Add(pluginMysql(meta.Dependency{">=1.0.0, <2.0.0", custom})))
-	a.Nil(managerPlugin.Add(pluginCms()))
+	a.Nil(managerPlugin.Add(plugin2(meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceThree})))
+	a.Nil(managerPlugin.Add(plugin_Sql(meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceThree})))
+	a.Nil(managerPlugin.Add(plugin_Cms()))
 
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
@@ -633,17 +730,19 @@ func TestDependencyGraph_Sort11(t *testing.T) {
 
 //as 11 test but have ring pluginCms->pluginCms
 //12) plugin1 -> plugin2 -> plugin3 order for adding - 1 3 2, plugin1->Interface Http, pluginCms->interfaceHttp and interfaceMysql (plugins with such interfaces added),pluginHTTP and pluginMysql -> plugin3,
-func TestDependencyGraph_Sort12(t *testing.T) {
+func TestDependencyGraph_SortWithRing(t *testing.T) {
 	a := assert.New(t)
-	var custom meta.Interface = ""
 	managerPlugin := dependency.NewManager()
-	a.Nil(managerPlugin.Add(plugin1(meta.Dependency{">=1.0.0, <2.0.0", custom},
-		HttpInterface.Dependency())))
-	a.Nil(managerPlugin.Add(pluginHTTP(meta.Dependency{">=1.0.0, <2.0.0", custom})))
+	a.Nil(managerPlugin.Add(plugin1(meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceTwo},
+		meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceHttp})))
+	a.Nil(managerPlugin.Add(plugin_HTTP(meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceThree})))
 	a.Nil(managerPlugin.Add(plugin3()))
 	a.Nil(managerPlugin.Add(plugin2()))
-	a.Nil(managerPlugin.Add(pluginMysql(meta.Dependency{">=1.0.0, <2.0.0", custom})))
-	a.Nil(managerPlugin.Add(pluginCms(meta.Dependency{">=1.0.0, <2.0.0", custom})))
+	a.Nil(managerPlugin.Add(plugin_Sql(meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceThree})))
+	a.Equal(errors.LoopVertexFound{Dependency: struct {
+		Constraint string
+		Interface  meta.Interface
+	}{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceCms}}, managerPlugin.Add(plugin_Cms(meta.Dependency{">=1.0.0, <2.0.0", InterfaceCms})))
 
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
@@ -661,26 +760,24 @@ func TestDependencyGraph_Sort12(t *testing.T) {
 			t.Log("Plugin n.", i, " in list until sotring:", value.Id(), "Plugin doesn't have dependencies")
 		}
 	}
-	t.Log()
 	_, err := managerPlugin.Sort()
-	a.Error(err, "Error in sorting")
+	a.NoError(err)
 	t.Log(err)
 
 }
 
 //as 11 test but have ring pluginHTTP->plugin3, plugin3->pluginHTTP
 //13) plugin1 -> plugin2 -> plugin3 order for adding - 1 3 2, plugin1->Interface Http, pluginCms->interfaceHttp and interfaceMysql (plugins with such interfaces added),pluginHTTP and pluginMysql -> plugin3
-func TestDependencyGraph_Sort13(t *testing.T) {
+func TestDependencyGraph_SortWithRing2(t *testing.T) {
 	a := assert.New(t)
-	var custom meta.Interface = ""
 	managerPlugin := dependency.NewManager()
-	a.Nil(managerPlugin.Add(plugin1(meta.Dependency{">=1.0.0, <2.0.0", custom},
-		HttpInterface.Dependency())))
-	a.Nil(managerPlugin.Add(pluginHTTP(meta.Dependency{">=1.0.0, <2.0.0", custom})))
-	a.Nil(managerPlugin.Add(plugin3(meta.Dependency{">=1.0.0, <2.0.0", custom})))
-	a.Nil(managerPlugin.Add(plugin2(meta.Dependency{">=1.0.0, <2.0.0", custom})))
-	a.Nil(managerPlugin.Add(pluginMysql(meta.Dependency{">=1.0.0, <2.0.0", custom})))
-	a.Nil(managerPlugin.Add(pluginCms()))
+	a.Nil(managerPlugin.Add(plugin1(meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceTwo},
+		meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceHttp})))
+	a.Nil(managerPlugin.Add(plugin_HTTP(meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceThree})))
+	a.Nil(managerPlugin.Add(plugin3(meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceHttp})))
+	a.Nil(managerPlugin.Add(plugin2(meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceThree})))
+	a.Nil(managerPlugin.Add(plugin_Sql(meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceThree})))
+	a.Nil(managerPlugin.Add(plugin_Cms()))
 
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
@@ -706,17 +803,16 @@ func TestDependencyGraph_Sort13(t *testing.T) {
 
 //// ring through interface as 11 test but have ring pluginCms>interfaceHttp, plugin3->pluginCms
 //14) plugin1 -> plugin2 -> plugin3 order for adding - 1 3 2, plugin1->Interface Http, pluginCms->interfaceHttp and interfaceMysql (plugins with such interfaces added),pluginHTTP and pluginMysql -> plugin3
-func TestDependencyGraph_Sort14(t *testing.T) {
+func TestDependencyGraph_SortWithRing3(t *testing.T) {
 	a := assert.New(t)
-	var custom meta.Interface = ""
 	managerPlugin := dependency.NewManager()
-	a.Nil(managerPlugin.Add(plugin1(meta.Dependency{">=1.0.0, <2.0.0", custom},
-		HttpInterface.Dependency())))
-	a.Nil(managerPlugin.Add(pluginHTTP(meta.Dependency{">=1.0.0, <2.0.0", custom})))
-	a.Nil(managerPlugin.Add(plugin3(meta.Dependency{">=1.0.0, <2.0.0", custom})))
-	a.Nil(managerPlugin.Add(plugin2(meta.Dependency{">=1.0.0, <2.0.0", custom})))
-	a.Nil(managerPlugin.Add(pluginMysql(meta.Dependency{">=1.0.0, <2.0.0", custom})))
-	a.Nil(managerPlugin.Add(pluginCms()))
+	a.Nil(managerPlugin.Add(plugin1(meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceTwo},
+		meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceHttp})))
+	a.Nil(managerPlugin.Add(plugin_HTTP(meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceThree})))
+	a.Nil(managerPlugin.Add(plugin3(meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceCms})))
+	a.Nil(managerPlugin.Add(plugin2(meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceThree})))
+	a.Nil(managerPlugin.Add(plugin_Sql(meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceThree})))
+	a.Nil(managerPlugin.Add(plugin_Cms()))
 
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
@@ -742,12 +838,12 @@ func TestDependencyGraph_Sort14(t *testing.T) {
 
 // ring through 1 plugin, between plugin1 and plugin3
 //15) plugin1 -> plugin2 -> plugin3, plugin3->1 (all available) order for adding - 1 2 3
-func TestDependencyGraph_Sort15(t *testing.T) {
+func TestDependencyGraph_SortWithRing4(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(plugin1()))
 	a.Nil(managerPlugin.Add(plugin2()))
-	a.Nil(managerPlugin.Add(plugin3(meta.Dependency{">=1.0.0, <2.0.0", meta.Interface("")})))
+	a.Nil(managerPlugin.Add(plugin3(meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceOne})))
 
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
