@@ -570,11 +570,11 @@ func TestDependencyGraph_Loops(t *testing.T) {
 }
 
 //10)ring plugin2->plugin3, plugin3->plugin2
-/*func TestDependencyGraph_Ring(t *testing.T) {
+func TestDependencyGraph_Ring(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(plugin2()))
-	a.Nil(managerPlugin.Add(plugin3(meta.Dependency{pluginTwo, ">=1.0.0, <2.0.0", meta.Interface("")})))
+	a.Nil(managerPlugin.Add(plugin3(meta.Dependency{Constraint:">=1.0.0, <2.0.0",Interface: InterfaceTwo})))
 	t.Log("Plugins' order until sorting:")
 	pluginsList := managerPlugin.GetPluginsList()
 	i := 0
@@ -597,7 +597,7 @@ func TestDependencyGraph_Loops(t *testing.T) {
 	t.Log(err)
 
 }
-*/
+
 //10)ring plugin1->plugin2, plugin2->plugin3, plugin3->plugin2, plugin3->plugin1
 /*func TestDependencyGraph_Ring2(t *testing.T) {
 	a := assert.New(t)
