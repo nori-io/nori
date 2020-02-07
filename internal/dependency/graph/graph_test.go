@@ -414,7 +414,7 @@ func TestDependencyGraph_UnavailableInterface(t *testing.T) {
 
 }
 
-//6) plugin1 -> plugin2, plugin 3 -> plugin2, plugin 2 -> plugin4 (all available)
+//6) plugin 3 -> interfaceTwo, plugin 2 -> InterfaceFour (all available)
 func TestDependencyGraph_AllPluginsAvailable2(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
