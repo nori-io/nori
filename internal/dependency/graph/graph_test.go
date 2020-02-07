@@ -635,16 +635,22 @@ func TestDependencyGraph_Ring2(t *testing.T) {
 
 //11) plugin1 -> plugin2 -> plugin3 order for adding - 1 3 2, plugin1->Interface Http, pluginCms->interfaceHttp and interfaceMysql
 // (plugins with such interfaces added),pluginHTTP and pluginMysql -> plugin3, pluginHTTP->interface SQL
-/*func TestDependencyGraph_Sort1(t *testing.T) {
+func TestDependencyGraph_Sort1(t *testing.T) {
 	a := assert.New(t)
-	var custom meta.Interface = ""
 	managerPlugin := dependency.NewManager()
-	a.Nil(managerPlugin.Add(plugin1(meta.Dependency{pluginTwo, ">=1.0.0, <2.0.0", custom},
-		HttpInterface.Dependency())))
-	a.Nil(managerPlugin.Add(pluginHTTP(meta.Dependency{pluginThree, ">=1.0.0, <2.0.0", custom}, SQLInterface.Dependency())))
+	a.Nil(managerPlugin.Add(plugin1(meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface: InterfaceTwo},
+		meta.Dependency{
+			Constraint: ">=1.0.0, <2.0.0",
+			Interface:  InterfaceHttp,
+		})))
+	a.Nil(managerPlugin.Add(pluginHTTP(meta.Dependency{Constraint:">=1.0.0, <2.0.0",Interface: InterfaceThree},
+	meta.Dependency{
+		Constraint: ">=1.0.0, <2.0.0",
+		Interface:  SQLInterface,
+	})))
 	a.Nil(managerPlugin.Add(plugin3()))
-	a.Nil(managerPlugin.Add(plugin2(meta.Dependency{pluginThree, ">=1.0.0, <2.0.0", custom})))
-	a.Nil(managerPlugin.Add(pluginMysql(meta.Dependency{pluginThree, ">=1.0.0, <2.0.0", custom})))
+	a.Nil(managerPlugin.Add(plugin2(meta.Dependency{Constraint: ">=1.0.0, <2.0.0", Interface:InterfaceThree})))
+	a.Nil(managerPlugin.Add(pluginMysql(meta.Dependency{Constraint:">=1.0.0, <2.0.0", Interface:InterfaceThree})))
 	a.Nil(managerPlugin.Add(pluginCms()))
 
 	t.Log("Plugins' order until sorting:")
@@ -711,7 +717,7 @@ func TestDependencyGraph_Ring2(t *testing.T) {
 
 	a.Equal(6, len(pluginsSorted))
 }
-*/
+
 //as 11 test but have ring pluginCms->pluginCms
 //12) plugin1 -> plugin2 -> plugin3 order for adding - 1 3 2, plugin1->Interface Http, pluginCms->interfaceHttp and interfaceMysql (plugins with such interfaces added),pluginHTTP and pluginMysql -> plugin3,
 /*func TestDependencyGraph_SortWithRing(t *testing.T) {
