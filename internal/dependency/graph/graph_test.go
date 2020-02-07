@@ -168,7 +168,7 @@ func plugin4(deps ...meta.Dependency) meta.Meta {
 // without dependencies
 
 // without dependencies
-/*func pluginMysql(deps ...meta.Dependency) meta.Meta {
+func pluginMysql(deps ...meta.Dependency) meta.Meta {
 	data := meta.Data{
 		ID: meta.ID{
 			ID:      "pluginMysql",
@@ -184,9 +184,9 @@ func plugin4(deps ...meta.Dependency) meta.Meta {
 	}
 	return data
 }
-*/
+
 // depend of  pluginHTTP, pluginMysql
-/*func pluginCms(deps ...meta.Dependency) meta.Meta {
+func pluginCms(deps ...meta.Dependency) meta.Meta {
 	custom := meta.Interface("nori/Custom@1.0.0")
 	data := meta.Data{
 		ID: meta.ID{
@@ -194,7 +194,7 @@ func plugin4(deps ...meta.Dependency) meta.Meta {
 			Version: "1.0.0",
 		},
 		Dependencies: []meta.Dependency{
-			HttpInterface.Dependency(),
+			InterfaceHttp.Dependency(),
 			SQLInterface.Dependency(),
 		},
 		Core: meta.Core{
@@ -207,7 +207,7 @@ func plugin4(deps ...meta.Dependency) meta.Meta {
 	}
 	return data
 }
-*/
+
 //1) plugin1 -> plugin2 -> plugin3 (all available) order for adding - 1 3 2
 func TestDependencyGraph_AllPluginsAvailable(t *testing.T) {
 	a := assert.New(t)
@@ -501,7 +501,7 @@ func TestDependencyGraph_UnavailablePlugin(t *testing.T) {
 }
 
 //8) pluginCms->pluginMysql, pluginCms->pluginHTTP
-/*func TestDependencyGraph_PluginsCmsMySqlHttp(t *testing.T) {
+func TestDependencyGraph_PluginsCmsMySqlHttp(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(pluginCms()))
@@ -552,7 +552,7 @@ func TestDependencyGraph_UnavailablePlugin(t *testing.T) {
 	a.Equal(true, index3Cms > index2Mysql)
 	a.Equal(3, len(pluginsSorted))
 }
-*/
+
 //9) ring -plugin1->plugin1, plugin2->plugin2
 func TestDependencyGraph_Loops(t *testing.T) {
 	a := assert.New(t)
