@@ -599,16 +599,15 @@ func TestDependencyGraph_Ring(t *testing.T) {
 }
 
 //10)ring plugin1->plugin2, plugin2->plugin3, plugin3->plugin2, plugin3->plugin1
-/*func TestDependencyGraph_Ring2(t *testing.T) {
+func TestDependencyGraph_Ring2(t *testing.T) {
 	a := assert.New(t)
 	managerPlugin := dependency.NewManager()
 	a.Nil(managerPlugin.Add(plugin1()))
 	a.Nil(managerPlugin.Add(plugin2()))
-	a.Nil(managerPlugin.Add(plugin3(meta.Dependency{pluginTwo, ">=1.0.0, <2.0.0", meta.Interface("")},
+	a.Nil(managerPlugin.Add(plugin3(meta.Dependency{Constraint:">=1.0.0, <2.0.0", Interface:InterfaceTwo},
 		meta.Dependency{
-			ID:         pluginOne,
 			Constraint: ">=1.0.0, <2.0.0",
-			Interface:  meta.Interface(""),
+			Interface:  InterfaceOne,
 		})))
 
 	t.Log("Plugins' order until sorting:")
@@ -633,7 +632,7 @@ func TestDependencyGraph_Ring(t *testing.T) {
 	t.Log(err)
 
 }
-*/
+
 //11) plugin1 -> plugin2 -> plugin3 order for adding - 1 3 2, plugin1->Interface Http, pluginCms->interfaceHttp and interfaceMysql
 // (plugins with such interfaces added),pluginHTTP and pluginMysql -> plugin3, pluginHTTP->interface SQL
 /*func TestDependencyGraph_Sort1(t *testing.T) {
