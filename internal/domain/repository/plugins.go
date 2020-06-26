@@ -11,6 +11,13 @@ type PluginRepository interface {
 	// UnRegister removes plugin from plugin set
 	UnRegister(p *entity.Plugin) error
 
+	// Install saves the plugin meta data to Storage
+	Install(m meta.Meta) error
+	// IsInstalled returns true if plugin already installed, false otherwise
+	IsInstalled(m meta.Meta) (bool, error)
+	// UnInstall removes the plugin meta data from Storage
+	UnInstall(m meta.Meta) error
+
 	// FindAll returns all registered plugins
 	FindAll() []*entity.Plugin
 	// FindByID returns plugin by specific id

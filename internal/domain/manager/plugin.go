@@ -16,6 +16,11 @@ type Plugin interface {
 	UnRegister(p *entity.Plugin) error
 
 	//
+	Install(ctx context.Context, plugin *entity.Plugin) error
+	//
+	UnInstall(ctx context.Context, plugin *entity.Plugin) error
+
+	//
 	GetAll() []*entity.Plugin
 	//
 	GetByID(id meta.ID) (*entity.Plugin, error)

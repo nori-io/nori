@@ -7,7 +7,6 @@ import (
 	"github.com/nori-io/nori-common/v2/logger"
 	"github.com/nori-io/nori-common/v2/meta"
 	"github.com/nori-io/nori-common/v2/plugin"
-	"github.com/nori-io/nori-common/v2/storage"
 	"github.com/nori-io/nori/internal/domain/entity"
 	"github.com/nori-io/nori/internal/domain/enum/status"
 	"github.com/nori-io/nori/internal/domain/repository"
@@ -19,7 +18,6 @@ type Manager struct {
 	registryService  plugin.Registry
 	cm               config.Manager
 	logger           logger.Logger
-	bucket           storage.Bucket
 }
 
 func (m *Manager) Register(plugin *entity.Plugin) error {
@@ -45,6 +43,44 @@ func (m *Manager) RegisterAll(plugins []*entity.Plugin) error {
 
 func (m *Manager) UnRegister(p *entity.Plugin) error {
 	return m.pluginRepository.UnRegister(p)
+}
+
+func (m *Manager) Install(ctx context.Context, plugin *entity.Plugin) error {
+	isInstalled, err := m.pluginRepository.IsInstalled(plugin.Meta())
+	if err != nil {
+		return err
+	}
+
+	if isInstalled {
+		// todo: already installed
+		return nil
+	}
+
+	err = plugin.Install(ctx, m.registryService)
+	if err != nil {
+		return err
+	}
+
+	return m.pluginRepository.Install(plugin.Meta())
+}
+
+func (m *Manager) UnInstall(ctx context.Context, plugin *entity.Plugin) error {
+	isInstalled, err := m.pluginRepository.IsInstalled(plugin.Meta())
+	if err != nil {
+		return err
+	}
+
+	if !isInstalled {
+		// todo: not installed
+		return nil
+	}
+
+	err = plugin.UnInstall(ctx, m.registryService)
+	if err != nil {
+		return err
+	}
+
+	return m.pluginRepository.Install(plugin.Meta())
 }
 
 func (m *Manager) GetAll() []*entity.Plugin {

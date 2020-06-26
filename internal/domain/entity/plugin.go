@@ -100,13 +100,43 @@ func (p *Plugin) Stop(ctx context.Context, registry plugin.Registry) error {
 }
 
 func (p *Plugin) Install(ctx context.Context, registry plugin.Registry) error {
+	if !p.isInstallable {
+		// todo: error not installable
+		return nil
+	}
+
 	var err error
 	var recovered interface{}
 	func() {
 		defer func() {
 			recovered = recover()
 		}()
-		err = p.plugin.Stop(ctx, registry)
+		err = p.plugin.(plugin.Installable).Install(ctx, registry)
+	}()
+	if err != nil {
+		return err
+	}
+	if recovered != nil {
+		return fmt.Errorf("%v", recovered)
+	}
+
+	p.status = status.Nil
+	return nil
+}
+
+func (p *Plugin) UnInstall(ctx context.Context, registry plugin.Registry) error {
+	if !p.isInstallable {
+		// todo: error not installable
+		return nil
+	}
+
+	var err error
+	var recovered interface{}
+	func() {
+		defer func() {
+			recovered = recover()
+		}()
+		err = p.plugin.(plugin.Installable).UnInstall(ctx, registry)
 	}()
 	if err != nil {
 		return err

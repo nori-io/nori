@@ -1,7 +1,10 @@
 package plugin
 
 import (
+	"encoding/json"
+
 	"github.com/nori-io/nori-common/v2/meta"
+	"github.com/nori-io/nori-common/v2/storage"
 	"github.com/nori-io/nori-common/v2/version"
 	"github.com/nori-io/nori/internal/domain/entity"
 	"github.com/nori-io/nori/internal/repository/plugin/graph"
@@ -9,6 +12,7 @@ import (
 )
 
 type PluginRepository struct {
+	bucket     storage.Bucket
 	plugins    []*entity.Plugin
 	graph      graph.DependencyGraph
 	unresolved map[meta.ID][]meta.Dependency
@@ -40,6 +44,37 @@ func (r *PluginRepository) UnRegister(p *entity.Plugin) error {
 	}
 
 	return nil
+}
+
+func (r *PluginRepository) Install(m meta.Meta) error {
+	data, err := json.Marshal(m)
+	if err != nil {
+		return err
+	}
+	return r.bucket.Set(m.Id().String(), data)
+}
+
+func (r *PluginRepository) IsInstalled(m meta.Meta) (bool, error) {
+	val, err := r.bucket.Get(m.Id().String())
+	if err != nil {
+		return false, err
+	}
+
+	var data meta.Data
+	err = json.Unmarshal(val, &data)
+	if err != nil {
+		return false, err
+	}
+
+	if data.ID.String() != m.Id().String() {
+		return false, nil
+	}
+
+	return true, nil
+}
+
+func (r *PluginRepository) UnInstall(m meta.Meta) error {
+	return r.bucket.Delete(m.Id().String())
 }
 
 func (r *PluginRepository) FindAll() []*entity.Plugin {
