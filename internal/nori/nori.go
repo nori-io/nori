@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2020 The Nori Authors.
+Copyright 2018-2020 The Nori Authors.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,127 +15,84 @@ package nori
 
 import (
 	"context"
-	"os"
-	"sync"
 
+	log "github.com/nori-io/logger"
 	"github.com/nori-io/nori-common/v2/logger"
-
-	go_config "github.com/cheebo/go-config"
-	"github.com/nori-io/nori/internal/plugins"
+	"github.com/nori-io/nori-common/v2/storage"
+	"github.com/nori-io/nori/internal/domain/entity"
+	"github.com/nori-io/nori/internal/domain/manager"
+	"github.com/nori-io/nori/internal/env"
 )
 
-type Nori interface {
-	Exec() error
+type Nori struct {
+	log      logger.Logger
+	env      *env.Env
+	managers struct {
+		File   manager.File
+		Plugin manager.Plugin
+	}
+	storage storage.Storage
 }
 
-type nori struct {
-	config        Config
-	log           logger.Logger
-	pluginManager plugins.Manager
-	sig           chan os.Signal
-}
-
-func NewNori(cfg go_config.Config, log logger.Logger, sig chan os.Signal) Nori {
-	c := Config{
-		Plugins: struct{ Dir []interface{} }{Dir: nil},
-	}
-	// plugins
-	err := cfg.Unmarshal(&c.Plugins, "plugins")
+func (n *Nori) Run(ctx context.Context) error {
+	err := n.loadHooks()
 	if err != nil {
-		log.Fatal("%v", err)
+		n.log.Error(err.Error())
+		return err
 	}
-	// nori
-	err = cfg.Unmarshal(&c.Nori, "nori")
+
+	err = n.loadPlugins()
 	if err != nil {
-		log.Fatal("%v", err)
+		n.log.Error(err.Error())
+		return err
 	}
 
-	return &nori{
-		config:        c,
-		log:           log,
-		pluginManager: plugins.NewManager(cfg, log),
-		sig:           sig,
+	for _, p := range n.managers.Plugin.GetAll() {
+		n.log.Info("plugin loaded %s", p.Meta().Id().String())
 	}
-}
 
-func (n *nori) Exec() error {
-	ctx := context.Background()
-	// todo: load config
-	// todo: log config
-
-	// hooks
-	// storage
-
-	// load plugin files
-	m, err := n.pluginManager.AddDir(pluginDir(n.config.Plugins.Dir))
+	err = n.managers.Plugin.StartAll(ctx)
 	if err != nil {
-		n.log.Fatal("Cannot load plugins: %s", err.Error())
-	}
-	for _, d := range m {
-		n.log.Info("Found plugin [%s] interface [%s]", d.Id(), d.GetInterface())
+		return err
 	}
 
-	//filepath.Match()
-
-	ctx, cancelFunc := context.WithCancel(context.Background())
-
-	wg := &sync.WaitGroup{}
-	// three services to shutdown: PluginManager, gRPC, HTTP
-	wg.Add(3)
-
-	// start plugins
-	err = n.pluginManager.StartAll(ctx)
-	if err != nil {
-		n.log.Error("PluginManager cannot start all plugins: [%s]", err.Error())
-	}
-
-	go n.pm(ctx, wg)
-	go n.rest(ctx, wg)
-	go n.gRPC(ctx, wg)
-
-	<-n.sig
-	cancelFunc()
-	wg.Wait()
 	return nil
 }
 
-func (n *nori) rest(ctx context.Context, wg *sync.WaitGroup) {
-	defer wg.Done()
-	// todo start REST server
-	select {
-	case <-ctx.Done():
-		// todo: shutdown
-		n.log.Info("Nori REST Server went down")
-	}
+func (n *Nori) Stop() error {
+	log.L().Info("Stop")
+	return n.storage.Close()
 }
 
-func (n *nori) gRPC(ctx context.Context, wg *sync.WaitGroup) {
-	defer wg.Done()
-	// todo start gRPC server
-	select {
-	case <-ctx.Done():
-		// todo: shutdown
-		n.log.Info("Nori gRPC Server went down")
+func (n *Nori) loadHooks() error {
+	files, err := n.managers.File.Dirs(n.env.Config.Hooks.Hooks)
+	if err != nil {
+		return err
 	}
+	// todo: add hooks to logger
+	return n.load(files)
 }
 
-func (n *nori) pm(ctx context.Context, wg *sync.WaitGroup) {
-	defer wg.Done()
-	// todo
-	select {
-	case <-ctx.Done():
-		if err := n.pluginManager.StopAll(ctx); err != nil {
-			n.log.Error("Plugin Manager stopped all with error [%s]", err.Error())
-		} else {
-			n.log.Info("Plugin Manager stopped all")
+func (n *Nori) loadPlugins() error {
+	files, err := n.managers.File.Dirs(n.env.Config.Plugins.Dirs)
+	if err != nil {
+		return err
+	}
+	return n.load(files)
+}
+
+func (n *Nori) load(files []*entity.File) error {
+	plugins, err := n.managers.File.GetAll(files)
+	if err != nil {
+		return err
+	}
+
+	for _, plugin := range plugins {
+		err := n.managers.Plugin.Register(plugin)
+		if err != nil {
+			return err
 		}
 	}
-}
 
-func pluginDir(list []interface{}) []string {
-	dirs := make([]string, len(list))
-	for i := 0; i < len(list); i++ {
-		dirs[i] = list[i].(string)
-	}
-	return dirs
+	return nil
 }

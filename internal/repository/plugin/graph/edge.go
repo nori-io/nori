@@ -11,24 +11,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package commands
+package graph
 
-import (
-	"fmt"
+import "github.com/nori-io/nori-common/v2/meta"
 
-	"github.com/nori-io/nori/internal/version"
-	"github.com/spf13/cobra"
-)
+type Edge interface {
+	From() meta.ID
+	To() meta.ID
+}
 
-var (
-	// Cmd version command
-	versionCmd = &cobra.Command{
-		Use:           "version",
-		Short:         "application version",
-		SilenceUsage:  true,
-		SilenceErrors: true,
-		Run: func(_ *cobra.Command, _ []string) {
-			fmt.Println(version.GetHumanVersion())
-		},
-	}
-)
+type edge struct {
+	from meta.ID
+	to   meta.ID
+}
+
+func (e *edge) From() meta.ID {
+	return e.from
+}
+
+func (e *edge) To() meta.ID {
+	return e.to
+}

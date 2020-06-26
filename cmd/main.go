@@ -11,24 +11,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package commands
+package main
 
-import (
-	"fmt"
+import "github.com/nori-io/nori/cmd/commands"
 
-	"github.com/nori-io/nori/internal/version"
-	"github.com/spf13/cobra"
-)
-
-var (
-	// Cmd version command
-	versionCmd = &cobra.Command{
-		Use:           "version",
-		Short:         "application version",
-		SilenceUsage:  true,
-		SilenceErrors: true,
-		Run: func(_ *cobra.Command, _ []string) {
-			fmt.Println(version.GetHumanVersion())
-		},
-	}
-)
+func main() {
+	commands.Execute()
+}

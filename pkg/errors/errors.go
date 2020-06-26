@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2020 The Nori Authors.
+Copyright 2018-2020 The Nori Authors.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -56,6 +56,15 @@ func (e FileOpenError) Error() string {
 	return fmt.Sprintf("error on file [%s] opening: %s", e.Path, e.Err.Error())
 }
 
+type FileExtError struct {
+	Path string
+	Err  error
+}
+
+func (e FileExtError) Error() string {
+	return fmt.Sprintf("error on file [%s] opening: %s", e.Path, e.Err.Error())
+}
+
 type LookupError struct {
 	Path string
 	Err  error
@@ -105,18 +114,18 @@ type DependencyNotFound struct {
 	Dependency meta.Dependency
 }
 
-func (e LoopVertexFound) Error() string {
-	return fmt.Sprintf("LoopVertex [%s][%s] found",
-		e.Dependency.Interface, e.Dependency.Constraint)
+func (e DependencyNotFound) Error() string {
+	return fmt.Sprintf("Dependency [%s][%s] not found",
+		e.Dependency.Interface, e.Dependency.Interface.Constraint())
 }
 
 type LoopVertexFound struct {
 	Dependency meta.Dependency
 }
 
-func (e DependencyNotFound) Error() string {
-	return fmt.Sprintf("Dependency [%s][%s] not found",
-		e.Dependency.Interface, e.Dependency.Constraint)
+func (e LoopVertexFound) Error() string {
+	return fmt.Sprintf("LoopVertex [%s][%s] found",
+		e.Dependency.Interface, e.Dependency.Interface.Constraint())
 }
 
 type DependenciesNotFound struct {
@@ -158,4 +167,12 @@ func (e DependencyCycleFound) Error() string {
 		deps = append(deps, d.String())
 	}
 	return strings.Join(deps, "\n")
+}
+
+type ConfigFormatError struct {
+	Param string
+}
+
+func (e ConfigFormatError) Error() string {
+	return fmt.Sprintf("config param format error [%s]", e.Param)
 }

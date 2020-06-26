@@ -1,3 +1,5 @@
+
+
 # Nori Makefile
 
 NORI_BUILD_CMD ?= build -o build/bin/nori ./cmd/nori.go
@@ -54,7 +56,7 @@ lint: ## execute linter
 .PHONY: lint
 
 run: ## run 'go run cmd/nori.go server'
-	go run cmd/nori.go server
+	go run cmd/main.go server
 .PHONY: run
 
 test: ## run go tests

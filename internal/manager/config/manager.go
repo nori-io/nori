@@ -11,24 +11,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package commands
+package config
 
 import (
-	"fmt"
-
-	"github.com/nori-io/nori/internal/version"
-	"github.com/spf13/cobra"
+	"github.com/cheebo/go-config"
+	"github.com/nori-io/nori-common/v2/config"
+	"github.com/nori-io/nori-common/v2/meta"
 )
 
-var (
-	// Cmd version command
-	versionCmd = &cobra.Command{
-		Use:           "version",
-		Short:         "application version",
-		SilenceUsage:  true,
-		SilenceErrors: true,
-		Run: func(_ *cobra.Command, _ []string) {
-			fmt.Println(version.GetHumanVersion())
-		},
+type manager struct {
+	configs map[meta.ID]*[]config.Variable
+	config  go_config.Fields
+}
+
+func (m *manager) Register(id meta.ID) config.Config {
+	vars := make([]config.Variable, 0)
+	m.configs[id] = &vars
+	return &registry{
+		cfgs:   &vars,
+		config: m.config,
 	}
-)
+}
+
+func (m *manager) PluginVariables(id meta.ID) []config.Variable {
+	vars, ok := m.configs[id]
+	if !ok {
+		return []config.Variable{}
+	}
+	return *vars
+}
