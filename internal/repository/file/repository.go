@@ -1,109 +1,118 @@
 package file
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	stdplugin "plugin"
 
-	"github.com/nori-io/nori-common/v2/plugin"
+	"github.com/nori-io/common/v5/pkg/domain/plugin"
 	"github.com/nori-io/nori/internal/domain/entity"
 	"github.com/nori-io/nori/pkg/errors"
 )
 
-type FileRepository struct {
-	plugins []*entity.Plugin
-}
+type FileRepository struct{}
 
-func (r *FileRepository) Get(file entity.File) (*entity.Plugin, error) {
-	if _, err := os.Stat(file.Path); os.IsNotExist(err) {
+func (r *FileRepository) Find(file string) (*entity.File, error) {
+	stat, err := os.Stat(file)
+	if os.IsNotExist(err) {
 		return nil, errors.FileDoesNotExist{
-			Path: file.Path,
+			Path: file,
 			Err:  err,
 		}
 	}
 
-	f, err := stdplugin.Open(file.Path)
+	if stat.IsDir() {
+		return nil, errors.FileOpenError{
+			Path: file,
+			Err:  fmt.Errorf("%s is a directory", file),
+		}
+	}
+
+	if filepath.Ext(file) != ".so" {
+		return nil, errors.FileExtError{
+			Path: file,
+		}
+	}
+
+	f, err := stdplugin.Open(file)
 	if err != nil {
 		e := errors.FileOpenError{
-			Path: file.Path,
+			Path: file,
 			Err:  err,
 		}
 		return nil, e
 	}
 
-	instance, err := f.Lookup("Plugin")
+	symbol, err := f.Lookup("New")
 	if err != nil {
 		e := errors.LookupError{
-			Path: file.Path,
+			Path: file,
 			Err:  err,
 		}
 		return nil, e
 	}
 
-	p, ok := instance.(plugin.Plugin)
+	fn, ok := symbol.(func() plugin.Plugin)
 	if !ok {
 		e := errors.NoPluginInterfaceError{
-			Path: file.Path,
+			Path: file,
 		}
 		return nil, e
-	}
-
-	return entity.NewPlugin(file, p), nil
-}
-
-func (r *FileRepository) GetAll(files []entity.File) ([]*entity.Plugin, error) {
-	items := []*entity.Plugin{}
-	for _, file := range files {
-		p, err := r.Get(file)
-		if err != nil {
-			return nil, err
-		}
-		items = append(items, p)
-	}
-	return items, nil
-}
-
-func (r *FileRepository) File(path string) (*entity.File, error) {
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return nil, errors.FileDoesNotExist{
-			Path: path,
-			Err:  err,
-		}
-	}
-
-	if filepath.Ext(path) != ".so" {
-		return nil, errors.FileExtError{
-			Path: path,
-		}
 	}
 
 	return &entity.File{
-		Path: path,
+		Path: file,
+		Fn:   fn,
 	}, nil
 }
 
-func (r *FileRepository) Dir(dir string) ([]*entity.File, error) {
+func (r *FileRepository) FindAll(paths ...string) ([]entity.File, error) {
 	var (
-		err   error
-		dirs  []os.FileInfo
-		files []*entity.File
+		files []entity.File
 	)
-	if dirs, err = ioutil.ReadDir(dir); err != nil {
-		return nil, err
-	}
-	for _, d := range dirs {
-		if d.IsDir() {
+	for _, path := range paths {
+		if path == "" {
 			continue
 		}
-		if filepath.Ext(d.Name()) != ".so" {
+
+		stat, err := os.Stat(path)
+
+		if !stat.IsDir() {
+			file, err := r.Find(path)
+			if err != nil {
+				return nil, err
+			}
+			files = append(files, *file)
 			continue
 		}
-		file, err := r.File(filepath.Join(dir, d.Name()))
+
+		dirs, err := ioutil.ReadDir(path)
 		if err != nil {
 			return nil, err
 		}
-		files = append(files, file)
+		for _, d := range dirs {
+			if d.IsDir() {
+				nestedFiles, err := r.FindAll(filepath.Join(path, d.Name()))
+				if err != nil {
+					return nil, err
+				}
+				files = append(files, nestedFiles...)
+				continue
+			}
+			if d.Size() == 0 {
+				continue
+			}
+			if filepath.Ext(d.Name()) != ".so" {
+				continue
+			}
+			file, err := r.Find(filepath.Join(path, d.Name()))
+			if err != nil {
+				return nil, err
+			}
+			files = append(files, *file)
+		}
 	}
 	return files, nil
 }

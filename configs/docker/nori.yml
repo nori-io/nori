@@ -1,8 +1,7 @@
-plugins:
-  dir:
-    - "/plugins"
 nori:
+  plugins:
+    dir: "/plugins"
   storage:
-    plugin: ""
-    boltdb:
-      file: "/config/storage_bbolt.db"
+      dsn: "bolt:///app/db.bolt"
+  install: auto
+  startup: start

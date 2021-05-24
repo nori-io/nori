@@ -16,7 +16,6 @@ package commands
 import (
 	"fmt"
 
-	"github.com/nori-io/nori/internal/version"
 	"github.com/spf13/cobra"
 )
 
@@ -28,7 +27,7 @@ var (
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Run: func(_ *cobra.Command, _ []string) {
-			fmt.Println(version.GetHumanVersion())
+			fmt.Println("dev") // todo
 		},
 	}
 )

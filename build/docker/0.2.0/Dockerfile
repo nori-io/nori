@@ -1,7 +1,7 @@
 # Dockerfile References: https://docs.docker.com/engine/reference/builder/
 
 # Start from the latest golang base image
-FROM golang:1.13.4 as builder
+FROM golang:1.16.4 as builder
 # Add Maintainer Info
 LABEL maintainer="nori <info@nori.io>"
 # Set the Current Working Directory inside the container
@@ -13,11 +13,11 @@ RUN go mod download
 # Copy the source from the current directory to the Working Directory inside the container
 COPY . .
 # Build Nori
-RUN go build -o bin/nori  ./cmd/nori.go
+RUN go build -o bin/nori  ./cmd/main.go
 
 
-# Create ubuntu 18.04 image
-FROM ubuntu:18.04 
+# Create ubuntu 20.04 image
+FROM ubuntu:20.04
 
 RUN apt-get install
 WORKDIR /app/
@@ -34,10 +34,10 @@ RUN chmod +x nori.sh
 
 # Pass Nori Config flag
 ARG NORI_CONFIG
-ENV NORI_CONFIG=${NORI_CONFIG:-'file;/app/config/nori.yml'}
+ENV NORI_CONFIG=${NORI_CONFIG:-'/app/config/nori.yml'}
 
 # Expose port 80, 8080, 29876 to the outside world
-EXPOSE 80 8080 29876
+EXPOSE 80 8080 5876
 
 # Declare volumes to mount
 VOLUME /plugins

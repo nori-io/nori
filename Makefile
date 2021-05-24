@@ -1,5 +1,3 @@
-
-
 # Nori Makefile
 
 NORI_BUILD_CMD ?= build -o build/bin/nori ./cmd/nori.go
@@ -9,7 +7,7 @@ override GO111MODULE = on
 endif
 
 DOCKER_IMAGE ?= noriio/nori
-DOCKER_TAG ?= 0.2.0
+DOCKER_TAG ?= dev-1.16.4
 
 clean: ## remove generated files, tidy vendor dependencies
 	export GO111MODULE=on ;\
@@ -32,7 +30,7 @@ build-web: protoc-generate ## build nori binary with packr
 	@packr clean
 .PHONY: build-web
 
-docker-image: protoc-generate ## build noriio/nori docker image
+docker-image:
 	docker build -f build/docker/0.2.0/Dockerfile -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
 .PHONY: docker-image
 
@@ -41,11 +39,11 @@ docker-push: ## push docker image to registry
 .PHONY: docker-push
 
 git-update: ## update git submodules
-	git submodule update --remote
+	git submodule update --init
 .PHONY: git-sub-pull
 
-protoc-generate: ## generate protobuf
-	@protoc --proto_path=api/protobuf/plugin --go_out=plugins=grpc:./internal/generated/protobuf api/protobuf/plugin/*.proto
+grpc-gen: ## generate protobuf
+	@protoc --proto_path=api/grpc -I=api/grpc/ --go_out=plugins=grpc:. api/grpc/*.proto
 .PHONY: protoc-generate
 
 lint: ## execute linter
