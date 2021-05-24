@@ -1,5 +1,5 @@
 package main
 
-var Plugin plugin
-
-type plugin struct{}
+func New() bool {
+	return false
+}

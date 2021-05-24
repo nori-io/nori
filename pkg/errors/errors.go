@@ -17,9 +17,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/nori-io/nori-common/v2/meta"
+	"github.com/nori-io/common/v5/pkg/domain/meta"
 )
 
+// Not found
 type NotFound struct {
 	ID meta.ID
 }
@@ -28,86 +29,12 @@ func (e NotFound) Error() string {
 	return fmt.Sprintf("plugin [%s] not found", e.ID.String())
 }
 
-type AlreadyExists struct {
-	ID   meta.ID
-	Path string
-	Err  error
-}
-
-func (e AlreadyExists) Error() string {
-	return fmt.Sprintf("plugin [%s] already exists {%s}", e.ID.String(), e.Path)
-}
-
-type FileDoesNotExist struct {
-	Path string
-	Err  error
-}
-
-func (e FileDoesNotExist) Error() string {
-	return fmt.Sprintf("file [%s] does not exist", e.Path)
-}
-
-type FileOpenError struct {
-	Path string
-	Err  error
-}
-
-func (e FileOpenError) Error() string {
-	return fmt.Sprintf("error on file [%s] opening: %s", e.Path, e.Err.Error())
-}
-
-type FileExtError struct {
-	Path string
-	Err  error
-}
-
-func (e FileExtError) Error() string {
-	return fmt.Sprintf("error on file [%s] opening: %s", e.Path, e.Err.Error())
-}
-
-type LookupError struct {
-	Path string
-	Err  error
-}
-
-func (e LookupError) Error() string {
-	return fmt.Sprintf("error on lookup in [%s]: %s", e.Path, e.Err.Error())
-}
-
-type NoPluginInterfaceError struct {
-	Path string
-}
-
-func (e NoPluginInterfaceError) Error() string {
-	return fmt.Sprintf("plugin [%s] does not implement Plugin interface", e.Path)
-}
-
-type NonInstallablePlugin struct {
-	ID   meta.ID
-	Path string
-}
-
-func (e NonInstallablePlugin) Error() string {
-	return fmt.Sprintf("non-installable plugin [%s] in %s", e.ID.String(), e.Path)
-}
-
-type IncompatibleCoreVersion struct {
-	ID                 meta.ID
-	NeededCoreVersion  string
-	CurrentCoreVersion string
-}
-
-func (e IncompatibleCoreVersion) Error() string {
-	return fmt.Sprintf("Plugin [%s] requires Nori [%s], running Nori [%s]",
-		e.ID.String(), e.NeededCoreVersion, e.CurrentCoreVersion)
-}
-
 type InterfaceNotFound struct {
 	Interface meta.Interface
 }
 
 func (e InterfaceNotFound) Error() string {
-	return fmt.Sprintf("Interface %s is nil", e.Interface)
+	return fmt.Sprintf("Interface %s not found", e.Interface)
 }
 
 type DependencyNotFound struct {
@@ -116,16 +43,7 @@ type DependencyNotFound struct {
 
 func (e DependencyNotFound) Error() string {
 	return fmt.Sprintf("Dependency [%s][%s] not found",
-		e.Dependency.Interface, e.Dependency.Interface.Constraint())
-}
-
-type LoopVertexFound struct {
-	Dependency meta.Dependency
-}
-
-func (e LoopVertexFound) Error() string {
-	return fmt.Sprintf("LoopVertex [%s][%s] found",
-		e.Dependency.Interface, e.Dependency.Interface.Constraint())
+		e.Dependency.String(), e.Dependency.Constraint())
 }
 
 type DependenciesNotFound struct {
@@ -157,6 +75,92 @@ func (e DependenciesNotFound) Error() string {
 	return strings.Join(msg, "\n")
 }
 
+// Already exists
+type AlreadyExists struct {
+	ID   meta.ID
+	Path string
+}
+
+func (e AlreadyExists) Error() string {
+	return fmt.Sprintf("plugin [%s] already exists {%s}", e.ID.String(), e.Path)
+}
+
+// File errors
+type FileDoesNotExist struct {
+	Path string
+	Err  error
+}
+
+func (e FileDoesNotExist) Error() string {
+	return fmt.Sprintf("file [%s] does not exist", e.Path)
+}
+
+type FileOpenError struct {
+	Path string
+	Err  error
+}
+
+func (e FileOpenError) Error() string {
+	return fmt.Sprintf("error on file [%s] opening: %s", e.Path, e.Err.Error())
+}
+
+type FileExtError struct {
+	Path string
+	Err  error
+}
+
+func (e FileExtError) Error() string {
+	return fmt.Sprintf("error on file [%s] opening: %s", e.Path, e.Err.Error())
+}
+
+// plugin errors
+type LookupError struct {
+	Path string
+	Err  error
+}
+
+func (e LookupError) Error() string {
+	return fmt.Sprintf("error on lookup in [%s]: %s", e.Path, e.Err.Error())
+}
+
+type NoPluginInterfaceError struct {
+	Path string
+}
+
+func (e NoPluginInterfaceError) Error() string {
+	return fmt.Sprintf("plugin [%s] does not implement Plugin interface", e.Path)
+}
+
+// core errors
+type NonInstallablePlugin struct {
+	ID   meta.ID
+	Path string
+}
+
+func (e NonInstallablePlugin) Error() string {
+	return fmt.Sprintf("non-installable plugin [%s] in %s", e.ID.String(), e.Path)
+}
+
+type IncompatibleCoreVersion struct {
+	ID                 meta.ID
+	NeededCoreVersion  string
+	CurrentCoreVersion string
+}
+
+func (e IncompatibleCoreVersion) Error() string {
+	return fmt.Sprintf("Plugin [%s] requires Nori [%s], running Nori [%s]",
+		e.ID.String(), e.NeededCoreVersion, e.CurrentCoreVersion)
+}
+
+type LoopVertexFound struct {
+	Dependency meta.Dependency
+}
+
+func (e LoopVertexFound) Error() string {
+	return fmt.Sprintf("LoopVertex [%s][%s] found",
+		e.Dependency.String(), e.Dependency.Constraint())
+}
+
 type DependencyCycleFound struct {
 	DependencyCycle []meta.Dependency
 }
@@ -169,10 +173,19 @@ func (e DependencyCycleFound) Error() string {
 	return strings.Join(deps, "\n")
 }
 
+// config errors
 type ConfigFormatError struct {
 	Param string
 }
 
 func (e ConfigFormatError) Error() string {
 	return fmt.Sprintf("config param format error [%s]", e.Param)
+}
+
+type ConfigParamUndefinedError struct {
+	Param string
+}
+
+func (e ConfigParamUndefinedError) Error() string {
+	return fmt.Sprintf("config param [%s] is undefined", e.Param)
 }

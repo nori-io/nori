@@ -14,37 +14,29 @@ limitations under the License.
 package commands
 
 import (
-	"os"
-
 	"github.com/nori-io/logger"
 	"github.com/nori-io/nori/internal/app"
+	"github.com/nori-io/nori/internal/app/container"
 	"github.com/spf13/cobra"
 )
 
 var (
-	// Cmd version command
+	// Cmd server command
 	serverCmd = func() *cobra.Command {
 		var configFile string
+
 		cmd := &cobra.Command{
 			Use:           "server",
 			Short:         "server",
 			SilenceUsage:  true,
 			SilenceErrors: true,
 			Run: func(c *cobra.Command, v []string) {
-				app, err := app.New(app.Params{ConfigFile: configFile})
+				container := container.New(configFile)
+				err := container.Invoke(func(app *app.App) {
+					app.Run()
+				})
 				if err != nil {
-					logger.L().Error(err.Error())
-					os.Exit(1)
-				}
-				err = app.Init()
-				if err != nil {
-					logger.L().Error(err.Error())
-					os.Exit(1)
-				}
-				err = app.Run()
-				if err != nil {
-					logger.L().Error(err.Error())
-					os.Exit(1)
+					logger.L().Fatal(err.Error())
 				}
 			},
 		}

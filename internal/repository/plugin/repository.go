@@ -1,256 +1,68 @@
 package plugin
 
 import (
-	"encoding/json"
-
-	"github.com/nori-io/nori-common/v2/meta"
-	"github.com/nori-io/nori-common/v2/storage"
-	"github.com/nori-io/nori-common/v2/version"
+	"github.com/nori-io/common/v5/pkg/domain/meta"
 	"github.com/nori-io/nori/internal/domain/entity"
-	"github.com/nori-io/nori/internal/repository/plugin/graph"
 	"github.com/nori-io/nori/pkg/errors"
 )
 
-type PluginRepository struct {
-	bucket     storage.Bucket
-	plugins    []*entity.Plugin
-	graph      graph.DependencyGraph
-	unresolved map[meta.ID][]meta.Dependency
-}
-
-func (r *PluginRepository) Register(p *entity.Plugin) error {
-	item := r.FindByID(p.Meta().Id())
-
-	// plugin already in the list
-	if item != nil {
-		// todo: return error or log
-		return nil
-	}
-	r.plugins = append(r.plugins, p)
-
-	if err := r.registerDependency(p); err != nil {
-		r.UnRegister(p) // ?
+func (r *PluginRepository) Create(file *entity.File) (*entity.Plugin, error) {
+	if file.Fn == nil {
+		return nil, errors.NoPluginInterfaceError{Path: file.Path}
 	}
 
-	return nil
+	if p, ok := r.files[file.Path]; ok {
+		return p, nil
+	}
+
+	plugin := &entity.Plugin{
+		File:   file.Path,
+		Fn:     file.Fn,
+		Plugin: file.Fn(),
+	}
+
+	// todo
+	r.plugins[plugin.Plugin.Meta().GetID().String()] = plugin
+	r.files[file.Path] = plugin
+
+	return plugin, nil
 }
 
-func (r *PluginRepository) UnRegister(p *entity.Plugin) error {
-	for i, item := range r.plugins {
-		if item.Meta().Id() == p.Meta().Id() {
-			r.plugins = append(r.plugins[:i], r.plugins[:i+1]...)
+func (r *PluginRepository) Delete(file *entity.File) error {
+	delete(r.files, file.Path)
+	for id, plugin := range r.plugins {
+		if plugin.File == file.Path {
+			delete(r.plugins, id)
 			break
 		}
 	}
-
 	return nil
 }
 
-func (r *PluginRepository) Install(m meta.Meta) error {
-	data, err := json.Marshal(m)
-	if err != nil {
-		return err
+func (r *PluginRepository) Find(id meta.ID) (*entity.Plugin, error) {
+	plugin, ok := r.plugins[id.String()]
+	if !ok {
+		return nil, errors.NotFound{ID: id}
 	}
-	return r.bucket.Set(m.Id().String(), data)
-}
-
-func (r *PluginRepository) IsInstalled(m meta.Meta) (bool, error) {
-	val, err := r.bucket.Get(m.Id().String())
-	if err != nil {
-		return false, err
-	}
-
-	var data meta.Data
-	err = json.Unmarshal(val, &data)
-	if err != nil {
-		return false, err
-	}
-
-	if data.ID.String() != m.Id().String() {
-		return false, nil
-	}
-
-	return true, nil
-}
-
-func (r *PluginRepository) UnInstall(m meta.Meta) error {
-	return r.bucket.Delete(m.Id().String())
+	return plugin, nil
 }
 
 func (r *PluginRepository) FindAll() []*entity.Plugin {
-	return r.plugins
-}
-
-func (r *PluginRepository) FindByID(id meta.ID) *entity.Plugin {
-	for _, p := range r.plugins {
-		if p.Meta().Id().String() == id.String() {
-			return p
-		}
-	}
-	return nil
-}
-
-func (r *PluginRepository) FindByIDs(ids []meta.ID) []*entity.Plugin {
 	items := []*entity.Plugin{}
-	for _, p := range r.plugins {
-		for _, id := range ids {
-			if p.Meta().Id().String() == id.String() {
-				items = append(items, p)
-			}
-		}
+	for _, plugin := range r.plugins {
+		items = append(items, plugin)
 	}
 	return items
 }
 
-func (r *PluginRepository) FindByInterface(i meta.Interface) []*entity.Plugin {
-	var plugins []*entity.Plugin
-	for _, p := range r.plugins {
-		if p.Meta().GetInterface().Equal(i) {
-			plugins = append(plugins, p)
-		}
-	}
-	return plugins
-}
-
-// Resolve returns plugin that fits given dependency spec
-func (r *PluginRepository) Resolve(dependency meta.Dependency) (*entity.Plugin, error) {
-	for _, p := range r.plugins {
-		// interface is undefined
-		if dependency.Interface.IsUndefined() {
-			continue
-		}
-
-		// names of interfaces are not equal
-		if p.Meta().GetInterface().Name() != dependency.Interface.Name() {
-			continue
-		}
-
-		constraint, err := dependency.GetConstraint()
-		if err != nil {
-			return nil, err
-		}
-		ver, err := version.NewVersion(p.Meta().GetInterface().Version())
-		if err != nil {
-			return nil, err
-		}
-		if constraint.Check(ver) {
-			return p, nil
-		}
-	}
-
-	return nil, errors.DependencyNotFound{
-		Dependency: dependency,
-	}
-}
-
-//
-func (r *PluginRepository) FindDependent(id meta.ID) []*entity.Plugin {
-	return r.FindByIDs(r.graph.To(id))
-}
-
-func (r *PluginRepository) FindInstallable() []*entity.Plugin {
-	var plugins []*entity.Plugin
-	for _, p := range r.plugins {
-		if p.IsInstallable() {
-			plugins = append(plugins, p)
-		}
-	}
-	return plugins
-}
-
-func (r *PluginRepository) FindHooks() []*entity.Plugin {
-	var plugins []*entity.Plugin
-	for _, p := range r.plugins {
-		if p.IsHook() {
-			plugins = append(plugins, p)
-		}
-	}
-	return plugins
-}
-
-// Tree returns plugin execution tree as an array
-func (r *PluginRepository) Tree() ([]*entity.Plugin, error) {
-	if len(r.unresolved) > 0 {
-		return nil, errors.DependenciesNotFound{
-			Dependencies: r.unresolved,
-		}
-	}
-	ids, err := r.graph.Sort()
-	if err != nil {
-		return nil, err
-	}
-
-	// keep ids and plugins order
+func (r *PluginRepository) FindByIDs(ids []meta.ID) []*entity.Plugin {
 	items := []*entity.Plugin{}
-	for _, id := range ids {
-		for _, p := range r.plugins {
-			if p.Meta().Id().String() == id.String() {
-				items = append(items, p)
+	for _, plugin := range r.plugins {
+		for _, id := range ids {
+			if id == plugin.Plugin.Meta().GetID() {
+				items = append(items, plugin)
 			}
 		}
 	}
-	return items, nil
-}
-
-func (r *PluginRepository) registerDependency(p *entity.Plugin) error {
-	// dependency loop: self-dependency
-	//for _, dep := range p.Meta().GetDependencies() {
-	//	if p.Meta().GetInterface() == dep.Interface {
-	//		loopVertex := dep
-	//		return errors.LoopVertexFound{Dependency: loopVertex}
-	//	}
-	//}
-
-	// add to dependency graph
-	err := r.graph.AddNode(p.Meta().Id())
-	if err != nil {
-		return err
-	}
-	// build dependency graph edges
-	for _, dep := range p.Meta().GetDependencies() {
-		d, err := r.Resolve(dep)
-		if err != nil {
-			if _, ok := r.unresolved[p.Meta().Id()]; !ok {
-				r.unresolved[p.Meta().Id()] = []meta.Dependency{}
-			}
-			r.unresolved[p.Meta().Id()] = append(r.unresolved[p.Meta().Id()], dep)
-			continue
-		}
-		if d.Meta().Id().String() == p.Meta().Id().String() {
-			r.unresolved[p.Meta().Id()] = append(r.unresolved[p.Meta().Id()], dep)
-			continue
-		}
-		r.graph.SetEdge(r.graph.NewEdge(p.Meta().Id(), d.Meta().Id()))
-	}
-	// check unresolved dependencies
-	for id, deps := range r.unresolved {
-		if p.Meta().Id().String() == id.String() {
-			continue
-		}
-		for i, dep := range deps {
-			d, err := r.Resolve(dep)
-			if err != nil {
-				continue
-			}
-
-			r.graph.SetEdge(r.graph.NewEdge(id, d.Meta().Id()))
-			r.unresolved[id] = append(deps[:i], deps[i+1:]...)
-		}
-		if len(r.unresolved[id]) == 0 {
-			delete(r.unresolved, id)
-		}
-	}
-
-	return nil
-}
-
-func (r *PluginRepository) unRegisterDependency(p *entity.Plugin) error {
-	// remove dependencies
-	delete(r.unresolved, p.Meta().Id())
-	// @todo delete node and related edges?
-	r.graph.RemoveNode(p.Meta().Id())
-
-	// todo: check unresolved dependencies on dependent plugins
-
-	return nil
+	return items
 }
