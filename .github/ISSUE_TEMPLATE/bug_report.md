@@ -1,0 +1,38 @@
+---
+name: Bug report
+about: 'Create a report to help us improve Nori Engine '
+title: ''
+labels: ''
+assignees: ''
+
+---
+
+<!-- Please answer these questions before submitting your issue. Thanks! -->
+
+### What version of Go and Nori are you using (`go version`, `nori version`)?
+
+<pre>
+$ go version
+$ nori version
+</pre>
+
+### Does this issue reproduce with the latest release?
+
+### What operating system and processor architecture are you using (`go env`)?
+
+<details><summary><code>go env</code> Output</summary><br><pre>
+$ go env
+
+</pre></details>
+
+### What did you do?
+
+<!--
+If possible, provide a recipe for reproducing the error:
+- sources (plugin sources)
+- nori configuration
+-->
+
+### What did you expect to see?
+
+### What did you see instead?
