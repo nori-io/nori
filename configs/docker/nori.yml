@@ -1,0 +1,7 @@
+nori:
+  plugins:
+    dir: "/plugins"
+  storage:
+      dsn: "bolt:///app/db.bolt"
+  install: auto
+  startup: start

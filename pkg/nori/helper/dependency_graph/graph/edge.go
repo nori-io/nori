@@ -11,10 +11,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package graph
 
-import "github.com/nori-io/nori/cmd/commands"
+import "github.com/nori-io/common/v5/pkg/domain/meta"
 
-func main() {
-	commands.Execute()
+type Edge interface {
+	From() meta.ID
+	To() meta.ID
+}
+
+type edge struct {
+	from meta.ID
+	to   meta.ID
+}
+
+func (e *edge) From() meta.ID {
+	return e.from
+}
+
+func (e *edge) To() meta.ID {
+	return e.to
 }

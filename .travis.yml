@@ -1,0 +1,30 @@
+language: go
+sudo: false
+go:
+  - 1.16.x
+services:
+  - docker
+cache:
+  directories:
+    - "$GOPATH/pkg/mod"
+stages:
+  - test
+  - name: deploy
+    if: tag IS present
+jobs:
+  include:
+    - stage: test
+      script:
+        - go test --tags=integration ./... -coverprofile=coverage.txt -covermode=atomic
+          -p=1
+      after_success:
+        - bash <(curl -s https://codecov.io/bash)
+    - stage: deploy
+      services:
+        - docker
+      script:
+        - export TAG=`if [ "$TRAVIS_TAG" == "" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_TAG ; fi`
+        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+        - docker build -f Dockerfile -t noriio/nori:$TAG .
+        - docker images
+        - docker push noriio/nori:$TAG
