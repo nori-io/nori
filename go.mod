@@ -5,6 +5,8 @@ go 1.16
 require (
 	github.com/cheebo/go-config v0.9.1-0.20200209042327-ef5988a2909b
 	github.com/golang/mock v1.5.0
+	github.com/google/go-github v17.0.0+incompatible
+	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/nori-io/common/v5 v5.0.0
 	github.com/nori-io/logger v0.3.0
