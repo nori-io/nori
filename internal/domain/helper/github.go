@@ -7,7 +7,7 @@ import (
 )
 
 type GithubHelperInterface interface {
-	GetReleaseAsset(ctx context.Context, getReleaseAssetsData GetReleaseAssetsData) (*GithubAsset, error)
+	GetReleaseAsset(ctx context.Context, getReleaseAssetData GetReleaseAssetData) (*GithubAsset, error)
 	Parse(url string) (owner string, repo string, releaseVersion string, err error)
 	DownloadReleaseAsset(ctx context.Context, owner, repo string, asset GithubAsset, path string) error
 }
@@ -22,7 +22,7 @@ type GithubAsset struct {
 	Name string
 }
 
-type GetReleaseAssetsData struct {
+type GetReleaseAssetData struct {
 	Owner          string
 	Repo           string
 	ReleaseVersion string

@@ -28,8 +28,8 @@ func New(params Params) helper.GithubHelperInterface {
 }
 
 // формат github.com/nori-plugins/plugin@v1.0.0
-func (g GithubHelper) GetReleaseAsset(ctx context.Context, getReleaseAssetsData helper.GetReleaseAssetsData) (*helper.GithubAsset, error) {
-	ReleaseByTag, _, err := g.client.Repositories.GetReleaseByTag(context.Background(), getReleaseAssetsData.Owner, getReleaseAssetsData.Repo, getReleaseAssetsData.ReleaseVersion)
+func (g GithubHelper) GetReleaseAsset(ctx context.Context, getReleaseAssetData helper.GetReleaseAssetData) (*helper.GithubAsset, error) {
+	ReleaseByTag, _, err := g.client.Repositories.GetReleaseByTag(context.Background(), getReleaseAssetData.Owner, getReleaseAssetData.Repo, getReleaseAssetData.ReleaseVersion)
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +38,7 @@ func (g GithubHelper) GetReleaseAsset(ctx context.Context, getReleaseAssetsData 
 		return nil, errors.New("no releases found")
 	}
 
-	asset := getReleaseAssetsData.Repo + "_" + getReleaseAssetsData.GoVersion + "." + getReleaseAssetsData.GoosVersion + "-" + getReleaseAssetsData.GoarchVersion + ".so"
+	asset := getReleaseAssetData.Repo + "_" + getReleaseAssetData.GoVersion + "." + getReleaseAssetData.GoosVersion + "-" + getReleaseAssetData.GoarchVersion + ".so"
 
 	for _, v := range ReleaseByTag.Assets {
 		if *v.Name == asset {

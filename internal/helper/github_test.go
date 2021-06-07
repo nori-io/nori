@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestReleaseAssets(t *testing.T) {
+func TestReleaseAsset(t *testing.T) {
 	assert := assert.New(t)
 
 	url := "github.com/secure2work/http@0.0.81"
@@ -33,7 +33,7 @@ func TestReleaseAssets(t *testing.T) {
 		t.FailNow()
 	}
 
-	getReleaseAssetsData := h.GetReleaseAssetsData{
+	getReleaseAssetData := h.GetReleaseAssetData{
 		Owner:          owner,
 		Repo:           repo,
 		ReleaseVersion: releaseVersion,
@@ -42,7 +42,7 @@ func TestReleaseAssets(t *testing.T) {
 		GoarchVersion:  "amd64",
 	}
 
-	asset, err := githubHelper.GetReleaseAsset(ctx, getReleaseAssetsData)
+	asset, err := githubHelper.GetReleaseAsset(ctx, getReleaseAssetData)
 	assert.NotEqual(asset, nil)
 	if err != nil {
 		t.Log(err)
@@ -54,7 +54,7 @@ func TestReleaseAssets(t *testing.T) {
 		t.FailNow()
 	}
 
-	testAsset := getReleaseAssetsData.Repo + "_" + getReleaseAssetsData.GoVersion + "." + getReleaseAssetsData.GoosVersion + "-" + getReleaseAssetsData.GoarchVersion + ".so"
+	testAsset := getReleaseAssetData.Repo + "_" + getReleaseAssetData.GoVersion + "." + getReleaseAssetData.GoosVersion + "-" + getReleaseAssetData.GoarchVersion + ".so"
 	assert.Equal(testAsset, asset.Name)
 	assert.Equal(int64(37988274), asset.ID)
 
