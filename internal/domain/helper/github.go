@@ -26,6 +26,7 @@ type GetReleaseAssetData struct {
 	Owner          string
 	Repo           string
 	ReleaseVersion string
+	CommonVersion  string
 	GoVersion      string
 	GoosVersion    string
 	GoarchVersion  string

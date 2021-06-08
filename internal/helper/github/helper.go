@@ -20,10 +20,14 @@ func (g Helper) GetReleaseAsset(ctx context.Context, getReleaseAssetData helper.
 	}
 
 	if ReleaseByTag == nil {
-		return nil, errors.New("no releases found")
+		return nil, errors.New("no release found")
 	}
 
-	asset := getReleaseAssetData.Repo + "_" + getReleaseAssetData.GoVersion + "." + getReleaseAssetData.GoosVersion + "-" + getReleaseAssetData.GoarchVersion + ".so"
+	asset := getReleaseAssetData.Repo + *ReleaseByTag.TagName + "_" +
+		"common" + getReleaseAssetData.CommonVersion + "_" +
+		"go" + getReleaseAssetData.GoVersion + "_" +
+		getReleaseAssetData.GoosVersion + "_" +
+		getReleaseAssetData.GoarchVersion + ".so"
 
 	for _, v := range ReleaseByTag.Assets {
 		if *v.Name == asset {

@@ -13,7 +13,7 @@ import (
 func TestReleaseAsset(t *testing.T) {
 	assert := assert.New(t)
 
-	url := "github.com/secure2work/http@0.0.81"
+	url := "github.com/secure2work/http@0.0.85"
 
 	client := gogithub.NewClient(nil)
 
@@ -36,6 +36,7 @@ func TestReleaseAsset(t *testing.T) {
 		Owner:          owner,
 		Repo:           repo,
 		ReleaseVersion: releaseVersion,
+		CommonVersion:  "4.0.0",
 		GoVersion:      "1.16.3",
 		GoosVersion:    "linux",
 		GoarchVersion:  "amd64",
@@ -53,9 +54,13 @@ func TestReleaseAsset(t *testing.T) {
 		t.FailNow()
 	}
 
-	testAsset := getReleaseAssetData.Repo + "_" + getReleaseAssetData.GoVersion + "." + getReleaseAssetData.GoosVersion + "-" + getReleaseAssetData.GoarchVersion + ".so"
+	testAsset := getReleaseAssetData.Repo + releaseVersion + "_" +
+		"common" + getReleaseAssetData.CommonVersion + "_" +
+		"go" + getReleaseAssetData.GoVersion + "_" +
+		getReleaseAssetData.GoosVersion + "_" +
+		getReleaseAssetData.GoarchVersion + ".so"
 	assert.Equal(testAsset, asset.Name)
-	assert.Equal(int64(38196187), asset.ID)
+	assert.Equal(int64(38264290), asset.ID)
 
 	err = githubHelper.DownloadReleaseAsset(ctx, owner, repo, *asset, ``)
 	assert.Nil(err)
