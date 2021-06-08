@@ -1,13 +1,12 @@
-package helper_test
+package github_test
 
 import (
 	"context"
 	"testing"
 
-	"github.com/google/go-github/github"
-	h "github.com/nori-io/nori/internal/domain/helper"
-	"github.com/nori-io/nori/internal/helper"
-
+	gogithub "github.com/google/go-github/github"
+	"github.com/nori-io/nori/internal/domain/helper"
+	"github.com/nori-io/nori/internal/helper/github"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,9 +15,9 @@ func TestReleaseAsset(t *testing.T) {
 
 	url := "github.com/secure2work/http@0.0.81"
 
-	client := github.NewClient(nil)
+	client := gogithub.NewClient(nil)
 
-	githubHelper := helper.New(helper.Params{Client: client})
+	githubHelper := github.New(github.Params{Client: client})
 
 	ctx := context.Background()
 
@@ -33,7 +32,7 @@ func TestReleaseAsset(t *testing.T) {
 		t.FailNow()
 	}
 
-	getReleaseAssetData := h.GetReleaseAssetData{
+	getReleaseAssetData := helper.GetReleaseAssetData{
 		Owner:          owner,
 		Repo:           repo,
 		ReleaseVersion: releaseVersion,
@@ -56,7 +55,7 @@ func TestReleaseAsset(t *testing.T) {
 
 	testAsset := getReleaseAssetData.Repo + "_" + getReleaseAssetData.GoVersion + "." + getReleaseAssetData.GoosVersion + "-" + getReleaseAssetData.GoarchVersion + ".so"
 	assert.Equal(testAsset, asset.Name)
-	assert.Equal(int64(37988274), asset.ID)
+	assert.Equal(int64(38196187), asset.ID)
 
 	err = githubHelper.DownloadReleaseAsset(ctx, owner, repo, *asset, ``)
 	assert.Nil(err)
