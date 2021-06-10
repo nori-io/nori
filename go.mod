@@ -14,6 +14,5 @@ require (
 	github.com/stretchr/testify v1.7.0
 	go.etcd.io/bbolt v1.3.3
 	go.uber.org/dig v1.9.0
-	go.uber.org/fx v1.12.0
 	google.golang.org/grpc v1.37.0
 )

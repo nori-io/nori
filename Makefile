@@ -1,50 +1,36 @@
 # Nori Makefile
 
-NORI_BUILD_CMD ?= build -o build/bin/nori ./cmd/nori.go
+NORI_BUILD_CMD ?= build -ldflags "-X github.com/nori-io/nori/pkg/version.GOOS=`go env GOOS` -X 'github.com/nori-io/nori/pkg/version.GOARCH=`go env GOARCH`' -X 'github.com/nori-io/nori/pkg/version.GOVERSION=`go env GOVERSION | cut -c 3-`'" -o build/bin/nori ./cmd/main.go
 
 ifeq ($(GO111MODULE),auto)
 override GO111MODULE = on
 endif
 
 DOCKER_IMAGE ?= noriio/nori
-DOCKER_TAG ?= dev-1.16.4
+DOCKER_TAG ?= dev-go1.16.4
 
 clean: ## remove generated files, tidy vendor dependencies
 	export GO111MODULE=on ;\
 	go mod tidy ;\
 	rm -rf profile.out ;\
-	@rm -rf ./bin
-	@packr clean
+	@rm -rf ./build/bin/*
 .PHONY: clean
 
 build-test-plugins: ## build plugins to run tests with plugins
 	@echo "implement command to build test/testdata/plugins/* plugins"
 .PHONY: build-test-plugins
 
-build: protoc-generate ## build nori binary
+build: ## build nori binary
 	@go $(NORI_BUILD_CMD)
 .PHONY: build
 
-build-web: protoc-generate ## build nori binary with packr
-	@packr $(NORI_BUILD_CMD)
-	@packr clean
-.PHONY: build-web
-
 docker-image:
-	docker build -f build/docker/0.2.0/Dockerfile -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
+	docker build -f build/docker/0.3.0/Dockerfile -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
 .PHONY: docker-image
 
 docker-push: ## push docker image to registry
 	docker push ${DOCKER_IMAGE}:${DOCKER_TAG}
 .PHONY: docker-push
-
-git-update: ## update git submodules
-	git submodule update --init
-.PHONY: git-sub-pull
-
-grpc-gen: ## generate protobuf
-	@protoc --proto_path=api/grpc -I=api/grpc/ --go_out=plugins=grpc:. api/grpc/*.proto
-.PHONY: protoc-generate
 
 lint: ## execute linter
 	golangci-lint run --no-config --issues-exit-code=0 --deadline=30m \
