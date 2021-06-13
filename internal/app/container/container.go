@@ -6,6 +6,7 @@ import (
 	"github.com/nori-io/nori/internal/app"
 	"github.com/nori-io/nori/internal/app/container/env"
 	"github.com/nori-io/nori/internal/app/container/handler"
+	"github.com/nori-io/nori/internal/app/container/helper"
 	"github.com/nori-io/nori/internal/app/container/repository"
 	"github.com/nori-io/nori/internal/app/container/service"
 	"go.uber.org/dig"
@@ -35,6 +36,9 @@ func New(configFile string) *dig.Container {
 
 	// handler
 	handler.Provide(container)
+
+	//helper
+	helper.Provide(container)
 
 	return container
 }
