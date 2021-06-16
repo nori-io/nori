@@ -1,7 +1,14 @@
 package grpc
 
 import (
+	"bytes"
 	"context"
+	"io"
+	"log"
+	"strconv"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"github.com/nori-io/common/v5/pkg/domain/meta"
 	pkgmeta "github.com/nori-io/common/v5/pkg/meta"
@@ -14,6 +21,7 @@ import (
 )
 
 type Handler struct {
+	FileService      service.FileService
 	InstalledService service.PluginOptionService
 	PluginService    service.PluginService
 	PluginManager    service.PluginManager
@@ -23,6 +31,7 @@ type Handler struct {
 type HandlerParams struct {
 	dig.In
 
+	FileService      service.FileService
 	InstalledService service.PluginOptionService
 	PluginManager    service.PluginManager
 	PluginService    service.PluginService
@@ -30,6 +39,7 @@ type HandlerParams struct {
 
 func NewHandler(params HandlerParams) *Handler {
 	return &Handler{
+		FileService:      params.FileService,
 		InstalledService: params.InstalledService,
 		PluginManager:    params.PluginManager,
 		PluginService:    params.PluginService,
@@ -324,7 +334,79 @@ func (h Handler) PluginUninstall(ctx context.Context, in *proto.PluginUninstallR
 }
 
 // todo
-func (h Handler) PluginUpload(in proto.Nori_PluginUploadServer) error {
+func (h Handler) PluginUpload(stream proto.Nori_PluginUploadServer) error {
+	req, err := stream.Recv()
+	if err != nil {
+		log.Println(status.Errorf(codes.Unknown, "cannot receive plugin info"))
+		return err
+	}
+
+	//@todo check if file already exists
+
+	pluginData := bytes.Buffer{}
+	pluginSize := 0
+
+	for {
+		//@todo helper for handling contextError?
+		/*	err := contextError(stream.Context())
+			if err != nil {
+				return err
+			}*/
+
+		log.Print("waiting to receive more data")
+
+		req, err := stream.Recv()
+		if err == io.EOF {
+			log.Print("no more data")
+			break
+		}
+		if err != nil {
+			log.Println(status.Errorf(codes.Unknown, "cannot receive chunk data: %v", err))
+			return err
+		}
+
+		chunk := req.GetChunk()
+		size := len(chunk)
+
+		log.Println("received a chunk with size:", size)
+
+		pluginSize += size
+		//@todo code down in the comment
+		/*	if pluginSize > maxPluginSize {
+			log.Println(status.Errorf(codes.InvalidArgument, "plugin is too large: %d > %d", pluginSize, maxPluginSize))
+			return err
+		}*/
+
+		_, err = pluginData.Write(chunk)
+		if err != nil {
+			log.Println(status.Errorf(codes.Internal, "cannot write chunk data: %v", err))
+			return err
+		}
+	}
+
+	h.FileService.Open(req.GetName(), pluginData)
+
+	var codeError string
+	if err == nil {
+		codeError = "no error"
+	} else {
+		codeError = err.Error()
+	}
+
+	res := &proto.Reply{
+		Error: &proto.Error{
+			Code:    codeError,
+			Message: "filename: " + req.GetName() + ", length in bytes: " + strconv.Itoa(len(pluginData.Bytes()))},
+	}
+
+	err = stream.SendAndClose(res)
+	if err != nil {
+		log.Println(status.Errorf(codes.Unknown, "cannot send response: %v", err))
+		return err
+	}
+
+	log.Printf("saved plugin with name: %s, size: %d", req.GetName(), pluginSize)
+
 	return nil
 }
 
