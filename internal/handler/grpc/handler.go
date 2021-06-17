@@ -5,10 +5,6 @@ import (
 	"context"
 	"io"
 	"log"
-	"strconv"
-
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 
 	"github.com/nori-io/common/v5/pkg/domain/meta"
 	pkgmeta "github.com/nori-io/common/v5/pkg/meta"
@@ -337,31 +333,22 @@ func (h Handler) PluginUninstall(ctx context.Context, in *proto.PluginUninstallR
 func (h Handler) PluginUpload(stream proto.Nori_PluginUploadServer) error {
 	req, err := stream.Recv()
 	if err != nil {
-		log.Println(status.Errorf(codes.Unknown, "cannot receive plugin info"))
 		return err
 	}
 
-	//@todo check if file already exists
+	//@todo check if file already exists (os.Stat, isDir)
 
 	pluginData := bytes.Buffer{}
 	pluginSize := 0
 
 	for {
-		//@todo helper for handling contextError?
-		/*	err := contextError(stream.Context())
-			if err != nil {
-				return err
-			}*/
-
 		log.Print("waiting to receive more data")
 
 		req, err := stream.Recv()
 		if err == io.EOF {
-			log.Print("no more data")
-			break
+			return stream.SendAndClose(&proto.Reply{})
 		}
 		if err != nil {
-			log.Println(status.Errorf(codes.Unknown, "cannot receive chunk data: %v", err))
 			return err
 		}
 
@@ -379,35 +366,17 @@ func (h Handler) PluginUpload(stream proto.Nori_PluginUploadServer) error {
 
 		_, err = pluginData.Write(chunk)
 		if err != nil {
-			log.Println(status.Errorf(codes.Internal, "cannot write chunk data: %v", err))
 			return err
 		}
 	}
 
-	h.FileService.Open(req.GetName(), pluginData)
-
-	var codeError string
-	if err == nil {
-		codeError = "no error"
-	} else {
-		codeError = err.Error()
-	}
-
-	res := &proto.Reply{
-		Error: &proto.Error{
-			Code:    codeError,
-			Message: "filename: " + req.GetName() + ", length in bytes: " + strconv.Itoa(len(pluginData.Bytes()))},
-	}
-
-	err = stream.SendAndClose(res)
+	_, err = h.FileService.Open(req.GetName(), pluginData)
 	if err != nil {
-		log.Println(status.Errorf(codes.Unknown, "cannot send response: %v", err))
 		return err
 	}
 
-	log.Printf("saved plugin with name: %s, size: %d", req.GetName(), pluginSize)
+	return stream.SendAndClose(&proto.Reply{})
 
-	return nil
 }
 
 //config
