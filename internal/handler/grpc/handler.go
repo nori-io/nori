@@ -370,7 +370,7 @@ func (h Handler) PluginUpload(stream proto.Nori_PluginUploadServer) error {
 		}
 	}
 
-	_, err = h.FileService.Open(req.GetName(), pluginData)
+	_, err = h.FileService.Create(req.GetName(), pluginData)
 	if err != nil {
 		return err
 	}
