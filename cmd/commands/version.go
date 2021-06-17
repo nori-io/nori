@@ -14,8 +14,9 @@ limitations under the License.
 package commands
 
 import (
-	"fmt"
+	"log"
 
+	"github.com/nori-io/nori/pkg/version"
 	"github.com/spf13/cobra"
 )
 
@@ -23,11 +24,13 @@ var (
 	// Cmd version command
 	versionCmd = &cobra.Command{
 		Use:           "version",
-		Short:         "application version",
+		Short:         "nori version",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Run: func(_ *cobra.Command, _ []string) {
-			fmt.Println("dev") // todo
+
+			log.Println(version.GetCommonPkgVersion())
+
 		},
 	}
 )

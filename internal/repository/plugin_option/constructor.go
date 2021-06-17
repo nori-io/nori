@@ -4,11 +4,11 @@ import (
 	"github.com/nori-io/common/v5/pkg/domain/logger"
 	"github.com/nori-io/nori/internal/domain/repository"
 	"github.com/nori-io/nori/internal/env"
-	"go.uber.org/fx"
+	"go.uber.org/dig"
 )
 
 type Params struct {
-	fx.In
+	dig.In
 
 	Env    *env.Env
 	Logger logger.Logger
