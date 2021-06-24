@@ -1,7 +1,10 @@
 package grpc
 
 import (
+	"bytes"
 	"context"
+	"io"
+	"log"
 
 	"github.com/nori-io/common/v5/pkg/domain/meta"
 	pkgmeta "github.com/nori-io/common/v5/pkg/meta"
@@ -14,6 +17,7 @@ import (
 )
 
 type Handler struct {
+	FileService      service.FileService
 	InstalledService service.PluginOptionService
 	PluginService    service.PluginService
 	PluginManager    service.PluginManager
@@ -23,6 +27,7 @@ type Handler struct {
 type HandlerParams struct {
 	dig.In
 
+	FileService      service.FileService
 	InstalledService service.PluginOptionService
 	PluginManager    service.PluginManager
 	PluginService    service.PluginService
@@ -30,6 +35,7 @@ type HandlerParams struct {
 
 func NewHandler(params HandlerParams) *Handler {
 	return &Handler{
+		FileService:      params.FileService,
 		InstalledService: params.InstalledService,
 		PluginManager:    params.PluginManager,
 		PluginService:    params.PluginService,
@@ -324,8 +330,53 @@ func (h Handler) PluginUninstall(ctx context.Context, in *proto.PluginUninstallR
 }
 
 // todo
-func (h Handler) PluginUpload(in proto.Nori_PluginUploadServer) error {
-	return nil
+func (h Handler) PluginUpload(stream proto.Nori_PluginUploadServer) error {
+	req, err := stream.Recv()
+	if err != nil {
+		return err
+	}
+
+	//@todo check if file already exists (os.Stat, isDir)
+
+	pluginData := bytes.Buffer{}
+	pluginSize := 0
+
+	for {
+		log.Print("waiting to receive more data")
+
+		req, err := stream.Recv()
+		if err == io.EOF {
+			return stream.SendAndClose(&proto.Reply{})
+		}
+		if err != nil {
+			return err
+		}
+
+		chunk := req.GetChunk()
+		size := len(chunk)
+
+		log.Println("received a chunk with size:", size)
+
+		pluginSize += size
+		//@todo code down in the comment
+		/*	if pluginSize > maxPluginSize {
+			log.Println(status.Errorf(codes.InvalidArgument, "plugin is too large: %d > %d", pluginSize, maxPluginSize))
+			return err
+		}*/
+
+		_, err = pluginData.Write(chunk)
+		if err != nil {
+			return err
+		}
+	}
+
+	_, err = h.FileService.Create(req.GetName(), pluginData)
+	if err != nil {
+		return err
+	}
+
+	return stream.SendAndClose(&proto.Reply{})
+
 }
 
 //config

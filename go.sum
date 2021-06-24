@@ -130,6 +130,8 @@ github.com/nori-io/common/v5 v5.0.0 h1:aDBY1YBJV+wD7AE17UeYMYJhaQsqvfaQAgbw1XzmY
 github.com/nori-io/common/v5 v5.0.0/go.mod h1:DWik4lJlGAPoOOhrYtGlL1KVSUWw0wATIWt2UbfvV4Y=
 github.com/nori-io/logger v0.3.0 h1:qxynurA5VXKft/q5IwB2DlAzCDtocLKKDM4LDHwQVFY=
 github.com/nori-io/logger v0.3.0/go.mod h1:Wwox+tUJiMjg329TXOmTmtz7XGr58HjmCuzH72HOQww=
+github.com/nori-io/nori-grpc v0.2.1-0.20210617053503-5bbe981a26da h1:hdl/0YkG9syXd30z/SWmLaCSWLO+5pvPjEWuxa9Tw8E=
+github.com/nori-io/nori-grpc v0.2.1-0.20210617053503-5bbe981a26da/go.mod h1:wqQqkjVKNQW9NpExGcz1amAO1PfYTZJ4P+64f+sxkfk=
 github.com/nori-io/nori-grpc v0.2.2 h1:AsISEWkxG48QlAiM4pML6/d5nlA6zqJEFYHGIsAeqo8=
 github.com/nori-io/nori-grpc v0.2.2/go.mod h1:W5aycKHn8NRoV1/KngZrs3pcM7ed9j821CfCUwFR6vs=
 github.com/oklog/ulid v1.3.1/go.mod h1:CirwcVhetQ6Lv90oh/F+FBtV6XMibvdAFo93nm5qn4U=
