@@ -7,8 +7,8 @@ import (
 )
 
 type FileService interface {
-	Open(name string, src bytes.Buffer) (*entity.File, error)
-	Delete(file string) error
+	Create(name string, src bytes.Buffer) (*entity.File, error)
+	Delete(file *entity.File) error
 
 	Get(file string) (*entity.File, error)
 	GetAll(dir string) ([]entity.File, error)

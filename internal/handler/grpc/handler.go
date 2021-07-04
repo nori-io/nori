@@ -17,6 +17,7 @@ import (
 )
 
 type Handler struct {
+	proto.UnimplementedNoriServer
 	FileService      service.FileService
 	InstalledService service.PluginOptionService
 	PluginService    service.PluginService
@@ -218,7 +219,7 @@ func (h Handler) PluginMeta(ctx context.Context, in *proto.PluginMetaRequest) (*
 }
 
 // todo
-func (h Handler) PluginPull(ctx context.Context, in *proto.PluginRequest) (*proto.Reply, error) {
+func (h Handler) PluginPull(ctx context.Context, in *proto.PluginPullRequest) (*proto.Reply, error) {
 	return nil, nil
 }
 
@@ -377,6 +378,11 @@ func (h Handler) PluginUpload(stream proto.Nori_PluginUploadServer) error {
 
 	return stream.SendAndClose(&proto.Reply{})
 
+}
+
+// todo
+func (h Handler) PluginDownload(*proto.PluginDownloadRequest, proto.Nori_PluginDownloadServer) error {
+	return nil
 }
 
 //config

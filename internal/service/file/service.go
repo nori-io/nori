@@ -4,7 +4,8 @@ import (
 	"bytes"
 	"errors"
 	"os"
-	"path"
+	"path/filepath"
+	"strings"
 
 	"github.com/nori-io/nori/internal/domain/entity"
 	"github.com/nori-io/nori/internal/domain/repository"
@@ -16,13 +17,13 @@ type Service struct {
 	FileRepository repository.FileRepository
 }
 
-func (s *Service) Open(name string, src bytes.Buffer) (*entity.File, error) {
+func (s *Service) Create(name string, src bytes.Buffer) (*entity.File, error) {
 	if s.Env.Config.Nori.Plugins.Dir == "" {
 		// todo: error
 		return nil, errors.New("plugin directory not defined")
 	}
 
-	name = path.Join(s.Env.Config.Nori.Plugins.Dir, name)
+	name = filepath.Join(s.Env.Config.Nori.Plugins.Dir, name)
 
 	err := os.WriteFile(name, src.Bytes(), 0644)
 	if err != nil {
@@ -32,9 +33,19 @@ func (s *Service) Open(name string, src bytes.Buffer) (*entity.File, error) {
 	return s.Get(name)
 }
 
-func (s *Service) Delete(file string) error {
-	// todo: name must be inside plugins.dir
-	return os.Remove(file)
+func (s *Service) Delete(file *entity.File) error {
+	if s.Env.Config.Nori.Plugins.Dir == "" {
+		// todo: error
+		return errors.New("plugin directory not defined")
+	}
+
+	// todo: file must be inside plugins.dir
+	if !strings.HasPrefix(file.Path, s.Env.Config.Nori.Plugins.Dir) {
+		// todo: error
+		return errors.New("cannot delete file outside plugins.dir")
+	}
+
+	return os.Remove(file.Path)
 }
 
 func (s *Service) Get(file string) (*entity.File, error) {

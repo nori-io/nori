@@ -134,6 +134,8 @@ github.com/nori-io/nori-grpc v0.2.1-0.20210617053503-5bbe981a26da h1:hdl/0YkG9sy
 github.com/nori-io/nori-grpc v0.2.1-0.20210617053503-5bbe981a26da/go.mod h1:wqQqkjVKNQW9NpExGcz1amAO1PfYTZJ4P+64f+sxkfk=
 github.com/nori-io/nori-grpc v0.2.2 h1:AsISEWkxG48QlAiM4pML6/d5nlA6zqJEFYHGIsAeqo8=
 github.com/nori-io/nori-grpc v0.2.2/go.mod h1:W5aycKHn8NRoV1/KngZrs3pcM7ed9j821CfCUwFR6vs=
+github.com/nori-io/nori-grpc v0.3.0 h1:ah0BZrr8fPhWmOfB3yVouXuV9Y4vm7R4qj4yqx0JAZ8=
+github.com/nori-io/nori-grpc v0.3.0/go.mod h1:wqQqkjVKNQW9NpExGcz1amAO1PfYTZJ4P+64f+sxkfk=
 github.com/oklog/ulid v1.3.1/go.mod h1:CirwcVhetQ6Lv90oh/F+FBtV6XMibvdAFo93nm5qn4U=
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
 github.com/pelletier/go-toml v1.2.0/go.mod h1:5z9KED0ma1S8pY6P1sdut58dfprrGBbd/94hg7ilaic=

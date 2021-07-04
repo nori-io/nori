@@ -10,7 +10,7 @@ require (
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/nori-io/common/v5 v5.0.0
 	github.com/nori-io/logger v0.3.0
-	github.com/nori-io/nori-grpc v0.2.1-0.20210617053503-5bbe981a26da
+	github.com/nori-io/nori-grpc v0.3.0
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/cobra v1.0.0
 	github.com/stretchr/testify v1.7.0
