@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/nori-io/common/v5/pkg/domain/meta"
-	"github.com/nori-io/nori/pkg/nori/domain/entity"
 	"github.com/nori-io/nori/internal/domain/enum"
+	"github.com/nori-io/nori/pkg/nori/domain/entity"
 )
 
 type PluginManager interface {
@@ -25,5 +25,5 @@ type PluginManager interface {
 }
 
 type GetByFilterData struct {
-	State enum.State
+	State *enum.State
 }

@@ -9,8 +9,10 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/nori-io/common/v5/pkg/domain/storage"
 	log "github.com/nori-io/logger"
 	"github.com/nori-io/nori/internal/domain/service"
+	"github.com/nori-io/nori/internal/env"
 	nori_http "github.com/nori-io/nori/internal/handler/http"
 	"go.uber.org/dig"
 )
@@ -20,17 +22,20 @@ type Params struct {
 
 	PluginManager service.PluginManager
 	Http          *nori_http.Handler
+	Env *env.Env
 }
 
 type App struct {
 	pluginManager service.PluginManager
 	http          *nori_http.Handler
+	storage storage.Storage
 }
 
 func New(params Params) (*App, error) {
 	return &App{
 		pluginManager: params.PluginManager,
 		http:          params.Http,
+		storage: params.Env.Storage,
 	}, nil
 }
 
@@ -60,6 +65,9 @@ func (a *App) Run() {
 		select {
 		case <-sig:
 			a.http.Stop(context.Background())
+			if err := a.storage.Close(); err != nil {
+				log.L().Error(err.Error())
+			}
 
 			err := a.pluginManager.StopAll(context.Background())
 			if err != nil {

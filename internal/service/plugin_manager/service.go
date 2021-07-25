@@ -6,9 +6,9 @@ import (
 
 	"github.com/nori-io/common/v5/pkg/domain/meta"
 	errors2 "github.com/nori-io/common/v5/pkg/errors"
-	nori_entity "github.com/nori-io/nori/pkg/nori/domain/entity"
 	"github.com/nori-io/nori/internal/domain/service"
 	"github.com/nori-io/nori/pkg/nori"
+	nori_entity "github.com/nori-io/nori/pkg/nori/domain/entity"
 	"github.com/nori-io/nori/pkg/nori/domain/enum"
 	errors3 "github.com/nori-io/nori/pkg/nori/domain/errors"
 )
@@ -41,6 +41,9 @@ func (s *PluginManager) Enable(ctx context.Context, id meta.ID) error {
 	}
 
 	_, err = s.PluginOptionService.Upsert(data)
+	if err != nil {
+		return err
+	}
 
 	return s.Nori.Add(p)
 }
@@ -189,8 +192,13 @@ func (s *PluginManager) StopAll(ctx context.Context) error {
 }
 
 func (s *PluginManager) GetByFilter(filter service.GetByFilterData) ([]*nori_entity.Plugin, error) {
+	var state *enum.State
+	if filter.State != nil {
+		st := enum.New(filter.State.Value())
+		state = &st
+	}
 	ids := s.Nori.GetByFilter(nori.Filter{
-		State: enum.New(filter.State.Value()),
+		State: state,
 	})
 	plugins := s.PluginService.GetByIDs(ids)
 	return plugins, nil

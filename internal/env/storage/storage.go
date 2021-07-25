@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/nori-io/common/v5/pkg/domain/storage"
+	log "github.com/nori-io/logger"
 	"github.com/nori-io/nori/internal/config"
 	"github.com/nori-io/nori/internal/env/storage/bolt"
 	"github.com/nori-io/nori/internal/env/storage/memory"
@@ -16,6 +17,7 @@ func New(cfg *config.Config) (storage.Storage, error) {
 		err   error
 	)
 
+	log.L().Info(cfg.Nori.Storage.DSN)
 	// storage config
 	if len(cfg.Nori.Storage.DSN) == 0 {
 		return nil, errors2.ConfigParamUndefinedError{

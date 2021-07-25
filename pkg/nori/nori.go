@@ -239,9 +239,14 @@ func (n *Engine) UnInstall(ctx context.Context, id meta.ID) error {
 }
 
 func (n *Engine) GetByFilter(filter Filter) []meta.ID {
-	//return n.state.GetAllByState(filter.State)
-	// todo
-	return nil
+	var ids []meta.ID
+
+	plugins := n.registry.GetAll()
+	for _, p := range plugins {
+		ids = append(ids, p.Meta().GetID())
+	}
+
+	return ids
 }
 
 func (n *Engine) GetPluginVariables(id meta.ID) []common_registry.Variable {
@@ -319,6 +324,10 @@ func (n *Engine) stop(ctx context.Context, id meta.ID) error {
 	p := n.registry.GetByID(id)
 	if p == nil {
 		return errors.NotFound{ID: id}
+	}
+
+	if p.State() == enum.None {
+		return nil
 	}
 
 	// stop dependent

@@ -2,7 +2,6 @@ package plugin_manager
 
 import (
 	"context"
-	"errors"
 
 	"github.com/nori-io/common/v5/pkg/domain/registry"
 	common_errors "github.com/nori-io/common/v5/pkg/errors"
@@ -35,7 +34,6 @@ type PluginManager struct {
 
 func New(params Params) (service.PluginManager, error) {
 	files, err := params.FileService.GetAll(params.Env.Config.Nori.Plugins.Dir)
-
 	if err != nil {
 		params.Env.Logger.Fatal(err.Error())
 	}
@@ -55,16 +53,19 @@ func New(params Params) (service.PluginManager, error) {
 		}
 
 		params.Env.Logger.Info("found %s (%s) in %s", p.Meta().GetID().String(), p.Meta().GetInterface().String(), file.Path)
+		params.PluginService.Create(p)
 
 		pluginOptions, err := params.PluginOptionService.Get(p.Meta().GetID())
-		if errors.Is(err, common_errors.EntityNotFound{}) {
-				continue
-		}
 		if err != nil {
+			// 'not found' is equal 'not enabled'
+			if _, ok := err.(common_errors.EntityNotFound); ok {
+				continue
+			}
 			return nil, err
 		}
 
 		if p.IsInstallable() {
+			params.Env.Logger.Info("installable %s", p.Meta().GetID().String())
 			// not installed
 			if !pluginOptions.Installed {
 				continue

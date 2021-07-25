@@ -9,7 +9,6 @@ import (
 	"github.com/nori-io/common/v5/pkg/domain/meta"
 	pkgmeta "github.com/nori-io/common/v5/pkg/meta"
 	"github.com/nori-io/nori-grpc/pkg/api/proto"
-	"github.com/nori-io/nori/internal/domain/enum"
 	"github.com/nori-io/nori/internal/domain/service"
 	"github.com/nori-io/nori/pkg/nori/domain/entity"
 	errors2 "github.com/nori-io/nori/pkg/nori/domain/errors"
@@ -137,68 +136,70 @@ func (h Handler) PluginInterface(ctx context.Context, in *proto.PluginInterfaceR
 
 //
 func (h Handler) PluginList(ctx context.Context, in *proto.PluginListRequest) (*proto.PluginListReply, error) {
-	items := []*entity.Plugin{}
+	//items := []*entity.Plugin{}
+	//
+	//if in.FlagInstallable {
+	//	// todo ???
+	//}
+	//
+	//if in.FlagInstalled {
+	//	installed, err := h.InstalledService.GetAll()
+	//	if err != nil {
+	//		return &proto.PluginListReply{
+	//			Error: &proto.Error{
+	//				Code:    "500",
+	//				Message: err.Error(),
+	//			},
+	//		}, nil
+	//	}
+	//
+	//	plugins := []*proto.Plugin{}
+	//	for _, i := range installed {
+	//		plugins = append(plugins, &proto.Plugin{
+	//			Meta: &proto.Meta{
+	//				Id: &proto.ID{
+	//					PluginId: string(i.ID.GetID()),
+	//					Version:  i.ID.GetVersion(),
+	//				},
+	//			},
+	//			IsActive:      false,
+	//			IsInstallable: false,
+	//			Status:        0,
+	//		})
+	//	}
+	//}
+	//
+	//if in.FlagError {
+	//	// todo ???
+	//}
+	//
+	//if in.FlagRunning {
+	//	running := enum.Running
+	//	running, err := h.PluginManager.GetByFilter(service.GetByFilterData{State: &running})
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	items = append(items, running...)
+	//}
+	//
+	//if in.FlagStopped {
+	//	stopped, err := h.PluginManager.GetByFilter(service.GetByFilterData{State: enum.Stopped})
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	items = append(items, stopped...)
+	//}
+	//
+	//plugins := []*proto.Plugin{}
+	//for _, item := range items {
+	//	plugins = append(plugins, h.View.Plugin(item))
+	//}
 
-	if in.FlagInstallable {
-		// todo ???
-	}
-
-	if in.FlagInstalled {
-		installed, err := h.InstalledService.GetAll()
-		if err != nil {
-			return &proto.PluginListReply{
-				Error: &proto.Error{
-					Code:    "500",
-					Message: err.Error(),
-				},
-			}, nil
-		}
-
-		plugins := []*proto.Plugin{}
-		for _, i := range installed {
-			plugins = append(plugins, &proto.Plugin{
-				Meta: &proto.Meta{
-					Id: &proto.ID{
-						PluginId: string(i.ID.GetID()),
-						Version:  i.ID.GetVersion(),
-					},
-				},
-				IsActive:      false,
-				IsInstallable: false,
-				Status:        0,
-			})
-		}
-	}
-
-	if in.FlagError {
-		// todo ???
-	}
-
-	if in.FlagRunning {
-		running, err := h.PluginManager.GetByFilter(service.GetByFilterData{State: enum.Running})
-		if err != nil {
-			return nil, err
-		}
-		items = append(items, running...)
-	}
-
-	if in.FlagStopped {
-		stopped, err := h.PluginManager.GetByFilter(service.GetByFilterData{State: enum.Stopped})
-		if err != nil {
-			return nil, err
-		}
-		items = append(items, stopped...)
-	}
-
-	plugins := []*proto.Plugin{}
-	for _, item := range items {
-		plugins = append(plugins, h.View.Plugin(item))
-	}
-
-	return &proto.PluginListReply{
-		Plugin: plugins,
-		Error:  nil,
-	}, nil
+	//return &proto.PluginListReply{
+	//	Plugin: plugins,
+	//	Error:  nil,
+	//}, nil
+	return nil, nil
 }
 
 //

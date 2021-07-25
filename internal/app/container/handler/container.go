@@ -15,7 +15,7 @@ func Provide(container *dig.Container) {
 	}
 
 	if err := container.Provide(
-		http.NewHandler,
+		http.New,
 	); err != nil {
 		log.L().Fatal("%s", err.Error())
 	}

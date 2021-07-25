@@ -14,6 +14,6 @@ func (h *Handler) Plugins(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, plugin := range plugins {
-		w.Write([]byte(plugin.Plugin.Meta().GetID().String() + " " ))
+		w.Write([]byte(plugin.Meta().GetID().String() + " " ))
 	}
 }

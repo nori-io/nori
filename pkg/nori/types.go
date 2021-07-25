@@ -32,5 +32,5 @@ type Nori interface {
 }
 
 type Filter struct {
-	State enum.State
+	State *enum.State
 }
