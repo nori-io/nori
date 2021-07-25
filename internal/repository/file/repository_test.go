@@ -19,7 +19,7 @@ import (
 	"testing"
 
 	"github.com/nori-io/nori/internal/repository/file"
-	"github.com/nori-io/nori/pkg/errors"
+	errors2 "github.com/nori-io/nori/pkg/nori/domain/errors"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -44,8 +44,8 @@ func TestPluginExtractor_Get_FileDoesNotExist(t *testing.T) {
 	file, err := pe.Find(filePath)
 
 	a.Error(err)
-	a.IsType(errors.FileDoesNotExist{}, err)
-	errTyped := err.(errors.FileDoesNotExist)
+	a.IsType(errors2.FileDoesNotExist{}, err)
+	errTyped := err.(errors2.FileDoesNotExist)
 	a.Equal(filePath, errTyped.Path)
 	a.Nil(file)
 }
@@ -59,7 +59,7 @@ func TestPluginExtractor_Get_FileOpenError(t *testing.T) {
 	file, err := pe.Find(path.Join(dir, "testdata/empty.so"))
 
 	a.Error(err)
-	a.IsType(errors.FileOpenError{}, err)
+	a.IsType(errors2.FileOpenError{}, err)
 	a.Nil(file)
 }
 
@@ -72,7 +72,7 @@ func TestPluginExtractor_Get_LookupError(t *testing.T) {
 	file, err := pe.Find(path.Join(dir, "testdata/no_variable.so"))
 
 	a.Error(err)
-	a.IsType(errors.LookupError{}, err)
+	a.IsType(errors2.LookupError{}, err)
 	a.Nil(file)
 }
 
@@ -85,7 +85,7 @@ func TestPluginExtractor_Get_NoPluginInterfaceError(t *testing.T) {
 	file, err := pe.Find(path.Join(dir, "/testdata/no_interface.so"))
 
 	a.Error(err)
-	a.IsType(errors.NoPluginInterfaceError{}, err)
+	a.IsType(errors2.NoPluginInterfaceError{}, err)
 	a.Nil(file)
 }
 

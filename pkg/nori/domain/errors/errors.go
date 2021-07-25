@@ -18,6 +18,7 @@ import (
 	"strings"
 
 	"github.com/nori-io/common/v5/pkg/domain/meta"
+	"github.com/nori-io/nori/pkg/nori/domain/enum"
 )
 
 // Not found
@@ -188,4 +189,14 @@ type ConfigParamUndefinedError struct {
 
 func (e ConfigParamUndefinedError) Error() string {
 	return fmt.Sprintf("config param [%s] is undefined", e.Param)
+}
+
+// nori plugin errors
+type PluginIncorrectState struct {
+	Expected enum.State
+	Current enum.State
+}
+
+func (e PluginIncorrectState) Error() string {
+	return fmt.Sprintf("current plugin state is %s, but expected %s", e.Current, e.Expected)
 }

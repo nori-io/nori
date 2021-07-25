@@ -2,6 +2,8 @@ package app
 
 import (
 	"context"
+	"errors"
+	"net/http"
 	"os"
 	"os/signal"
 	"sync"
@@ -9,7 +11,7 @@ import (
 
 	log "github.com/nori-io/logger"
 	"github.com/nori-io/nori/internal/domain/service"
-	"github.com/nori-io/nori/internal/handler/grpc"
+	nori_http "github.com/nori-io/nori/internal/handler/http"
 	"go.uber.org/dig"
 )
 
@@ -17,18 +19,18 @@ type Params struct {
 	dig.In
 
 	PluginManager service.PluginManager
-	GRPC          *grpc.Server
+	Http          *nori_http.Handler
 }
 
 type App struct {
 	pluginManager service.PluginManager
-	grpc          *grpc.Server
+	http          *nori_http.Handler
 }
 
 func New(params Params) (*App, error) {
 	return &App{
 		pluginManager: params.PluginManager,
-		grpc:          params.GRPC,
+		http:          params.Http,
 	}, nil
 }
 
@@ -43,18 +45,21 @@ func (a *App) Run() {
 
 	go func() {
 		defer func() {
-			log.L().Info("gRPC server stopped")
 			wg.Done()
 		}()
-		if err := a.grpc.Start(); err != nil {
-			log.L().Fatal("gRPC error: %s", err.Error())
+		if err := a.http.Start(); err != nil {
+			if errors.Is(err, http.ErrServerClosed) {
+				log.L().Info("http server stopped")
+			} else {
+				log.L().Fatal("http error: %s", err.Error())
+			}
 		}
 	}()
 
 	go func() {
 		select {
 		case <-sig:
-			a.grpc.Shutdown()
+			a.http.Stop(context.Background())
 
 			err := a.pluginManager.StopAll(context.Background())
 			if err != nil {

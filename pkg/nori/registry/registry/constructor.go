@@ -3,12 +3,13 @@ package registry
 import (
 	"sync"
 
-	"github.com/nori-io/common/v5/pkg/domain/plugin"
+	"github.com/nori-io/nori/pkg/nori/domain/entity"
+	"github.com/nori-io/nori/pkg/nori/domain/registry"
 )
 
-func New() *Registry {
+func New() registry.Registry {
 	return &Registry{
 		mx:      sync.Mutex{},
-		plugins: []plugin.Plugin{},
+		plugins: []*entity.Plugin{},
 	}
 }

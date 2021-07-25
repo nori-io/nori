@@ -4,14 +4,14 @@ import (
 	"context"
 
 	"github.com/nori-io/common/v5/pkg/domain/meta"
-	"github.com/nori-io/common/v5/pkg/domain/plugin"
 	"github.com/nori-io/common/v5/pkg/domain/registry"
+	"github.com/nori-io/nori/pkg/nori/domain/entity"
 	"github.com/nori-io/nori/pkg/nori/domain/enum"
 )
 
 type Nori interface {
-	Add(p plugin.Plugin) error
-	Remove(p plugin.Plugin) error
+	Add(p *entity.Plugin) error
+	Remove(id meta.ID) error
 
 	Init(ctx context.Context, id meta.ID) error
 	InitAll(ctx context.Context) error
@@ -22,7 +22,7 @@ type Nori interface {
 	Stop(ctx context.Context, id meta.ID) error
 	StopAll(ctx context.Context) error
 
-	Install(ctx context.Context, p plugin.Plugin) error
+	Install(ctx context.Context, plugin *entity.Plugin) error
 	UnInstall(ctx context.Context, id meta.ID) error
 
 	GetByFilter(filter Filter) []meta.ID

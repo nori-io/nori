@@ -3,7 +3,7 @@ package grpc
 import (
 	"github.com/nori-io/common/v5/pkg/domain/meta"
 	"github.com/nori-io/nori-grpc/pkg/api/proto"
-	"github.com/nori-io/nori/internal/domain/entity"
+	"github.com/nori-io/nori/pkg/nori/domain/entity"
 )
 
 type View struct{}
@@ -77,7 +77,7 @@ func (v View) Plugin(p *entity.Plugin) *proto.Plugin {
 	//}
 
 	return &proto.Plugin{
-		Meta:     v.Meta(p.Plugin.Meta()),
+		Meta:     v.Meta(p.Meta()),
 		IsActive: false,
 		//IsInstallable: p.IsInstallable(),
 		//Status:        s,

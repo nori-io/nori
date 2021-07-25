@@ -5,11 +5,11 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	stdplugin "plugin"
+	"plugin"
 
-	"github.com/nori-io/common/v5/pkg/domain/plugin"
+	nori_plugin "github.com/nori-io/common/v5/pkg/domain/plugin"
 	"github.com/nori-io/nori/internal/domain/entity"
-	"github.com/nori-io/nori/pkg/errors"
+	errors2 "github.com/nori-io/nori/pkg/nori/domain/errors"
 )
 
 type FileRepository struct{}
@@ -17,28 +17,28 @@ type FileRepository struct{}
 func (r *FileRepository) Find(file string) (*entity.File, error) {
 	stat, err := os.Stat(file)
 	if os.IsNotExist(err) {
-		return nil, errors.FileDoesNotExist{
+		return nil, errors2.FileDoesNotExist{
 			Path: file,
 			Err:  err,
 		}
 	}
 
 	if stat.IsDir() {
-		return nil, errors.FileOpenError{
+		return nil, errors2.FileOpenError{
 			Path: file,
 			Err:  fmt.Errorf("%s is a directory", file),
 		}
 	}
 
 	if filepath.Ext(file) != ".so" {
-		return nil, errors.FileExtError{
+		return nil, errors2.FileExtError{
 			Path: file,
 		}
 	}
 
-	f, err := stdplugin.Open(file)
+	f, err := plugin.Open(file)
 	if err != nil {
-		e := errors.FileOpenError{
+		e := errors2.FileOpenError{
 			Path: file,
 			Err:  err,
 		}
@@ -47,16 +47,16 @@ func (r *FileRepository) Find(file string) (*entity.File, error) {
 
 	symbol, err := f.Lookup("New")
 	if err != nil {
-		e := errors.LookupError{
+		e := errors2.LookupError{
 			Path: file,
 			Err:  err,
 		}
 		return nil, e
 	}
 
-	fn, ok := symbol.(func() plugin.Plugin)
+	fn, ok := symbol.(func() nori_plugin.Plugin)
 	if !ok {
-		e := errors.NoPluginInterfaceError{
+		e := errors2.NoPluginInterfaceError{
 			Path: file,
 		}
 		return nil, e

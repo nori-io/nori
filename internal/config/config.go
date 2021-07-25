@@ -4,8 +4,8 @@ import (
 	"os"
 
 	go_config "github.com/cheebo/go-config"
-	"github.com/cheebo/go-config/sources/env"
-	"github.com/cheebo/go-config/sources/file"
+	"github.com/cheebo/go-config/pkg/sources/env"
+	"github.com/cheebo/go-config/pkg/sources/file"
 	"github.com/nori-io/logger"
 )
 

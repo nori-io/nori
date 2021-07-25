@@ -1,8 +1,8 @@
 package plugin
 
 import (
-	"github.com/nori-io/nori/internal/domain/entity"
 	"github.com/nori-io/nori/internal/domain/repository"
+	"github.com/nori-io/nori/pkg/nori/domain/entity"
 )
 
 type PluginRepository struct {

@@ -2,36 +2,26 @@ package plugin
 
 import (
 	"github.com/nori-io/common/v5/pkg/domain/meta"
-	"github.com/nori-io/nori/internal/domain/entity"
-	"github.com/nori-io/nori/pkg/errors"
+	"github.com/nori-io/nori/pkg/nori/domain/entity"
+	domain_errors "github.com/nori-io/nori/pkg/nori/domain/errors"
 )
 
-func (r *PluginRepository) Create(file *entity.File) (*entity.Plugin, error) {
-	if file.Fn == nil {
-		return nil, errors.NoPluginInterfaceError{Path: file.Path}
-	}
-
-	if p, ok := r.files[file.Path]; ok {
-		return p, nil
-	}
-
-	plugin := &entity.Plugin{
-		File:   file.Path,
-		Fn:     file.Fn,
-		Plugin: file.Fn(),
+func (r *PluginRepository) Add(plugin *entity.Plugin) error {
+	if _, ok := r.files[plugin.File()]; ok {
+		return nil
 	}
 
 	// todo
-	r.plugins[plugin.Plugin.Meta().GetID().String()] = plugin
-	r.files[file.Path] = plugin
+	r.plugins[plugin.Meta().GetID().String()] = plugin
+	r.files[plugin.File()] = plugin
 
-	return plugin, nil
+	return nil
 }
 
-func (r *PluginRepository) Delete(file *entity.File) error {
-	delete(r.files, file.Path)
+func (r *PluginRepository) Remove(file string) error {
+	delete(r.files, file)
 	for id, plugin := range r.plugins {
-		if plugin.File == file.Path {
+		if plugin.File() == file {
 			delete(r.plugins, id)
 			break
 		}
@@ -42,7 +32,7 @@ func (r *PluginRepository) Delete(file *entity.File) error {
 func (r *PluginRepository) Find(id meta.ID) (*entity.Plugin, error) {
 	plugin, ok := r.plugins[id.String()]
 	if !ok {
-		return nil, errors.NotFound{ID: id}
+		return nil, domain_errors.NotFound{ID: id}
 	}
 	return plugin, nil
 }
@@ -59,7 +49,7 @@ func (r *PluginRepository) FindByIDs(ids []meta.ID) []*entity.Plugin {
 	items := []*entity.Plugin{}
 	for _, plugin := range r.plugins {
 		for _, id := range ids {
-			if id == plugin.Plugin.Meta().GetID() {
+			if id == plugin.Meta().GetID() {
 				items = append(items, plugin)
 			}
 		}

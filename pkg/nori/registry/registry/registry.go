@@ -1,21 +1,27 @@
 package registry
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/nori-io/common/v5/pkg/domain/meta"
-	"github.com/nori-io/common/v5/pkg/domain/plugin"
-	"github.com/nori-io/nori/pkg/errors"
+	"github.com/nori-io/nori/pkg/nori/domain/entity"
+	"github.com/nori-io/nori/pkg/nori/domain/errors"
 )
 
 type Registry struct {
 	mx      sync.Mutex
-	plugins []plugin.Plugin
+	plugins []*entity.Plugin
 }
 
-func (r *Registry) Add(p plugin.Plugin) error {
+func (r *Registry) Add(p *entity.Plugin) error {
 	r.mx.Lock()
 	defer r.mx.Unlock()
+
+	if p == nil {
+		// todo: custom error
+		return fmt.Errorf("plugin cannot be nil")
+	}
 
 	item := r.getByID(p.Meta().GetID())
 	if item != nil {
@@ -27,12 +33,12 @@ func (r *Registry) Add(p plugin.Plugin) error {
 	return nil
 }
 
-func (r *Registry) Remove(p plugin.Plugin) error {
+func (r *Registry) Remove(id meta.ID) error {
 	r.mx.Lock()
 	defer r.mx.Unlock()
 
 	for i, item := range r.plugins {
-		if item.Meta().GetID() == p.Meta().GetID() {
+		if item.Meta().GetID() == id {
 			r.plugins = append(r.plugins[:i], r.plugins[:i+1]...)
 		}
 	}
@@ -40,22 +46,22 @@ func (r *Registry) Remove(p plugin.Plugin) error {
 	return nil
 }
 
-func (r *Registry) GetAll() []plugin.Plugin {
+func (r *Registry) GetAll() []*entity.Plugin {
 	return r.plugins
 }
 
-func (r *Registry) GetByID(id meta.ID) plugin.Plugin {
+func (r *Registry) GetByID(id meta.ID) *entity.Plugin {
 	r.mx.Lock()
 	defer r.mx.Unlock()
 
 	return r.getByID(id)
 }
 
-func (r *Registry) GetByInterface(i meta.Interface) []plugin.Plugin {
+func (r *Registry) GetByInterface(i meta.Interface) []*entity.Plugin {
 	r.mx.Lock()
 	defer r.mx.Unlock()
 
-	var plugins []plugin.Plugin
+	var plugins []*entity.Plugin
 	for _, p := range r.plugins {
 		if p.Meta().GetInterface().Equal(i) {
 			plugins = append(plugins, p)
@@ -65,11 +71,11 @@ func (r *Registry) GetByInterface(i meta.Interface) []plugin.Plugin {
 }
 
 // id: for future use
-func (r *Registry) ResolveDependency(id meta.ID, d meta.Dependency) []plugin.Plugin {
+func (r *Registry) ResolveDependency(id meta.ID, d meta.Dependency) []*entity.Plugin {
 	r.mx.Lock()
 	defer r.mx.Unlock()
 
-	var plugins []plugin.Plugin
+	var plugins []*entity.Plugin
 
 	if d.Name() == "" {
 		return plugins
@@ -134,7 +140,7 @@ func (r *Registry) Resolve(dep meta.Dependency) (interface{}, error) {
 	return nil, errors.DependencyNotFound{Dependency: dep}
 }
 
-func (r *Registry) getByID(id meta.ID) plugin.Plugin {
+func (r *Registry) getByID(id meta.ID) *entity.Plugin {
 	for _, p := range r.plugins {
 		if p.Meta().GetID().String() == id.String() {
 			return p

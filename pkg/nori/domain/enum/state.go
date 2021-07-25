@@ -7,7 +7,6 @@ const (
 	None
 	Inited
 	Running
-	Stopped
 )
 
 const (
@@ -15,7 +14,6 @@ const (
 	none      = "none"
 	inited    = "inited"
 	running   = "running"
-	stopped   = "stopped"
 )
 
 func (s State) String() string {
@@ -26,8 +24,6 @@ func (s State) String() string {
 		return inited
 	case Running:
 		return running
-	case Stopped:
-		return stopped
 	default:
 		return undefined
 	}
@@ -38,7 +34,7 @@ func (s State) Value() uint8 {
 }
 
 func New(v uint8) State {
-	if uint8(Undefined) <= v && v <= uint8(Stopped) {
+	if uint8(Undefined) <= v && v <= uint8(Running) {
 		return State(v)
 	}
 	return Undefined

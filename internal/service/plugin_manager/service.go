@@ -5,13 +5,12 @@ import (
 	"fmt"
 
 	"github.com/nori-io/common/v5/pkg/domain/meta"
-	"github.com/nori-io/common/v5/pkg/domain/plugin"
 	errors2 "github.com/nori-io/common/v5/pkg/errors"
-	"github.com/nori-io/nori/internal/domain/entity"
+	nori_entity "github.com/nori-io/nori/pkg/nori/domain/entity"
 	"github.com/nori-io/nori/internal/domain/service"
-	"github.com/nori-io/nori/pkg/errors"
 	"github.com/nori-io/nori/pkg/nori"
 	"github.com/nori-io/nori/pkg/nori/domain/enum"
+	errors3 "github.com/nori-io/nori/pkg/nori/domain/errors"
 )
 
 func (s *PluginManager) Enable(ctx context.Context, id meta.ID) error {
@@ -43,7 +42,7 @@ func (s *PluginManager) Enable(ctx context.Context, id meta.ID) error {
 
 	_, err = s.PluginOptionService.Upsert(data)
 
-	return s.Nori.Add(p.Plugin)
+	return s.Nori.Add(p)
 }
 
 func (s *PluginManager) Disable(ctx context.Context, id meta.ID) error {
@@ -81,7 +80,7 @@ func (s *PluginManager) Disable(ctx context.Context, id meta.ID) error {
 		return err
 	}
 
-	return s.Nori.Remove(p.Plugin)
+	return s.Nori.Remove(p.Meta().GetID())
 }
 
 func (s *PluginManager) Install(ctx context.Context, id meta.ID) error {
@@ -90,11 +89,10 @@ func (s *PluginManager) Install(ctx context.Context, id meta.ID) error {
 		return err
 	}
 
-	_, ok := (p.Plugin).(plugin.Installable)
-	if !ok {
-		return errors.NonInstallablePlugin{
+	if !p.IsInstallable() {
+		return errors3.NonInstallablePlugin{
 			ID:   id,
-			Path: p.File,
+			Path: p.File(),
 		}
 	}
 
@@ -108,7 +106,7 @@ func (s *PluginManager) Install(ctx context.Context, id meta.ID) error {
 		return nil
 	}
 
-	err = s.Nori.Install(ctx, p.Plugin)
+	err = s.Nori.Install(ctx, p)
 	if err != nil {
 		return err
 	}
@@ -129,11 +127,10 @@ func (s *PluginManager) UnInstall(ctx context.Context, id meta.ID) error {
 		return err
 	}
 
-	_, ok := (p.Plugin).(plugin.Installable)
-	if !ok {
-		return errors.NonInstallablePlugin{
+	if !p.IsInstallable() {
+		return errors3.NonInstallablePlugin{
 			ID:   id,
-			Path: p.File,
+			Path: p.File(),
 		}
 	}
 
@@ -191,7 +188,7 @@ func (s *PluginManager) StopAll(ctx context.Context) error {
 	return s.Nori.StopAll(ctx)
 }
 
-func (s *PluginManager) GetByFilter(filter service.GetByFilterData) ([]*entity.Plugin, error) {
+func (s *PluginManager) GetByFilter(filter service.GetByFilterData) ([]*nori_entity.Plugin, error) {
 	ids := s.Nori.GetByFilter(nori.Filter{
 		State: enum.New(filter.State.Value()),
 	})

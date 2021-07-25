@@ -7,7 +7,7 @@ import (
 	"github.com/nori-io/nori/internal/config"
 	"github.com/nori-io/nori/internal/env/storage/bolt"
 	"github.com/nori-io/nori/internal/env/storage/memory"
-	"github.com/nori-io/nori/pkg/errors"
+	errors2 "github.com/nori-io/nori/pkg/nori/domain/errors"
 )
 
 func New(cfg *config.Config) (storage.Storage, error) {
@@ -18,7 +18,7 @@ func New(cfg *config.Config) (storage.Storage, error) {
 
 	// storage config
 	if len(cfg.Nori.Storage.DSN) == 0 {
-		return nil, errors.ConfigParamUndefinedError{
+		return nil, errors2.ConfigParamUndefinedError{
 			Param: "nori.storage.dsn",
 		}
 	}
@@ -30,13 +30,13 @@ func New(cfg *config.Config) (storage.Storage, error) {
 		store, err = memory.New()
 	case "bolt":
 		if len(parts) < 2 {
-			return nil, errors.ConfigFormatError{
+			return nil, errors2.ConfigFormatError{
 				Param: cfg.Nori.Storage.DSN,
 			}
 		}
 		store, err = bolt.New(parts[1], 0666)
 	default:
-		return nil, errors.ConfigFormatError{
+		return nil, errors2.ConfigFormatError{
 			Param: cfg.Nori.Storage.DSN,
 		}
 	}

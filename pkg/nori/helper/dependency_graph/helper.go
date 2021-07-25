@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/nori-io/common/v5/pkg/domain/meta"
-	"github.com/nori-io/common/v5/pkg/domain/plugin"
 	"github.com/nori-io/nori/pkg/nori/domain/registry"
 	"github.com/nori-io/nori/pkg/nori/helper/dependency_graph/graph"
 )
@@ -15,19 +14,19 @@ type DependencyGraphHelper struct {
 	unresolved map[meta.ID][]meta.Dependency
 }
 
-func (h *DependencyGraphHelper) Add(p plugin.Plugin) error {
+func (h *DependencyGraphHelper) Add(id meta.ID, deps []meta.Dependency) error {
 	// check already registered
-	if h.graph.Has(p.Meta().GetID()) {
+	if h.graph.Has(id) {
 		return nil
 	}
 
 	// add to dependency graph
-	if err := h.graph.AddNode(p.Meta().GetID()); err != nil {
+	if err := h.graph.AddNode(id); err != nil {
 		return err
 	}
 
 	// build dependency graph edges for plugin
-	unresolved, err := h.buildEdges(p.Meta().GetID(), p.Meta().GetDependencies())
+	unresolved, err := h.buildEdges(id, deps)
 	if err != nil {
 		return err
 	}
@@ -35,19 +34,19 @@ func (h *DependencyGraphHelper) Add(p plugin.Plugin) error {
 	//	h.unresolved[p.Meta().GetID()] = []meta.Dependency{}
 	//}
 	if len(unresolved) > 0 {
-		h.unresolved[p.Meta().GetID()] = unresolved
+		h.unresolved[id] = unresolved
 	}
 
 	// try to resolve and build dependency edges for unresolved dependencies
-	return h.resolveUnresolvedDeps(p.Meta().GetID())
+	return h.resolveUnresolvedDeps(id)
 }
 
-func (h *DependencyGraphHelper) Remove(p plugin.Plugin) error {
-	delete(h.unresolved, p.Meta().GetID())
-	if !h.graph.Has(p.Meta().GetID()) {
+func (h *DependencyGraphHelper) Remove(id meta.ID) error {
+	delete(h.unresolved, id)
+	if !h.graph.Has(id) {
 		return nil
 	}
-	h.graph.RemoveNode(p.Meta().GetID())
+	h.graph.RemoveNode(id)
 	return nil
 }
 
