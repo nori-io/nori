@@ -1,6 +1,6 @@
 # Nori Makefile
 
-NORI_BUILD_CMD ?= build -ldflags "-X github.com/nori-io/nori/pkg/version.GOOS=`go env GOOS` -X 'github.com/nori-io/nori/pkg/version.GOARCH=`go env GOARCH`' -X 'github.com/nori-io/nori/pkg/version.GOVERSION=`go env GOVERSION | cut -c 3-`'" -o build/bin/nori ./cmd/main.go
+NORI_BUILD_CMD ?= build -ldflags "-X github.com/nori-io/nori/pkg/version.GOOS=`go env GOOS` -X 'github.com/nori-io/nori/pkg/version.GOARCH=`go env GOARCH`' -X 'github.com/nori-io/nori/pkg/version.GOVERSION=`go env GOVERSION | cut -c 3-`'" -o build/bin/nori ./cmd/nori.go
 
 ifeq ($(GO111MODULE),auto)
 override GO111MODULE = on
@@ -40,7 +40,7 @@ lint: ## execute linter
 .PHONY: lint
 
 run: ## run 'go run cmd/nori.go server'
-	go run cmd/main.go server
+	go run cmd/nori.go server
 .PHONY: run
 
 test: ## run go tests

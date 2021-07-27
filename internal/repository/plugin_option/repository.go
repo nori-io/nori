@@ -3,7 +3,7 @@ package plugin_option
 import (
 	"github.com/nori-io/common/v5/pkg/domain/meta"
 	"github.com/nori-io/common/v5/pkg/domain/storage"
-	errors2 "github.com/nori-io/common/v5/pkg/errors"
+	"github.com/nori-io/common/v5/pkg/errors"
 	"github.com/nori-io/nori/internal/domain/entity"
 )
 
@@ -34,7 +34,7 @@ func (r *Repository) Find(id meta.ID) (entity.PluginOption, error) {
 	}
 
 	if len(data) == 0 {
-		return entity.PluginOption{}, errors2.EntityNotFound{Entity: id.String()}
+		return entity.PluginOption{}, errors.EntityNotFound{Entity: id.String()}
 	}
 
 	m, err := decode(data)

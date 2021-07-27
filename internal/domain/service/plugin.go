@@ -6,7 +6,7 @@ import (
 )
 
 type PluginService interface {
-	Create(plugin *entity.Plugin) error
+	Add(plugin *entity.Plugin) error
 
 	Get(id meta.ID) (*entity.Plugin, error)
 	GetAll() []*entity.Plugin

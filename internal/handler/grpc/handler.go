@@ -7,11 +7,11 @@ import (
 	"log"
 
 	"github.com/nori-io/common/v5/pkg/domain/meta"
-	pkgmeta "github.com/nori-io/common/v5/pkg/meta"
+	common_meta "github.com/nori-io/common/v5/pkg/meta"
 	"github.com/nori-io/nori-grpc/pkg/api/proto"
 	"github.com/nori-io/nori/internal/domain/service"
 	"github.com/nori-io/nori/pkg/nori/domain/entity"
-	errors2 "github.com/nori-io/nori/pkg/nori/domain/errors"
+	"github.com/nori-io/nori/pkg/nori/domain/errors"
 	"go.uber.org/dig"
 )
 
@@ -411,10 +411,10 @@ func (h Handler) ConfigUpload(ctx context.Context, in *proto.ConfigUploadRequest
 
 func (h Handler) toMetaID(id *proto.ID) (meta.ID, error) {
 	if id == nil {
-		return nil, errors2.NotFound{}
+		return nil, errors.NotFound{}
 	}
 
-	return pkgmeta.ID{
+	return common_meta.ID{
 		ID:      meta.PluginID(id.PluginId),
 		Version: id.Version,
 	}, nil

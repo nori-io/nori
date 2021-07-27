@@ -1,7 +1,13 @@
+# nori config
 nori:
   plugins:
     dir: "/plugins"
   storage:
-      dsn: "bolt:///app/db.bolt"
-  install: auto
-  startup: start
+      dsn: "bolt:///configs/db.bolt"
+
+# logger hooks
+hooks:
+  filehook:
+
+# plugin configuration
+plugins:

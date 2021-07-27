@@ -53,7 +53,7 @@ func New(params Params) (service.PluginManager, error) {
 		}
 
 		params.Env.Logger.Info("found %s (%s) in %s", p.Meta().GetID().String(), p.Meta().GetInterface().String(), file.Path)
-		params.PluginService.Create(p)
+		params.PluginService.Add(p)
 
 		pluginOptions, err := params.PluginOptionService.Get(p.Meta().GetID())
 		if err != nil {

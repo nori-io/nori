@@ -13,13 +13,14 @@ RUN go mod download
 # Copy the source from the current directory to the Working Directory inside the container
 COPY . .
 # Build Nori
-RUN go build -o bin/nori  ./cmd/main.go
+RUN go build -o bin/nori  ./cmd/nori.go
 
 
 # Create ubuntu 20.04 image
 FROM ubuntu:20.04
 
 RUN apt-get install
+
 WORKDIR /app/
 
 # Copy the Pre-built binary file from the previous stage
@@ -28,13 +29,15 @@ RUN chmod +x nori
 
 # Copy defualt config file
 RUN mkdir /app/config
-COPY /configs/docker/nori.yml /app/config/nori.yml
-COPY /build/docker/0.3.0/files/nori.sh /app/nori.sh
+COPY /configs/docker/nori.yml /app/nori.yml
+
+# Copy sh script to start nori
+COPY /build/docker/files/nori.sh /app/nori.sh
 RUN chmod +x nori.sh
 
 # Pass Nori Config flag
 ARG NORI_CONFIG
-ENV NORI_CONFIG=${NORI_CONFIG:-'/app/config/nori.yml'}
+ENV NORI_CONFIG=${NORI_CONFIG:-'/app/nori.yml'}
 
 # Expose port 80, 8080, 5876 to the outside world
 EXPOSE 80 8080 5876

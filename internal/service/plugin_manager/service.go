@@ -5,12 +5,12 @@ import (
 	"fmt"
 
 	"github.com/nori-io/common/v5/pkg/domain/meta"
-	errors2 "github.com/nori-io/common/v5/pkg/errors"
+	common_errors "github.com/nori-io/common/v5/pkg/errors"
 	"github.com/nori-io/nori/internal/domain/service"
 	"github.com/nori-io/nori/pkg/nori"
 	nori_entity "github.com/nori-io/nori/pkg/nori/domain/entity"
 	"github.com/nori-io/nori/pkg/nori/domain/enum"
-	errors3 "github.com/nori-io/nori/pkg/nori/domain/errors"
+	nori_errors "github.com/nori-io/nori/pkg/nori/domain/errors"
 )
 
 func (s *PluginManager) Enable(ctx context.Context, id meta.ID) error {
@@ -24,7 +24,7 @@ func (s *PluginManager) Enable(ctx context.Context, id meta.ID) error {
 
 	po, err := s.PluginOptionService.Get(id)
 	if err != nil {
-		if _, ok := err.(errors2.EntityNotFound); !ok {
+		if _, ok := err.(common_errors.EntityNotFound); !ok {
 			return err
 		}
 	}
@@ -63,7 +63,7 @@ func (s *PluginManager) Disable(ctx context.Context, id meta.ID) error {
 
 	po, err := s.PluginOptionService.Get(id)
 	if err != nil {
-		if _, ok := err.(errors2.EntityNotFound); !ok {
+		if _, ok := err.(common_errors.EntityNotFound); !ok {
 			return err
 		}
 	}
@@ -93,7 +93,7 @@ func (s *PluginManager) Install(ctx context.Context, id meta.ID) error {
 	}
 
 	if !p.IsInstallable() {
-		return errors3.NonInstallablePlugin{
+		return nori_errors.NonInstallablePlugin{
 			ID:   id,
 			Path: p.File(),
 		}
@@ -101,7 +101,7 @@ func (s *PluginManager) Install(ctx context.Context, id meta.ID) error {
 
 	po, err := s.PluginOptionService.Get(id)
 	if err != nil {
-		if _, ok := err.(errors2.EntityNotFound); !ok {
+		if _, ok := err.(common_errors.EntityNotFound); !ok {
 			return err
 		}
 	}
@@ -131,7 +131,7 @@ func (s *PluginManager) UnInstall(ctx context.Context, id meta.ID) error {
 	}
 
 	if !p.IsInstallable() {
-		return errors3.NonInstallablePlugin{
+		return nori_errors.NonInstallablePlugin{
 			ID:   id,
 			Path: p.File(),
 		}
@@ -139,7 +139,7 @@ func (s *PluginManager) UnInstall(ctx context.Context, id meta.ID) error {
 
 	po, err := s.PluginOptionService.Get(id)
 	if err != nil {
-		if _, ok := err.(errors2.EntityNotFound); !ok {
+		if _, ok := err.(common_errors.EntityNotFound); !ok {
 			return err
 		}
 	}

@@ -6,7 +6,7 @@ import (
 	"github.com/nori-io/nori/pkg/nori/domain/errors"
 )
 
-func (s *Service) Create(plugin *entity.Plugin) error {
+func (s *Service) Add(plugin *entity.Plugin) error {
 	return s.PluginRepository.Add(plugin)
 }
 
